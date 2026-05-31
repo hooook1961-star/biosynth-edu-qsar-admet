@@ -1,0 +1,140 @@
+{
+  "schema_version": "training_v2.0",
+  "created_at": "2026-05-26T15:43:40+00:00",
+  "biosynth_stage": "7.3",
+  "model_name": "rf_pka_model_v2",
+  "legacy_model_name": "rf_pka_model",
+  "task_type": "regression",
+  "feature_kind": "hybrid_pka",
+  "feature_schema": {
+    "name": "hybrid_pka",
+    "length": 2221,
+    "blocks": [
+      "MorganFP radius=2 nBits=2048",
+      "MACCS keys including bit 0; RDKit length usually 167",
+      "MW, TPSA, HBD, HBA, GasteigerMax, GasteigerMin"
+    ],
+    "description": "Hybrid pKa vector used by train_pka_sdf.py."
+  },
+  "model_path": "models/v2_experiment/rf_pka_model_v2.joblib",
+  "dataset": {
+    "data_kind": "sdf",
+    "data_path": "data/pKa_QR.sdf",
+    "train_data_path": null,
+    "test_data_path": null,
+    "smiles_col": null,
+    "target_col": null,
+    "smiles_prop": "Canonical_QSARr",
+    "target_prop": "pKa_b",
+    "filter_prop": null,
+    "filter_value": null,
+    "split_mode": "random"
+  },
+  "training": {
+    "random_state": 42,
+    "test_size": 0.2,
+    "deduplicate": true,
+    "dedup_strategy": "median_target",
+    "remove_train_test_overlap": true,
+    "estimator": "RandomForest",
+    "estimator_params": {}
+  },
+  "target": {
+    "target_transform": "none"
+  },
+  "threshold": null,
+  "metrics": {
+    "task_type": "regression",
+    "n": 736,
+    "r2": 0.6832431952252481,
+    "mae": 1.0154637624547105,
+    "rmse": 1.86631742943627
+  },
+  "target_summary": {
+    "n": 2940,
+    "min": -7.58,
+    "q25": 4.327500000000001,
+    "median": 6.95,
+    "q75": 9.15,
+    "max": 30.9,
+    "mean": 6.567295068027211,
+    "std": 3.237244486790069,
+    "scale_hint": "unknown",
+    "issues": []
+  },
+  "prep_audit": {
+    "data_quality": {
+      "kind": "sdf",
+      "path": "data/pKa_QR.sdf",
+      "rdkit_log_suppressed": true,
+      "records_seen": 6503,
+      "invalid_mol_count": 1,
+      "filter_missing_count": 0,
+      "filter_mismatch_count": 0,
+      "missing_target_count": 0,
+      "nonfinite_target_count": 2823,
+      "missing_smiles_prop_count": 0,
+      "rows_returned": 6502
+    },
+    "deduplication": {
+      "n_input": 6502,
+      "n_output": 3676,
+      "n_duplicates_removed": 2826,
+      "duplicate_groups": 282,
+      "conflict_groups": 0,
+      "strategy": "median_target"
+    },
+    "overlap_removal": {
+      "canonical_overlap_count_removed_from_test": 0,
+      "removed_canonical_smiles": []
+    },
+    "split_mode": "random"
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 2940,
+    "test_size": 736,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 163,
+    "scaffold_overlap_examples": [
+      "",
+      "C(=Cc1ccc2ccccc2n1)c1ccccc1",
+      "C(=Cc1ccncc1)c1ccccc1",
+      "C(=Nc1ccc(-c2ccccc2)cc1)c1ccccc1",
+      "C(=Nc1ccccc1)c1ccccc1",
+      "C(=Nc1ncccn1)c1ccccc1",
+      "C(NCC1CO1)C1CO1",
+      "C1=CC2C3Cc4cccc5c4C2(CCN3)C(C1)O5",
+      "C1=CC2CCCN2C1",
+      "C1=CCNCC1",
+      "C1=CN2CCC1CC2",
+      "C1=NCCS1",
+      "C1=NCCc2c1[nH]c1ccccc21",
+      "C1=Nc2ccccc2N=CC1",
+      "C1CC1",
+      "C1CC2CCC1NN2",
+      "C1CC2CCCN2C1",
+      "C1CCC2C(C1)CCC1C3CCCC3CCC21",
+      "C1CCC2NCCCC2C1",
+      "C1CCCC1"
+    ],
+    "status": "passed",
+    "issues": [
+      "Murcko scaffold overlap between train and test: 163 scaffolds"
+    ],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "qa_status": "experimental_caution",
+  "issues": [
+    "Skipped 1 invalid SDF molecules during dataset loading",
+    "Detected 2823 non-finite target values during SDF loading",
+    "Removed 2826 duplicate rows before split"
+  ],
+  "recommendations": [
+    "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+    "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation.",
+    "Confirm that pKa_b/basic pKa is appropriate for BBB ionization interpretation."
+  ],
+  "notes": "pKa_b/basic-pKa regression; acid/base interpretation still requires chemistry review."
+}

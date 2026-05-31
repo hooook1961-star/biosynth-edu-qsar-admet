@@ -1,0 +1,53 @@
+{
+  "schema_version": "training_v2.0",
+  "model_name": "rf_caco2_model_v2",
+  "metrics": {
+    "task_type": "regression",
+    "n": 915,
+    "r2": 0.5643923866894549,
+    "mae": 0.38891517928518327,
+    "rmse": 0.5224854544718298
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 3658,
+    "test_size": 915,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 342,
+    "scaffold_overlap_examples": [
+      "",
+      "C(#Cc1ccccc1)c1ccccc1",
+      "C1=C(CCCN2CCc3ccccc3C2)c2ccccc2CC1",
+      "C1=C(c2cccnc2)CCc2ccccc21",
+      "C1=CC2C3Cc4cccc5c4C2(CCN3)C(C1)O5",
+      "C1=NC(c2cccc(-c3cncnc3)c2)Oc2ccccc21",
+      "C1=NC(c2ccccc2)(c2cccc(-c3cccnc3)c2)N=C1",
+      "C1=NC(c2ccccc2)(c2cccc(-c3cncnc3)c2)N=C1",
+      "C1=NC(c2ccccc2)(c2ccccc2)C2=NCCCN12",
+      "C1=NC(c2ccncc2)(c2cccc(-c3cncnc3)c2)c2ccccc21",
+      "C1C2CC3CC1CC(C2)C3",
+      "C1CCC2C(C1)CCC1C3CCCC3CCC21",
+      "C1CSCS1",
+      "N=C(Nc1ccccc1)N1CCC(c2ccccc2)=N1",
+      "N=C1NCCC(=O)N1Cc1cccc(N2CC(c3ccccc3)CC2=O)c1",
+      "O=C(C(=O)N1CCN(C(=O)c2ccccc2)CC1)c1c[nH]c2ccccc12",
+      "O=C(C(=O)N1CCN(C(=O)c2ccccc2)CC1)c1c[nH]c2ncccc12",
+      "O=C(C=Cc1ccccc1)NC1CCCCO1",
+      "O=C(C=Cc1ccccc1)c1ccccc1",
+      "O=C(CC(Cc1ccc2[nH]ncc2c1)c1ccccn1)N1CCC(N2Cc3ccccc3NC2=O)CC1"
+    ],
+    "status": "passed",
+    "issues": [
+      "Murcko scaffold overlap between train and test: 342 scaffolds"
+    ],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "issues": [
+    "Removed 28 duplicate rows before split"
+  ],
+  "recommendations": [
+    "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+    "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": "training_v2.0",
+  "model_name": "rf_pgp_model_v2",
+  "metrics": {
+    "task_type": "classification",
+    "n": 245,
+    "threshold": 0.5099999999999999,
+    "prevalence": 0.5061224489795918,
+    "roc_auc": 0.9383497733937616,
+    "pr_auc": 0.948132504591342,
+    "accuracy": 0.8612244897959184,
+    "balanced_accuracy": 0.8622034124233537,
+    "f1": 0.8508771929824561,
+    "mcc": 0.7327567622832095,
+    "confusion_matrix": [
+      [
+        114,
+        7
+      ],
+      [
+        27,
+        97
+      ]
+    ],
+    "tn": 114,
+    "fp": 7,
+    "fn": 27,
+    "tp": 97
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 967,
+    "test_size": 245,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 0,
+    "scaffold_overlap_examples": [],
+    "status": "passed",
+    "issues": [],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "issues": [
+    "Removed 6 duplicate train rows before training"
+  ],
+  "recommendations": [
+    "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix."
+  ]
+}

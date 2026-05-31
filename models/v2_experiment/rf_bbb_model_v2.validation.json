@@ -1,0 +1,72 @@
+{
+  "schema_version": "training_v2.0",
+  "model_name": "rf_bbb_model_v2",
+  "metrics": {
+    "task_type": "classification",
+    "n": 525,
+    "threshold": 0.7899999999999999,
+    "prevalence": 0.7523809523809524,
+    "roc_auc": 0.9101460564751704,
+    "pr_auc": 0.9577654855746527,
+    "accuracy": 0.7828571428571428,
+    "balanced_accuracy": 0.8144109055501461,
+    "f1": 0.8389830508474576,
+    "mcc": 0.553168857187828,
+    "confusion_matrix": [
+      [
+        114,
+        16
+      ],
+      [
+        98,
+        297
+      ]
+    ],
+    "tn": 114,
+    "fp": 16,
+    "fn": 98,
+    "tp": 297
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 1937,
+    "test_size": 525,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 88,
+    "scaffold_overlap_examples": [
+      "",
+      "C(C=Cc1ccccc1)=Cc1ccccc1",
+      "C1=CC2=CCC3(CO3)C2CO1",
+      "C1=CC2=CCC3C(CCC4C3CC3OCOC34)C2CC1",
+      "C1=Cc2ccccc2Oc2ccccc21",
+      "C1CCC(OC2CCCC(OC3CCCCO3)C2)OC1",
+      "C1CCC(OC2OCCC2OC2CCCCO2)CC1",
+      "C1CCC2C(C1)CCC1C3CCCC3CCC21",
+      "C1CCCCC1",
+      "C1CO1",
+      "C=C1SC(C(=O)NC2C(=O)N3C=C(CSc4nnn[nH]4)CSC23)S1",
+      "C=C1c2ccccc2CNc2ccccc21",
+      "N=C(C(=O)NC1C(=O)N2C=CCSC12)c1ccco1",
+      "N=C(C(=O)NC1C(=O)N2C=CCSC12)c1cscn1",
+      "O=C(CCCN1CCC2(CC1)C(=O)NCN2c1ccccc1)c1ccccc1",
+      "O=C(Cc1ccccc1)NC1C(=O)N2C=CCSC12",
+      "O=C(NC1C(=O)N2CCSC12)c1ccccc1",
+      "O=C(OC1CCC2CC3c4[nH]c5ccccc5c4CCN3CC2C1)c1ccccc1",
+      "O=C(Oc1ccccc1)c1ccccc1",
+      "O=C1C2=CC3C(=O)C=CCC3CC2Cc2ccccc21"
+    ],
+    "status": "passed",
+    "issues": [
+      "Murcko scaffold overlap between train and test: 88 scaffolds"
+    ],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "issues": [
+    "Removed 1 duplicate test rows before validation"
+  ],
+  "recommendations": [
+    "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix.",
+    "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "training_v2.0",
+  "model_name": "rf_catmos_model_v2",
+  "metrics": {
+    "task_type": "regression",
+    "n": 11130,
+    "r2": 0.5788067128110923,
+    "mae": 0.25932646341272586,
+    "rmse": 0.3341463097863804
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 35210,
+    "test_size": 11130,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 0,
+    "scaffold_overlap_examples": [],
+    "status": "passed",
+    "issues": [],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "issues": [
+    "Skipped 53 invalid SDF molecules during dataset loading",
+    "Detected 34 non-finite target values during SDF loading",
+    "Removed 4188 duplicate rows before split"
+  ],
+  "recommendations": [
+    "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+    "Confirm target units/log transform before displaying predictions with physical units."
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "schema_version": "training_v2.0",
+  "created_at": "2026-05-26T15:42:03+00:00",
+  "biosynth_stage": "7.3",
+  "model_name": "rf_bbb_model_v2",
+  "legacy_model_name": "rf_bbb_model",
+  "task_type": "classification",
+  "feature_kind": "morgan_2048",
+  "feature_schema": {
+    "name": "morgan_2048",
+    "length": 2048,
+    "blocks": [
+      "MorganFP radius=2 nBits=2048"
+    ],
+    "description": "Morgan fingerprint only; used by BBB RF, Clint and CATMoS scripts."
+  },
+  "model_path": "models/v2_experiment/rf_bbb_model_v2.joblib",
+  "dataset": {
+    "data_kind": null,
+    "data_path": null,
+    "train_data_path": "data/train_data.csv",
+    "test_data_path": "data/Sdata-process-flow-step5-testdata.csv",
+    "smiles_col": "SMILES",
+    "target_col": "BBB",
+    "smiles_prop": null,
+    "target_prop": null,
+    "filter_prop": null,
+    "filter_value": null,
+    "split_mode": "external_files"
+  },
+  "training": {
+    "random_state": 42,
+    "test_size": 0.2,
+    "deduplicate": true,
+    "dedup_strategy": "majority_class",
+    "remove_train_test_overlap": true,
+    "estimator": "RandomForest",
+    "estimator_params": {}
+  },
+  "target": {
+    "target_transform": "as_int_class"
+  },
+  "threshold": {
+    "strategy": "internal_validation_balanced_accuracy",
+    "threshold": 0.7899999999999999,
+    "validation_metrics_at_threshold": {
+      "task_type": "classification",
+      "n": 388,
+      "threshold": 0.7899999999999999,
+      "prevalence": 0.7628865979381443,
+      "roc_auc": 0.9485715334900117,
+      "pr_auc": 0.9808627554593589,
+      "accuracy": 0.8969072164948454,
+      "balanced_accuracy": 0.8987220916568743,
+      "f1": 0.9298245614035088,
+      "mcc": 0.7445816975779626,
+      "confusion_matrix": [
+        [
+          83,
+          9
+        ],
+        [
+          31,
+          265
+        ]
+      ],
+      "tn": 83,
+      "fp": 9,
+      "fn": 31,
+      "tp": 265
+    },
+    "n_internal_fit": 1549,
+    "n_internal_validation": 388
+  },
+  "metrics": {
+    "task_type": "classification",
+    "n": 525,
+    "threshold": 0.7899999999999999,
+    "prevalence": 0.7523809523809524,
+    "roc_auc": 0.9101460564751704,
+    "pr_auc": 0.9577654855746527,
+    "accuracy": 0.7828571428571428,
+    "balanced_accuracy": 0.8144109055501461,
+    "f1": 0.8389830508474576,
+    "mcc": 0.553168857187828,
+    "confusion_matrix": [
+      [
+        114,
+        16
+      ],
+      [
+        98,
+        297
+      ]
+    ],
+    "tn": 114,
+    "fp": 16,
+    "fn": 98,
+    "tp": 297
+  },
+  "target_summary": {
+    "n": 1937,
+    "min": 0.0,
+    "q25": 1.0,
+    "median": 1.0,
+    "q75": 1.0,
+    "max": 1.0,
+    "mean": 0.7620030975735673,
+    "std": 0.4258572259124597,
+    "scale_hint": "unknown",
+    "issues": []
+  },
+  "prep_audit": {
+    "train_deduplication": {
+      "n_input": 1937,
+      "n_output": 1937,
+      "n_duplicates_removed": 0,
+      "duplicate_groups": 0,
+      "conflict_groups": 0,
+      "strategy": "majority_class"
+    },
+    "test_deduplication": {
+      "n_input": 526,
+      "n_output": 525,
+      "n_duplicates_removed": 1,
+      "duplicate_groups": 1,
+      "conflict_groups": 0,
+      "strategy": "majority_class"
+    },
+    "overlap_removal": {
+      "canonical_overlap_count_removed_from_test": 0,
+      "removed_canonical_smiles": []
+    }
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 1937,
+    "test_size": 525,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 88,
+    "scaffold_overlap_examples": [
+      "",
+      "C(C=Cc1ccccc1)=Cc1ccccc1",
+      "C1=CC2=CCC3(CO3)C2CO1",
+      "C1=CC2=CCC3C(CCC4C3CC3OCOC34)C2CC1",
+      "C1=Cc2ccccc2Oc2ccccc21",
+      "C1CCC(OC2CCCC(OC3CCCCO3)C2)OC1",
+      "C1CCC(OC2OCCC2OC2CCCCO2)CC1",
+      "C1CCC2C(C1)CCC1C3CCCC3CCC21",
+      "C1CCCCC1",
+      "C1CO1",
+      "C=C1SC(C(=O)NC2C(=O)N3C=C(CSc4nnn[nH]4)CSC23)S1",
+      "C=C1c2ccccc2CNc2ccccc21",
+      "N=C(C(=O)NC1C(=O)N2C=CCSC12)c1ccco1",
+      "N=C(C(=O)NC1C(=O)N2C=CCSC12)c1cscn1",
+      "O=C(CCCN1CCC2(CC1)C(=O)NCN2c1ccccc1)c1ccccc1",
+      "O=C(Cc1ccccc1)NC1C(=O)N2C=CCSC12",
+      "O=C(NC1C(=O)N2CCSC12)c1ccccc1",
+      "O=C(OC1CCC2CC3c4[nH]c5ccccc5c4CCN3CC2C1)c1ccccc1",
+      "O=C(Oc1ccccc1)c1ccccc1",
+      "O=C1C2=CC3C(=O)C=CCC3CC2Cc2ccccc21"
+    ],
+    "status": "passed",
+    "issues": [
+      "Murcko scaffold overlap between train and test: 88 scaffolds"
+    ],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "qa_status": "supplementary_caution",
+  "issues": [
+    "Removed 1 duplicate test rows before validation"
+  ],
+  "recommendations": [
+    "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix.",
+    "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+  ],
+  "notes": "BBB RF model is trained separately; current app primarily uses corrected Gupta score."
+}

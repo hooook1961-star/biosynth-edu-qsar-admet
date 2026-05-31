@@ -1,0 +1,482 @@
+{
+  "schema_version": "model_selection_v1.0",
+  "created_at": "2026-05-31T02:07:01+00:00",
+  "biosynth_stage": "7.4",
+  "source_registry_path": "models/v2_experiment/model_registry.json",
+  "source_registry_created_at": "2026-05-26T16:59:12+00:00",
+  "policy": {
+    "pgp_min_roc_auc": 0.85,
+    "pgp_min_mcc": 0.5,
+    "pgp_min_balanced_accuracy": 0.75,
+    "bbb_rf_min_roc_auc": 0.8,
+    "bbb_rf_min_balanced_accuracy": 0.7,
+    "bbb_rf_max_false_positive_rate_for_primary": 0.25,
+    "pka_min_r2": 0.5,
+    "pka_max_rmse": 2.2,
+    "caco2_min_r2": 0.45,
+    "caco2_max_rmse": 0.75,
+    "catmos_min_r2_for_score_only": 0.4,
+    "catmos_max_rmse_for_score_only": 0.5,
+    "clint_min_roc_auc": 0.7,
+    "clint_min_pr_auc": 0.45,
+    "clint_min_mcc": 0.3
+  },
+  "n_models_in_registry": 6,
+  "n_runtime_entries": 7,
+  "selection_status_counts": {
+    "selected_primary": 1,
+    "selected_experimental": 2,
+    "selected_validated": 1,
+    "selected_supplementary_caution": 1,
+    "selected_score_only": 1,
+    "disabled_weak_validation": 1
+  },
+  "runtime_role_counts": {
+    "primary_formula": 1,
+    "auxiliary_admet_experimental": 1,
+    "primary_efflux": 1,
+    "supplementary_bbb_ml": 1,
+    "helper_pka_experimental": 1,
+    "score_only_units_unverified": 1,
+    "disabled_by_default": 1
+  },
+  "primary_runtime": {
+    "bbb_primary": "gupta_bbb_corrected",
+    "pgp_primary": "rf_pgp_model",
+    "pka_helper": "rf_pka_model",
+    "bbb_ml_supplementary": "rf_bbb_model",
+    "caco2_auxiliary": "rf_caco2_model",
+    "catmos_score_only": null,
+    "clint_auxiliary": null
+  },
+  "models": {
+    "gupta_bbb_corrected": {
+      "model_name": "gupta_bbb_corrected",
+      "legacy_model_name": "gupta_bbb_corrected",
+      "runtime_role": "primary_formula",
+      "selection_status": "selected_primary",
+      "severity": "ok",
+      "load_for_runtime": false,
+      "use_in_final_cns_decision": true,
+      "show_in_ui": true,
+      "model_path": null,
+      "feature_kind": "gupta_descriptors",
+      "task_type": "formula",
+      "threshold": 3.0,
+      "metrics": {},
+      "labels": {
+        "ru": "Исправленная формула Gupta BBB",
+        "kk": "Түзетілген Gupta BBB формуласы",
+        "en": "Corrected Gupta BBB formula"
+      },
+      "role_labels": {
+        "ru": "Основной deterministic BBB-блок",
+        "kk": "Негізгі deterministic BBB блогы",
+        "en": "Primary deterministic BBB block"
+      },
+      "status_labels": {
+        "ru": "Выбрана как основная",
+        "kk": "Негізгі ретінде таңдалды",
+        "en": "Selected as primary"
+      },
+      "reason": {
+        "ru": "Исправленная формула Gupta использует p_mwhbn вместо сырого MWHBN и остаётся основным deterministic BBB score.",
+        "kk": "Түзетілген Gupta формуласы raw MWHBN орнына p_mwhbn қолданады және негізгі deterministic BBB score болып қалады.",
+        "en": "The corrected Gupta formula uses p_mwhbn instead of raw MWHBN and remains the primary deterministic BBB score."
+      },
+      "warnings": [],
+      "recommendations": []
+    },
+    "rf_caco2_model": {
+      "legacy_model_name": "rf_caco2_model",
+      "model_name": "rf_caco2_model_v2",
+      "model_path": "models/v2_experiment/rf_caco2_model_v2.joblib",
+      "model_card_path": "models/v2_experiment/rf_caco2_model_v2.model_card.json",
+      "feature_schema_path": "models/v2_experiment/rf_caco2_model_v2.feature_schema.json",
+      "validation_path": "models/v2_experiment/rf_caco2_model_v2.validation.json",
+      "training_qa_status": "experimental_caution",
+      "selection_status": "selected_experimental",
+      "severity": "warning",
+      "runtime_role": "auxiliary_admet_experimental",
+      "load_for_runtime": true,
+      "use_in_final_cns_decision": false,
+      "show_in_ui": true,
+      "task_type": "regression",
+      "feature_kind": "hybrid_caco2",
+      "threshold": null,
+      "metrics": {
+        "task_type": "regression",
+        "n": 915,
+        "r2": 0.5643923866894549,
+        "mae": 0.38891517928518327,
+        "rmse": 0.5224854544718298
+      },
+      "labels": {
+        "ru": "Caco-2 RF v2",
+        "kk": "Caco-2 RF v2",
+        "en": "Caco-2 RF v2"
+      },
+      "role_labels": {
+        "ru": "Вспомогательная ADMET-модель",
+        "kk": "Көмекші ADMET моделі",
+        "en": "Auxiliary ADMET model"
+      },
+      "status_labels": {
+        "ru": "Выбрана как экспериментальная вспомогательная модель",
+        "kk": "Эксперименттік көмекші модель ретінде таңдалды",
+        "en": "Selected as experimental auxiliary model"
+      },
+      "reason": {
+        "ru": "Caco-2 v2 имеет умеренное качество и используется как вспомогательный ADMET-показатель.",
+        "kk": "Caco-2 v2 сапасы орташа және көмекші ADMET көрсеткіші ретінде қолданылады.",
+        "en": "Caco-2 v2 has moderate quality and is used as an auxiliary ADMET endpoint."
+      },
+      "warnings": [
+        "Removed 28 duplicate rows before split"
+      ],
+      "recommendations": [
+        "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+        "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+      ]
+    },
+    "rf_pgp_model": {
+      "legacy_model_name": "rf_pgp_model",
+      "model_name": "rf_pgp_model_v2",
+      "model_path": "models/v2_experiment/rf_pgp_model_v2.joblib",
+      "model_card_path": "models/v2_experiment/rf_pgp_model_v2.model_card.json",
+      "feature_schema_path": "models/v2_experiment/rf_pgp_model_v2.feature_schema.json",
+      "validation_path": "models/v2_experiment/rf_pgp_model_v2.validation.json",
+      "training_qa_status": "candidate_validated",
+      "selection_status": "selected_validated",
+      "severity": "ok",
+      "runtime_role": "primary_efflux",
+      "load_for_runtime": true,
+      "use_in_final_cns_decision": true,
+      "show_in_ui": true,
+      "task_type": "classification",
+      "feature_kind": "hybrid_pgp",
+      "threshold": 0.5099999999999999,
+      "metrics": {
+        "task_type": "classification",
+        "n": 245,
+        "threshold": 0.5099999999999999,
+        "prevalence": 0.5061224489795918,
+        "roc_auc": 0.9383497733937616,
+        "pr_auc": 0.948132504591342,
+        "accuracy": 0.8612244897959184,
+        "balanced_accuracy": 0.8622034124233537,
+        "f1": 0.8508771929824561,
+        "mcc": 0.7327567622832095,
+        "confusion_matrix": [
+          [
+            114,
+            7
+          ],
+          [
+            27,
+            97
+          ]
+        ],
+        "tn": 114,
+        "fp": 7,
+        "fn": 27,
+        "tp": 97
+      },
+      "labels": {
+        "ru": "P-gp RF v2",
+        "kk": "P-gp RF v2",
+        "en": "P-gp RF v2"
+      },
+      "role_labels": {
+        "ru": "Основная P-gp ML-модель",
+        "kk": "Негізгі P-gp ML моделі",
+        "en": "Primary P-gp ML model"
+      },
+      "status_labels": {
+        "ru": "Выбрана: хорошая валидация",
+        "kk": "Таңдалды: валидациясы жақсы",
+        "en": "Selected: good validation"
+      },
+      "reason": {
+        "ru": "P-gp v2 показывает устойчивые classification-метрики и используется как основной блок эффлюкса.",
+        "kk": "P-gp v2 classification метрикалары тұрақты және негізгі эффлюкс моделі ретінде қолданылады.",
+        "en": "P-gp v2 shows stable classification metrics and is used as the primary efflux model."
+      },
+      "warnings": [
+        "Removed 6 duplicate train rows before training"
+      ],
+      "recommendations": [
+        "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix."
+      ]
+    },
+    "rf_bbb_model": {
+      "legacy_model_name": "rf_bbb_model",
+      "model_name": "rf_bbb_model_v2",
+      "model_path": "models/v2_experiment/rf_bbb_model_v2.joblib",
+      "model_card_path": "models/v2_experiment/rf_bbb_model_v2.model_card.json",
+      "feature_schema_path": "models/v2_experiment/rf_bbb_model_v2.feature_schema.json",
+      "validation_path": "models/v2_experiment/rf_bbb_model_v2.validation.json",
+      "training_qa_status": "supplementary_caution",
+      "selection_status": "selected_supplementary_caution",
+      "severity": "warning",
+      "runtime_role": "supplementary_bbb_ml",
+      "load_for_runtime": true,
+      "use_in_final_cns_decision": false,
+      "show_in_ui": true,
+      "task_type": "classification",
+      "feature_kind": "morgan_2048",
+      "threshold": 0.7899999999999999,
+      "metrics": {
+        "task_type": "classification",
+        "n": 525,
+        "threshold": 0.7899999999999999,
+        "prevalence": 0.7523809523809524,
+        "roc_auc": 0.9101460564751704,
+        "pr_auc": 0.9577654855746527,
+        "accuracy": 0.7828571428571428,
+        "balanced_accuracy": 0.8144109055501461,
+        "f1": 0.8389830508474576,
+        "mcc": 0.553168857187828,
+        "confusion_matrix": [
+          [
+            114,
+            16
+          ],
+          [
+            98,
+            297
+          ]
+        ],
+        "tn": 114,
+        "fp": 16,
+        "fn": 98,
+        "tp": 297
+      },
+      "labels": {
+        "ru": "BBB RF v2",
+        "kk": "BBB RF v2",
+        "en": "BBB RF v2"
+      },
+      "role_labels": {
+        "ru": "Дополнительный BBB ML-сигнал",
+        "kk": "Қосымша BBB ML сигналы",
+        "en": "Supplementary BBB ML signal"
+      },
+      "status_labels": {
+        "ru": "Выбрана как дополнительная, осторожная интерпретация",
+        "kk": "Қосымша ретінде таңдалды, сақтықпен түсіндіру керек",
+        "en": "Selected as supplementary, interpret with caution"
+      },
+      "reason": {
+        "ru": "BBB RF v2 имеет сильный ROC-AUC, но используется как дополнительный сигнал рядом с corrected Gupta, а не как основной вердикт.",
+        "kk": "BBB RF v2 ROC-AUC бойынша жақсы, бірақ негізгі шешім емес, corrected Gupta жанындағы қосымша сигнал ретінде қолданылады.",
+        "en": "BBB RF v2 has strong ROC-AUC, but is used as a supplementary signal next to corrected Gupta, not as the primary verdict."
+      },
+      "warnings": [
+        "Removed 1 duplicate test rows before validation"
+      ],
+      "recommendations": [
+        "False-positive rate improved after threshold tuning; keep as supplementary signal.",
+        "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix.",
+        "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+      ]
+    },
+    "rf_pka_model": {
+      "legacy_model_name": "rf_pka_model",
+      "model_name": "rf_pka_model_v2",
+      "model_path": "models/v2_experiment/rf_pka_model_v2.joblib",
+      "model_card_path": "models/v2_experiment/rf_pka_model_v2.model_card.json",
+      "feature_schema_path": "models/v2_experiment/rf_pka_model_v2.feature_schema.json",
+      "validation_path": "models/v2_experiment/rf_pka_model_v2.validation.json",
+      "training_qa_status": "experimental_caution",
+      "selection_status": "selected_experimental",
+      "severity": "warning",
+      "runtime_role": "helper_pka_experimental",
+      "load_for_runtime": true,
+      "use_in_final_cns_decision": true,
+      "show_in_ui": true,
+      "task_type": "regression",
+      "feature_kind": "hybrid_pka",
+      "threshold": null,
+      "metrics": {
+        "task_type": "regression",
+        "n": 736,
+        "r2": 0.6832431952252481,
+        "mae": 1.0154637624547105,
+        "rmse": 1.86631742943627
+      },
+      "labels": {
+        "ru": "pKa RF v2",
+        "kk": "pKa RF v2",
+        "en": "pKa RF v2"
+      },
+      "role_labels": {
+        "ru": "Вспомогательный pKa-сигнал",
+        "kk": "Көмекші pKa сигналы",
+        "en": "Auxiliary pKa signal"
+      },
+      "status_labels": {
+        "ru": "Выбрана как экспериментальная вспомогательная модель",
+        "kk": "Эксперименттік көмекші модель ретінде таңдалды",
+        "en": "Selected as experimental auxiliary model"
+      },
+      "reason": {
+        "ru": "pKa v2 полезна как приближённый basic pKa, но RMSE остаётся около 1.9 pKa units.",
+        "kk": "pKa v2 жуық basic pKa көмекші сигналы ретінде пайдалы, бірақ RMSE шамамен 1.9 pKa бірлігі.",
+        "en": "pKa v2 is useful as an approximate basic pKa helper, but RMSE remains around 1.9 pKa units."
+      },
+      "warnings": [
+        "Detected 2823 non-finite target values during SDF loading",
+        "Removed 2826 duplicate rows before split",
+        "Skipped 1 invalid SDF molecules during dataset loading"
+      ],
+      "recommendations": [
+        "Confirm that pKa_b/basic pKa is appropriate for BBB ionization interpretation.",
+        "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+        "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation.",
+        "Use as approximate predicted basic pKa, not as exact acid/base-aware pKa."
+      ]
+    },
+    "rf_catmos_model": {
+      "legacy_model_name": "rf_catmos_model",
+      "model_name": "rf_catmos_model_v2",
+      "model_path": "models/v2_experiment/rf_catmos_model_v2.joblib",
+      "model_card_path": "models/v2_experiment/rf_catmos_model_v2.model_card.json",
+      "feature_schema_path": "models/v2_experiment/rf_catmos_model_v2.feature_schema.json",
+      "validation_path": "models/v2_experiment/rf_catmos_model_v2.validation.json",
+      "training_qa_status": "requires_target_scale_review",
+      "selection_status": "disabled_in_cloud_due_to_large_artifact",
+      "severity": "warning",
+      "runtime_role": "disabled_in_cloud",
+      "load_for_runtime": false,
+      "use_in_final_cns_decision": false,
+      "show_in_ui": true,
+      "task_type": "regression",
+      "feature_kind": "morgan_2048",
+      "threshold": null,
+      "metrics": {
+        "task_type": "regression",
+        "n": 11130,
+        "r2": 0.5788067128110923,
+        "mae": 0.25932646341272586,
+        "rmse": 0.3341463097863804
+      },
+      "labels": {
+        "ru": "CATMoS RF v2",
+        "kk": "CATMoS RF v2",
+        "en": "CATMoS RF v2"
+      },
+      "role_labels": {
+        "ru": "Score-only: единицы не подтверждены",
+        "kk": "Score-only: бірліктер расталмаған",
+        "en": "Score-only: units not verified"
+      },
+      "status_labels": {
+        "ru": "Выбрана только как score; физические единицы не подтверждены",
+        "kk": "Тек score ретінде таңдалды; физикалық бірліктер расталмаған",
+        "en": "Selected as score only; physical units are not verified"
+      },
+      "reason": {
+        "ru": "CATMoS отключён в облачной версии: модель слишком велика для обычного GitHub/Streamlit deployment; шкала target также требует проверки.",
+        "kk": "CATMoS бұлттық нұсқада өшірілген: модель GitHub/Streamlit deployment үшін тым үлкен; target шкаласы да тексеруді қажет етеді.",
+        "en": "CATMoS is disabled in the cloud build: the model artifact is too large for regular GitHub/Streamlit deployment and the target scale still requires validation."
+      },
+      "warnings": [
+        "Detected 34 non-finite target values during SDF loading",
+        "Removed 4188 duplicate rows before split",
+        "Skipped 53 invalid SDF molecules during dataset loading"
+      ],
+      "recommendations": [
+        "Confirm target units/log transform before displaying predictions with physical units.",
+        "Display as CATMoS score only; do not display as LD50 mg/kg until target scale is confirmed.",
+        "Report R2, MAE and RMSE on a true holdout/scaffold split."
+      ]
+    },
+    "rf_clint_model": {
+      "legacy_model_name": "rf_clint_model",
+      "model_name": "rf_clint_model_v2",
+      "model_path": "models/v2_experiment/rf_clint_model_v2.joblib",
+      "model_card_path": "models/v2_experiment/rf_clint_model_v2.model_card.json",
+      "feature_schema_path": "models/v2_experiment/rf_clint_model_v2.feature_schema.json",
+      "validation_path": "models/v2_experiment/rf_clint_model_v2.validation.json",
+      "training_qa_status": "experimental_until_revalidated",
+      "selection_status": "disabled_weak_validation",
+      "severity": "danger",
+      "runtime_role": "disabled_by_default",
+      "load_for_runtime": false,
+      "use_in_final_cns_decision": false,
+      "show_in_ui": true,
+      "task_type": "classification",
+      "feature_kind": "morgan_2048",
+      "threshold": 0.24999999999999994,
+      "metrics": {
+        "task_type": "classification",
+        "n": 137,
+        "threshold": 0.24999999999999994,
+        "prevalence": 0.16058394160583941,
+        "roc_auc": 0.6258893280632412,
+        "pr_auc": 0.2766127450092465,
+        "accuracy": 0.7518248175182481,
+        "balanced_accuracy": 0.6132411067193676,
+        "f1": 0.34615384615384615,
+        "mcc": 0.20106748475801453,
+        "confusion_matrix": [
+          [
+            94,
+            21
+          ],
+          [
+            13,
+            9
+          ]
+        ],
+        "tn": 94,
+        "fp": 21,
+        "fn": 13,
+        "tp": 9
+      },
+      "labels": {
+        "ru": "Clint RF v2",
+        "kk": "Clint RF v2",
+        "en": "Clint RF v2"
+      },
+      "role_labels": {
+        "ru": "Отключена по умолчанию",
+        "kk": "Әдепкіде өшірілген",
+        "en": "Disabled by default"
+      },
+      "status_labels": {
+        "ru": "Отключена по умолчанию из-за слабой валидации",
+        "kk": "Әлсіз валидацияға байланысты әдепкіде өшірілген",
+        "en": "Disabled by default because validation is weak"
+      },
+      "reason": {
+        "ru": "Clint v2 показывает слабые classification-метрики и отключается по умолчанию.",
+        "kk": "Clint v2 classification метрикалары әлсіз, сондықтан әдепкіде өшіріледі.",
+        "en": "Clint v2 shows weak classification metrics and is disabled by default."
+      },
+      "warnings": [
+        "Clint v2 metrics are weak; disabled by default.",
+        "Removed 5 duplicate rows before split"
+      ],
+      "recommendations": [
+        "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix.",
+        "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+      ]
+    }
+  },
+  "errors": {},
+  "notes": [
+    "Corrected Gupta remains the primary deterministic BBB score.",
+    "P-gp v2 is selected as primary efflux model when validation metrics pass thresholds.",
+    "BBB RF v2 is supplementary, not primary, because corrected Gupta is the main BBB block.",
+    "CATMoS v2 is score-only until consensus_LD50 units/scale are confirmed.",
+    "Clint v2 is disabled by default when validation metrics are weak."
+  ],
+  "deployment_notes": {
+    "cloud_light": {
+      "catmos_joblib_included": false,
+      "reason": "rf_catmos_model_v2.joblib is intentionally excluded from cloud-light build."
+    }
+  }
+}

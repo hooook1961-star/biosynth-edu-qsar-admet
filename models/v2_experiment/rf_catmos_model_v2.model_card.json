@@ -1,0 +1,132 @@
+{
+  "schema_version": "training_v2.0",
+  "created_at": "2026-05-26T16:59:03+00:00",
+  "biosynth_stage": "7.3",
+  "model_name": "rf_catmos_model_v2",
+  "legacy_model_name": "rf_catmos_model",
+  "task_type": "regression",
+  "feature_kind": "morgan_2048",
+  "feature_schema": {
+    "name": "morgan_2048",
+    "length": 2048,
+    "blocks": [
+      "MorganFP radius=2 nBits=2048"
+    ],
+    "description": "Morgan fingerprint only; used by BBB RF, Clint and CATMoS scripts."
+  },
+  "model_path": "models/v2_experiment/rf_catmos_model_v2.joblib",
+  "dataset": {
+    "data_kind": "sdf",
+    "data_path": "data/CATMoS_QR50k.sdf",
+    "train_data_path": null,
+    "test_data_path": null,
+    "smiles_col": null,
+    "target_col": null,
+    "smiles_prop": "Canonical_QSARr",
+    "target_prop": "consensus_LD50",
+    "filter_prop": "AD_index_CATMoS",
+    "filter_value": "1",
+    "split_mode": "scaffold"
+  },
+  "training": {
+    "random_state": 42,
+    "test_size": 0.2,
+    "deduplicate": true,
+    "dedup_strategy": "median_target",
+    "remove_train_test_overlap": true,
+    "estimator": "RandomForest",
+    "estimator_params": {}
+  },
+  "target": {
+    "target_transform": "auto_catmos",
+    "chosen_transform": "none_assumed_pretransformed",
+    "target_scale_summary_train": {
+      "n": 35210,
+      "min": -0.72809263961018,
+      "q25": 2.851959532461874,
+      "median": 3.078615886963509,
+      "q75": 3.2793780796478473,
+      "max": 4.376293278288591,
+      "mean": 3.047354937550483,
+      "std": 0.40262733315922833,
+      "scale_hint": "transformed_or_log_scale",
+      "issues": [
+        "CATMoS target range looks log/transformed; do not display as raw mg/kg without source confirmation."
+      ]
+    },
+    "target_scale_review_required": true
+  },
+  "threshold": null,
+  "metrics": {
+    "task_type": "regression",
+    "n": 11130,
+    "r2": 0.5788067128110923,
+    "mae": 0.25932646341272586,
+    "rmse": 0.3341463097863804
+  },
+  "target_summary": {
+    "n": 35210,
+    "min": -0.72809263961018,
+    "q25": 2.851959532461874,
+    "median": 3.078615886963509,
+    "q75": 3.2793780796478473,
+    "max": 4.376293278288591,
+    "mean": 3.047354937550483,
+    "std": 0.40262733315922833,
+    "scale_hint": "transformed_or_log_scale",
+    "issues": [
+      "CATMoS target range looks log/transformed; do not display as raw mg/kg without source confirmation."
+    ]
+  },
+  "prep_audit": {
+    "data_quality": {
+      "kind": "sdf",
+      "path": "data/CATMoS_QR50k.sdf",
+      "rdkit_log_suppressed": true,
+      "records_seen": 50660,
+      "invalid_mol_count": 53,
+      "filter_missing_count": 0,
+      "filter_mismatch_count": 79,
+      "missing_target_count": 0,
+      "nonfinite_target_count": 34,
+      "missing_smiles_prop_count": 0,
+      "rows_returned": 50528
+    },
+    "deduplication": {
+      "n_input": 50528,
+      "n_output": 46340,
+      "n_duplicates_removed": 4188,
+      "duplicate_groups": 2965,
+      "conflict_groups": 0,
+      "strategy": "median_target"
+    },
+    "overlap_removal": {
+      "canonical_overlap_count_removed_from_test": 0,
+      "removed_canonical_smiles": []
+    },
+    "split_mode": "scaffold"
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 35210,
+    "test_size": 11130,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 0,
+    "scaffold_overlap_examples": [],
+    "status": "passed",
+    "issues": [],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "qa_status": "requires_target_scale_review",
+  "issues": [
+    "Skipped 53 invalid SDF molecules during dataset loading",
+    "Detected 34 non-finite target values during SDF loading",
+    "Removed 4188 duplicate rows before split"
+  ],
+  "recommendations": [
+    "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+    "Confirm target units/log transform before displaying predictions with physical units."
+  ],
+  "notes": "CATMoS script previously trained on all AD-filtered molecules; use retrain_split for honest metrics."
+}

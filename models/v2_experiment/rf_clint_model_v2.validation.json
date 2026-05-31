@@ -1,0 +1,72 @@
+{
+  "schema_version": "training_v2.0",
+  "model_name": "rf_clint_model_v2",
+  "metrics": {
+    "task_type": "classification",
+    "n": 137,
+    "threshold": 0.24999999999999994,
+    "prevalence": 0.16058394160583941,
+    "roc_auc": 0.6258893280632412,
+    "pr_auc": 0.2766127450092465,
+    "accuracy": 0.7518248175182481,
+    "balanced_accuracy": 0.6132411067193676,
+    "f1": 0.34615384615384615,
+    "mcc": 0.20106748475801453,
+    "confusion_matrix": [
+      [
+        94,
+        21
+      ],
+      [
+        13,
+        9
+      ]
+    ],
+    "tn": 94,
+    "fp": 21,
+    "fn": 13,
+    "tp": 9
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 409,
+    "test_size": 137,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 28,
+    "scaffold_overlap_examples": [
+      "",
+      "C1=CC(c2ccccc2)CC=N1",
+      "N=C1C=NN(c2ccccc2)C(=O)C1",
+      "O=C(NNC(=O)c1ccccc1)c1ccccc1",
+      "O=C(Nc1ncccn1)NS(=O)(=O)c1ccccn1",
+      "O=C(Nc1ncncn1)NS(=O)(=O)c1ccccc1",
+      "O=C(OCc1cccc(Oc2ccccc2)c1)C1CC1",
+      "O=C(c1ccccc1)c1ccccc1",
+      "O=C1C=CC2C(=C1)CCC1C3CCCC3CCC21",
+      "O=C1CC=NC(=O)N1",
+      "O=C1CN=C(c2ccccc2)c2ccccc2N1",
+      "O=C1CN=C(c2ccccn2)N1",
+      "O=c1[nH]c(=O)c2[nH]cnc2[nH]1",
+      "O=c1ccc2ccccc2o1",
+      "c1ccc(-c2ccccc2)cc1",
+      "c1ccc(C2=NCc3nncn3-c3ccccc32)cc1",
+      "c1ccc(CCn2cncn2)cc1",
+      "c1ccc(Cc2ccccc2)cc1",
+      "c1ccc(Cc2ccccn2)cc1",
+      "c1ccc(Nc2ccccc2)cc1"
+    ],
+    "status": "passed",
+    "issues": [
+      "Murcko scaffold overlap between train and test: 28 scaffolds"
+    ],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "issues": [
+    "Removed 5 duplicate rows before split"
+  ],
+  "recommendations": [
+    "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix.",
+    "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+  ]
+}

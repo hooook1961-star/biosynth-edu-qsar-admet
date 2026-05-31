@@ -1,0 +1,125 @@
+{
+  "schema_version": "training_v2.0",
+  "created_at": "2026-05-26T15:41:40+00:00",
+  "biosynth_stage": "7.3",
+  "model_name": "rf_caco2_model_v2",
+  "legacy_model_name": "rf_caco2_model",
+  "task_type": "regression",
+  "feature_kind": "hybrid_caco2",
+  "feature_schema": {
+    "name": "hybrid_caco2",
+    "length": 2222,
+    "blocks": [
+      "MorganFP radius=2 nBits=2048",
+      "MACCS keys including bit 0; RDKit length usually 167",
+      "MW, TPSA, HBD, HBA, GasteigerMax, GasteigerMin, LogP"
+    ],
+    "description": "Hybrid Caco-2 vector used by train_caco2.py."
+  },
+  "model_path": "models/v2_experiment/rf_caco2_model_v2.joblib",
+  "dataset": {
+    "data_kind": "csv",
+    "data_path": "data/Caco2_QR.csv",
+    "train_data_path": null,
+    "test_data_path": null,
+    "smiles_col": "Canonical_QSARr",
+    "target_col": "CalculatedLogPapp",
+    "smiles_prop": null,
+    "target_prop": null,
+    "filter_prop": null,
+    "filter_value": null,
+    "split_mode": "random"
+  },
+  "training": {
+    "random_state": 42,
+    "test_size": 0.2,
+    "deduplicate": true,
+    "dedup_strategy": "median_target",
+    "remove_train_test_overlap": true,
+    "estimator": "RandomForest",
+    "estimator_params": {}
+  },
+  "target": {
+    "target_transform": "none"
+  },
+  "threshold": null,
+  "metrics": {
+    "task_type": "regression",
+    "n": 915,
+    "r2": 0.5643923866894549,
+    "mae": 0.38891517928518327,
+    "rmse": 0.5224854544718298
+  },
+  "target_summary": {
+    "n": 3658,
+    "min": -9.5125140025,
+    "q25": -5.839456125,
+    "median": -5.1554195937,
+    "q75": -4.721246399,
+    "max": -3.127261173,
+    "mean": -5.324131498584164,
+    "std": 0.7837942231264067,
+    "scale_hint": "unknown",
+    "issues": []
+  },
+  "prep_audit": {
+    "data_quality": {},
+    "deduplication": {
+      "n_input": 4601,
+      "n_output": 4573,
+      "n_duplicates_removed": 28,
+      "duplicate_groups": 28,
+      "conflict_groups": 0,
+      "strategy": "median_target"
+    },
+    "overlap_removal": {
+      "canonical_overlap_count_removed_from_test": 0,
+      "removed_canonical_smiles": []
+    },
+    "split_mode": "random"
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 3658,
+    "test_size": 915,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 342,
+    "scaffold_overlap_examples": [
+      "",
+      "C(#Cc1ccccc1)c1ccccc1",
+      "C1=C(CCCN2CCc3ccccc3C2)c2ccccc2CC1",
+      "C1=C(c2cccnc2)CCc2ccccc21",
+      "C1=CC2C3Cc4cccc5c4C2(CCN3)C(C1)O5",
+      "C1=NC(c2cccc(-c3cncnc3)c2)Oc2ccccc21",
+      "C1=NC(c2ccccc2)(c2cccc(-c3cccnc3)c2)N=C1",
+      "C1=NC(c2ccccc2)(c2cccc(-c3cncnc3)c2)N=C1",
+      "C1=NC(c2ccccc2)(c2ccccc2)C2=NCCCN12",
+      "C1=NC(c2ccncc2)(c2cccc(-c3cncnc3)c2)c2ccccc21",
+      "C1C2CC3CC1CC(C2)C3",
+      "C1CCC2C(C1)CCC1C3CCCC3CCC21",
+      "C1CSCS1",
+      "N=C(Nc1ccccc1)N1CCC(c2ccccc2)=N1",
+      "N=C1NCCC(=O)N1Cc1cccc(N2CC(c3ccccc3)CC2=O)c1",
+      "O=C(C(=O)N1CCN(C(=O)c2ccccc2)CC1)c1c[nH]c2ccccc12",
+      "O=C(C(=O)N1CCN(C(=O)c2ccccc2)CC1)c1c[nH]c2ncccc12",
+      "O=C(C=Cc1ccccc1)NC1CCCCO1",
+      "O=C(C=Cc1ccccc1)c1ccccc1",
+      "O=C(CC(Cc1ccc2[nH]ncc2c1)c1ccccn1)N1CCC(N2Cc3ccccc3NC2=O)CC1"
+    ],
+    "status": "passed",
+    "issues": [
+      "Murcko scaffold overlap between train and test: 342 scaffolds"
+    ],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "qa_status": "experimental_caution",
+  "issues": [
+    "Removed 28 duplicate rows before split"
+  ],
+  "recommendations": [
+    "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+    "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation."
+  ],
+  "notes": "Caco-2 LogPapp regression. Saved-model validation assumes the original random split is reproducible."
+}

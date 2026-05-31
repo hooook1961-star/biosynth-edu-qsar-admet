@@ -1,0 +1,8 @@
+{
+  "name": "morgan_2048",
+  "length": 2048,
+  "blocks": [
+    "MorganFP radius=2 nBits=2048"
+  ],
+  "description": "Morgan fingerprint only; used by BBB RF, Clint and CATMoS scripts."
+}

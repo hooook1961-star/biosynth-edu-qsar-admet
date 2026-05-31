@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.env
+.DS_Store
+
+# Training / raw data are intentionally excluded from the standalone app.
+data/
+reports/
+model_qa_report*/
+model_revalidation_report*/
+docs/
+examples/
+tests/
+tools/
+
+# Generated runtime images
+models/admet_radar.png
+models/atom_weights.png
+
+# Documents and archives
+*.zip
+*.docx
+*.pdf
+*.xlsx
+*.xls

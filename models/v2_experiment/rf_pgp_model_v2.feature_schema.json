@@ -1,0 +1,10 @@
+{
+  "name": "hybrid_pgp",
+  "length": 2222,
+  "blocks": [
+    "MorganFP radius=2 nBits=2048",
+    "MACCS keys including bit 0; RDKit length usually 167",
+    "MW, TPSA, HBD, HBA, GasteigerMax, GasteigerMin, LogP"
+  ],
+  "description": "Hybrid P-gp vector used by train_pgp.py."
+}

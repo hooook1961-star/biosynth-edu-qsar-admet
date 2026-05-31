@@ -1,0 +1,56 @@
+{
+  "schema_version": "training_v2.0",
+  "model_name": "rf_pka_model_v2",
+  "metrics": {
+    "task_type": "regression",
+    "n": 736,
+    "r2": 0.6832431952252481,
+    "mae": 1.0154637624547105,
+    "rmse": 1.86631742943627
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 2940,
+    "test_size": 736,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 163,
+    "scaffold_overlap_examples": [
+      "",
+      "C(=Cc1ccc2ccccc2n1)c1ccccc1",
+      "C(=Cc1ccncc1)c1ccccc1",
+      "C(=Nc1ccc(-c2ccccc2)cc1)c1ccccc1",
+      "C(=Nc1ccccc1)c1ccccc1",
+      "C(=Nc1ncccn1)c1ccccc1",
+      "C(NCC1CO1)C1CO1",
+      "C1=CC2C3Cc4cccc5c4C2(CCN3)C(C1)O5",
+      "C1=CC2CCCN2C1",
+      "C1=CCNCC1",
+      "C1=CN2CCC1CC2",
+      "C1=NCCS1",
+      "C1=NCCc2c1[nH]c1ccccc21",
+      "C1=Nc2ccccc2N=CC1",
+      "C1CC1",
+      "C1CC2CCC1NN2",
+      "C1CC2CCCN2C1",
+      "C1CCC2C(C1)CCC1C3CCCC3CCC21",
+      "C1CCC2NCCCC2C1",
+      "C1CCCC1"
+    ],
+    "status": "passed",
+    "issues": [
+      "Murcko scaffold overlap between train and test: 163 scaffolds"
+    ],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "issues": [
+    "Skipped 1 invalid SDF molecules during dataset loading",
+    "Detected 2823 non-finite target values during SDF loading",
+    "Removed 2826 duplicate rows before split"
+  ],
+  "recommendations": [
+    "Report R2, MAE and RMSE on a true holdout/scaffold split.",
+    "Scaffold overlap exists; consider scaffold split as a stricter medicinal chemistry validation.",
+    "Confirm that pKa_b/basic pKa is appropriate for BBB ionization interpretation."
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "schema_version": "training_v2.0",
+  "created_at": "2026-05-26T15:41:51+00:00",
+  "biosynth_stage": "7.3",
+  "model_name": "rf_pgp_model_v2",
+  "legacy_model_name": "rf_pgp_model",
+  "task_type": "classification",
+  "feature_kind": "hybrid_pgp",
+  "feature_schema": {
+    "name": "hybrid_pgp",
+    "length": 2222,
+    "blocks": [
+      "MorganFP radius=2 nBits=2048",
+      "MACCS keys including bit 0; RDKit length usually 167",
+      "MW, TPSA, HBD, HBA, GasteigerMax, GasteigerMin, LogP"
+    ],
+    "description": "Hybrid P-gp vector used by train_pgp.py."
+  },
+  "model_path": "models/v2_experiment/rf_pgp_model_v2.joblib",
+  "dataset": {
+    "data_kind": null,
+    "data_path": null,
+    "train_data_path": "data/Pgp_Broccatelli_train.csv",
+    "test_data_path": "data/Pgp_Broccatelli_test.csv",
+    "smiles_col": "Drug",
+    "target_col": "Y",
+    "smiles_prop": null,
+    "target_prop": null,
+    "filter_prop": null,
+    "filter_value": null,
+    "split_mode": "external_files"
+  },
+  "training": {
+    "random_state": 42,
+    "test_size": 0.2,
+    "deduplicate": true,
+    "dedup_strategy": "majority_class",
+    "remove_train_test_overlap": true,
+    "estimator": "RandomForest",
+    "estimator_params": {}
+  },
+  "target": {
+    "target_transform": "as_int_class"
+  },
+  "threshold": {
+    "strategy": "internal_validation_balanced_accuracy",
+    "threshold": 0.5099999999999999,
+    "validation_metrics_at_threshold": {
+      "task_type": "classification",
+      "n": 194,
+      "threshold": 0.5099999999999999,
+      "prevalence": 0.5412371134020618,
+      "roc_auc": 0.9447298020331727,
+      "pr_auc": 0.963453208792874,
+      "accuracy": 0.8917525773195877,
+      "balanced_accuracy": 0.8965757089352595,
+      "f1": 0.8934010152284264,
+      "mcc": 0.7915015291437277,
+      "confusion_matrix": [
+        [
+          85,
+          4
+        ],
+        [
+          17,
+          88
+        ]
+      ],
+      "tn": 85,
+      "fp": 4,
+      "fn": 17,
+      "tp": 88
+    },
+    "n_internal_fit": 773,
+    "n_internal_validation": 194
+  },
+  "metrics": {
+    "task_type": "classification",
+    "n": 245,
+    "threshold": 0.5099999999999999,
+    "prevalence": 0.5061224489795918,
+    "roc_auc": 0.9383497733937616,
+    "pr_auc": 0.948132504591342,
+    "accuracy": 0.8612244897959184,
+    "balanced_accuracy": 0.8622034124233537,
+    "f1": 0.8508771929824561,
+    "mcc": 0.7327567622832095,
+    "confusion_matrix": [
+      [
+        114,
+        7
+      ],
+      [
+        27,
+        97
+      ]
+    ],
+    "tn": 114,
+    "fp": 7,
+    "fn": 27,
+    "tp": 97
+  },
+  "target_summary": {
+    "n": 967,
+    "min": 0.0,
+    "q25": 0.0,
+    "median": 1.0,
+    "q75": 1.0,
+    "max": 1.0,
+    "mean": 0.5408479834539814,
+    "std": 0.49832864883301986,
+    "scale_hint": "unknown",
+    "issues": []
+  },
+  "prep_audit": {
+    "train_deduplication": {
+      "n_input": 973,
+      "n_output": 967,
+      "n_duplicates_removed": 6,
+      "duplicate_groups": 6,
+      "conflict_groups": 0,
+      "strategy": "majority_class"
+    },
+    "test_deduplication": {
+      "n_input": 245,
+      "n_output": 245,
+      "n_duplicates_removed": 0,
+      "duplicate_groups": 0,
+      "conflict_groups": 0,
+      "strategy": "majority_class"
+    },
+    "overlap_removal": {
+      "canonical_overlap_count_removed_from_test": 0,
+      "removed_canonical_smiles": []
+    }
+  },
+  "leakage_audit": {
+    "schema_version": "train_test_overlap_audit_v1.0",
+    "train_size": 967,
+    "test_size": 245,
+    "canonical_overlap_count": 0,
+    "canonical_overlap_examples": [],
+    "scaffold_overlap_count": 0,
+    "scaffold_overlap_examples": [],
+    "status": "passed",
+    "issues": [],
+    "recommendation": "Remove duplicate canonical SMILES and consider scaffold split for medicinal chemistry validation."
+  },
+  "qa_status": "candidate_validated",
+  "issues": [
+    "Removed 6 duplicate train rows before training"
+  ],
+  "recommendations": [
+    "Report ROC-AUC, PR-AUC, F1, balanced accuracy, MCC and confusion matrix."
+  ],
+  "notes": "P-gp substrate classifier using Broccatelli train/test files."
+}
