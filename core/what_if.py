@@ -1,9 +1,9 @@
 """Educational What-if simulation for BioSynth-EDU.
 
-The What-if lab changes descriptor values, not the molecular structure.  It is a
-pedagogical sensitivity analysis over MW, LogP, TPSA, HBD, HBA, pKa and P-gp
-score.  It does not call the real ML models and must not be presented as a
-prediction for a new molecule.
+The What-if lab changes descriptor values, not the molecular structure. It is a
+teaching sensitivity analysis over MW, LogP, TPSA, HBD, HBA, pKa and P-gp.
+It does not call the real ML models and must not be presented as a prediction
+for a new molecule.
 """
 
 from __future__ import annotations
@@ -42,74 +42,99 @@ WHAT_IF_SLIDER_CONFIG: dict[str, dict[str, Any]] = {
     "pKa_pred": {"label": "pKa", "min": 0.0, "max": 14.0, "step": 0.1},
     "HBD": {"label": "HBD", "min": 0, "max": 8, "step": 1},
     "HBA": {"label": "HBA", "min": 0, "max": 15, "step": 1},
-    "Pgp_probability": {"label": "P-gp probability", "min": 0.0, "max": 1.0, "step": 0.01},
+    "Pgp_probability": {"label": "P-gp", "min": 0.0, "max": 1.0, "step": 0.01},
 }
 
-DISPLAY_NAMES: dict[str, str] = {
-    "MW": "MW",
-    "LogP": "LogP",
-    "TPSA": "TPSA",
-    "HBD": "HBD",
-    "HBA": "HBA",
-    "RotatableBonds": "RotB",
-    "AromaticRings": "Aromatic rings",
-    "pKa_pred": "pKa",
-    "FormalCharge": "Formal charge",
-    "Pgp_probability": "P-gp probability",
+DISPLAY_NAMES: dict[str, dict[str, str]] = {
+    "ru": {
+        "MW": "Молекулярная масса",
+        "LogP": "LogP",
+        "TPSA": "TPSA",
+        "HBD": "Доноры H-связей",
+        "HBA": "Акцепторы H-связей",
+        "RotatableBonds": "Вращаемые связи",
+        "AromaticRings": "Ароматические кольца",
+        "pKa_pred": "pKa",
+        "FormalCharge": "Формальный заряд",
+        "Pgp_probability": "Риск P-gp",
+    },
+    "kk": {
+        "MW": "Молекулалық масса",
+        "LogP": "LogP",
+        "TPSA": "TPSA",
+        "HBD": "H-байланыс донорлары",
+        "HBA": "H-байланыс акцепторлары",
+        "RotatableBonds": "Айналмалы байланыстар",
+        "AromaticRings": "Ароматты сақиналар",
+        "pKa_pred": "pKa",
+        "FormalCharge": "Формальды заряд",
+        "Pgp_probability": "P-gp қаупі",
+    },
+    "en": {
+        "MW": "Molecular weight",
+        "LogP": "LogP",
+        "TPSA": "TPSA",
+        "HBD": "H-bond donors",
+        "HBA": "H-bond acceptors",
+        "RotatableBonds": "Rotatable bonds",
+        "AromaticRings": "Aromatic rings",
+        "pKa_pred": "pKa",
+        "FormalCharge": "Formal charge",
+        "Pgp_probability": "P-gp risk",
+    },
 }
 
 SCORE_CLASS_LABELS_RU = {
-    "high": "высокий",
-    "borderline": "пограничный",
-    "low": "низкий",
+    "high": "благоприятная",
+    "borderline": "пограничная",
+    "low": "неблагоприятная",
 }
 
 DESCRIPTOR_DIRECTION_TEXT_RU = {
     "LogP": (
-        "Умеренный LogP обычно помогает пассивной диффузии. Слишком низкий LogP делает молекулу "
-        "слишком гидрофильной, а слишком высокий может ухудшать растворимость и усиливать связывание."
+        "Умеренный LogP обычно помогает пассивному прохождению через ГЭБ. Слишком низкий LogP делает молекулу "
+        "слишком гидрофильной, а слишком высокий может ухудшать растворимость."
     ),
     "TPSA": (
-        "Рост TPSA обычно снижает BBB-score, потому что молекула становится более полярной "
-        "и хуже проходит через липидный барьер."
+        "Рост TPSA обычно ухудшает прохождение через ГЭБ, потому что молекула становится более полярной."
     ),
-    "MW": "Рост молекулярной массы обычно усложняет пассивное прохождение через BBB.",
+    "MW": "Рост молекулярной массы обычно усложняет пассивное прохождение через ГЭБ.",
     "HBD": "Рост HBD усиливает взаимодействие с водой и часто мешает пассивной диффузии.",
-    "HBA": "Рост HBA часто повышает полярность и снижает учебный BBB-score.",
+    "HBA": "Рост HBA часто повышает полярность и ухудшает оценку прохождения через ГЭБ.",
     "pKa_pred": (
         "pKa влияет на долю ионизированной формы при pH 7.4. Более ионизированные формы "
         "обычно хуже проходят через липидные мембраны."
     ),
     "Pgp_probability": (
-        "P-gp не меняет пассивный BBB-score, но снижает итоговый CNS-score за счёт риска эффлюкса."
+        "P-gp не меняет пассивное прохождение через ГЭБ, но может снижать доступность для ЦНС за счёт активного выведения."
     ),
 }
 
 DESCRIPTOR_DIRECTION_TEXTS = {
     "ru": DESCRIPTOR_DIRECTION_TEXT_RU,
     "kk": {
-        "LogP": "Орташа LogP пассивті диффузияға көмектеседі; тым төмен немесе тым жоғары LogP профильді нашарлатуы мүмкін.",
-        "TPSA": "TPSA өсуі молекуланың полярлығын арттырып, BBB арқылы пассивті өтуді қиындатады.",
-        "MW": "Молекулалық массаның өсуі BBB арқылы пассивті өтуді қиындатуы мүмкін.",
+        "LogP": "Орташа LogP BBB арқылы пассивті өтуге көмектеседі; тым төмен немесе тым жоғары LogP профильді нашарлатуы мүмкін.",
+        "TPSA": "TPSA өсуі молекуланың полярлығын арттырып, BBB арқылы өтуді қиындатады.",
+        "MW": "Молекулалық массаның өсуі BBB арқылы өтуді қиындатуы мүмкін.",
         "HBD": "HBD санының өсуі сумен әрекеттесуді күшейтіп, пассивті диффузияға кедергі болуы мүмкін.",
-        "HBA": "HBA санының өсуі полярлықты арттырып, оқу BBB-score мәнін төмендетуі мүмкін.",
+        "HBA": "HBA санының өсуі полярлықты арттырып, BBB арқылы өту бағасын төмендетуі мүмкін.",
         "pKa_pred": "pKa pH 7.4 кезіндегі иондану үлесіне әсер етеді; иондалған түрлер мембранадан нашар өтеді.",
-        "Pgp_probability": "P-gp passive BBB-score мәнін өзгертпейді, бірақ efflux қаупі арқылы соңғы CNS-score мәнін төмендетеді.",
+        "Pgp_probability": "P-gp BBB арқылы пассивті өтуді өзгертпейді, бірақ белсенді шығару арқылы ОЖЖ қолжетімділігін төмендетуі мүмкін.",
     },
     "en": {
         "LogP": "Moderate LogP usually supports passive diffusion; very low or very high LogP can worsen the profile.",
         "TPSA": "Increasing TPSA makes the molecule more polar and usually reduces passive BBB passage.",
         "MW": "Increasing molecular weight can make passive BBB passage more difficult.",
         "HBD": "Increasing HBD strengthens interactions with water and can oppose passive diffusion.",
-        "HBA": "Increasing HBA often raises polarity and can reduce the educational BBB score.",
+        "HBA": "Increasing HBA often raises polarity and can make BBB passage less favorable.",
         "pKa_pred": "pKa affects the ionised fraction at pH 7.4; more ionised forms usually cross membranes less efficiently.",
-        "Pgp_probability": "P-gp does not change passive BBB score, but it lowers final CNS score through efflux risk.",
+        "Pgp_probability": "P-gp does not change passive BBB passage, but it can lower CNS exposure by actively removing the molecule.",
     },
 }
 
 SCORE_CLASS_LABELS = {
     "ru": SCORE_CLASS_LABELS_RU,
-    "kk": {"high": "жоғары", "borderline": "шекаралық", "low": "төмен"},
+    "kk": {"high": "қолайлы", "borderline": "шекаралық", "low": "қолайсыз"},
     "en": {"high": "high", "borderline": "borderline", "low": "low"},
 }
 
@@ -370,7 +395,7 @@ def compare_descriptor_zones(
         rows.append(
             {
                 "name": key,
-                "display_name": _display_name(key),
+                "display_name": _display_name(key, lang),
                 "old_value": old_value,
                 "new_value": new_value,
                 "base_value": old_value,
@@ -554,7 +579,7 @@ def _build_score_components(
         rows.append(
             {
                 "name": key,
-                "display_name": _display_name(key),
+                "display_name": _display_name(key, lang),
                 "base_value": old_value,
                 "modified_value": new_value,
                 "old_value": old_value,
@@ -641,10 +666,10 @@ def _component_interpretation(key: str, old_value: Any, new_value: Any, weighted
     direction = direction_map[lang][key_dir]
     base_text = _direction_text(key, lang)
     if lang == "en":
-        return f"Changing {_fmt(old_value)} -> {_fmt(new_value)} {direction} the educational score. {base_text}"
+        return f"Changing {_fmt(old_value)} -> {_fmt(new_value)} {direction} the teaching estimate. {base_text}"
     if lang == "kk":
-        return f"{_fmt(old_value)} -> {_fmt(new_value)} ауысуы оқу score мәнін {direction}. {base_text}"
-    return f"Переход {_fmt(old_value)} -> {_fmt(new_value)} {direction} учебный score. {base_text}"
+        return f"{_fmt(old_value)} -> {_fmt(new_value)} ауысуы оқу бағасын {direction}. {base_text}"
+    return f"Переход {_fmt(old_value)} -> {_fmt(new_value)} {direction} учебную оценку. {base_text}"
 
 
 def _ordered_keys(keys: set[str]) -> list[str]:
@@ -652,8 +677,10 @@ def _ordered_keys(keys: set[str]) -> list[str]:
     return [key for key in order if key in keys] + sorted(key for key in keys if key not in order)
 
 
-def _display_name(key: str) -> str:
-    return DISPLAY_NAMES.get(key, key)
+def _display_name(key: str, lang: str = "ru") -> str:
+    lang = normalize_language(lang)
+    labels = DISPLAY_NAMES.get(lang, DISPLAY_NAMES["ru"])
+    return labels.get(key, DISPLAY_NAMES["ru"].get(key, key))
 
 
 def _zone_label(zone: str, lang: str = "ru") -> str:

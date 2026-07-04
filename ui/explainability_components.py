@@ -1,7 +1,7 @@
 """Streamlit UI components for BioSynth-EDU explainable ADMET/BBB mode.
 
-Stage 6 adds RU/KZ/EN localization.  Internal keys remain stable; all visible
-labels are resolved through ``core.i18n``.
+Internal data keys remain stable; visible labels are resolved through the
+text catalogs in ``core.i18n`` and neighboring content modules.
 """
 
 from __future__ import annotations
@@ -120,7 +120,7 @@ def _progress_value(value: Any) -> float:
     return max(0.0, min(1.0, number))
 
 # ---------------------------------------------------------------------------
-# Stage 6 localized UI overrides
+# Localized rendering helpers
 # ---------------------------------------------------------------------------
 
 from core.i18n import (
@@ -529,7 +529,7 @@ def render_batch_explainability_result(batch_result: Mapping[str, Any], lang: st
 
 
 # ---------------------------------------------------------------------------
-# Stage 8.0.2 override: student-facing ML explanation
+# Student-facing ML explanation view
 # ---------------------------------------------------------------------------
 # Student-facing copy lives in core.ml_ui_text; this file keeps only rendering
 # and small view-specific formatting helpers.
@@ -599,13 +599,7 @@ def _ml_method_label_802(method: str, lang: str) -> str:
 
 
 def render_ml_explainability_tab(explanation_dict: Mapping[str, Any], lang: str | None = None) -> None:
-    """Render a student-facing Stage 8.0 ML explanation.
-
-    Stage 8.0.2 intentionally hides implementation details from the default view:
-    no runtime-selection paths, no raw fallback labels, no JSON download for
-    students, and no Morgan/MACCS bit table unless the user explicitly opens the
-    technical details section.
-    """
+    """Render the student-facing ML explanation."""
     from core.ml_explainability import explain_selected_runtime_models_for_smiles
 
     lang = _lang(explanation_dict, lang)
@@ -620,7 +614,7 @@ def render_ml_explainability_tab(explanation_dict: Mapping[str, Any], lang: str 
         st.warning(_ml_ui_t_802("unavailable", lang))
         return
 
-    with st.spinner("ML explanation..."):
+    with st.spinner(_ml_ui_t_802("loading", lang)):
         ml_data = explain_selected_runtime_models_for_smiles(str(smiles), lang=lang)
 
     models = ml_data.get("models", {}) or {}

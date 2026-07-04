@@ -1,12 +1,11 @@
-"""Stage 8.0 ML explainability layer for BioSynth-EDU.
+"""ML explainability helpers for BioSynth-EDU.
 
-This module adds local SHAP/feature-contribution explanations for selected
-runtime ML models.  It intentionally keeps the accepted rule-based educational
-explanation as the primary student-facing explanation and treats SHAP as an
-advanced ML layer.
+This module adds local feature-contribution explanations for selected runtime
+ML models. Rule-based educational explanations remain the primary
+student-facing interpretation.
 
 The first supported runtime models are:
-* ``rf_pgp_model``     -- selected P-gp efflux classifier, usually hybrid_pgp.
+* ``rf_pgp_model``     -- selected P-gp active-removal classifier, usually hybrid_pgp.
 * ``rf_bbb_model``     -- supplementary BBB RandomForest classifier, usually
                           morgan_2048.
 
@@ -78,32 +77,33 @@ ML_TEXT = {
         "group.GasteigerMin": "Gasteiger min",
         "group.LogP": "LogP",
         "group.other": "Другие признаки",
-        "direction.positive": "повышает score положительного класса",
-        "direction.negative": "снижает score положительного класса",
+        "direction.positive": "усиливает текущий вывод модели",
+        "direction.negative": "ослабляет текущий вывод модели",
         "direction.neutral": "вклад мал или нейтрален",
         "direction.importance_only": "важность без знака",
         "disclaimer": (
-            "SHAP показывает локальный вклад признаков ML-модели. Для fingerprint-моделей "
-            "отдельные биты трудно напрямую связать с химическим смыслом, поэтому BioSynth-EDU "
-            "агрегирует их в учебные группы. Это объяснение не является экспериментальным доказательством."
+            "Локальное объяснение показывает, какие признаки сильнее повлияли на вывод модели. "
+            "Для структурных отпечатков отдельные биты трудно напрямую связать с химическим смыслом, "
+            "поэтому BioSynth-EDU объединяет их в учебные группы. Это объяснение не является "
+            "экспериментальным доказательством."
         ),
         "fingerprint_note": (
-            "Большая доля вклада приходится на fingerprint-биты. Это означает, что модель использует "
-            "структурные подпаттерны, но отдельный бит Morgan/MACCS не всегда имеет простое учебное название."
+            "Большая доля сигнала приходится на структурные отпечатки молекулы. Это означает, что модель "
+            "использует фрагменты структуры, но отдельный технический бит не всегда имеет простое учебное название."
         ),
         "physchem_note": (
             "Существенный вклад внесли физико-химические признаки. Их можно сопоставлять с обычным "
             "учебным разбором: LogP, TPSA, MW, HBD/HBA и частичные заряды."
         ),
         "bbb_note": (
-            "BBB RF v2 является дополнительным ML-сигналом. Основным прозрачным BBB-блоком остаётся "
-            "исправленная формула Gupta."
+            "Это дополнительная статистическая проверка прохождения через ГЭБ. Основной учебный разбор "
+            "лучше читать по дескрипторам и формуле Gupta."
         ),
         "pgp_note": (
-            "P-gp RF v2 объясняет риск активного эффлюкса. Высокий вклад в положительный класс "
-            "поддерживает сценарий substrate/efflux."
+            "P-gp рассматривается как риск активного выведения молекулы из клеток барьера. Высокий сигнал "
+            "может снижать доступность для ЦНС."
         ),
-        "unavailable_reason": "Невозможно построить ML-объяснение: модель не загружена, отключена или SMILES некорректен.",
+        "unavailable_reason": "ML-разбор недоступен: модель не загружена, отключена или SMILES некорректен.",
     },
     "kk": {
         "model.rf_pgp_model": "P-gp RF v2",
@@ -123,32 +123,32 @@ ML_TEXT = {
         "group.GasteigerMin": "Gasteiger min",
         "group.LogP": "LogP",
         "group.other": "Басқа белгілер",
-        "direction.positive": "оң класс score-ын арттырады",
-        "direction.negative": "оң класс score-ын төмендетеді",
+        "direction.positive": "модельдің ағымдағы қорытындысын күшейтеді",
+        "direction.negative": "модельдің ағымдағы қорытындысын әлсіретеді",
         "direction.neutral": "үлесі аз немесе бейтарап",
         "direction.importance_only": "таңбасыз маңыздылық",
         "disclaimer": (
-            "SHAP ML-модель белгілерінің жергілікті үлесін көрсетеді. Fingerprint модельдерінде жеке "
-            "биттерді химиялық мағынамен тікелей байланыстыру қиын, сондықтан BioSynth-EDU оларды "
-            "оқу топтарына біріктіреді. Бұл түсіндірме эксперименттік дәлел емес."
+            "Жергілікті түсіндіру модель қорытындысына қай белгілер көбірек әсер еткенін көрсетеді. "
+            "Құрылымдық отпечатоктарда жеке биттерді химиялық мағынамен тікелей байланыстыру қиын, "
+            "сондықтан BioSynth-EDU оларды оқу топтарына біріктіреді. Бұл түсіндірме эксперименттік дәлел емес."
         ),
         "fingerprint_note": (
-            "Үлестің үлкен бөлігі fingerprint биттеріне тиесілі. Бұл модель құрылымдық подпаттерндерді "
-            "қолданатынын білдіреді, бірақ жеке Morgan/MACCS битінің қарапайым оқу атауы бола бермейді."
+            "Сигналдың үлкен бөлігі молекуланың құрылымдық отпечатоктарына тиесілі. Бұл модель құрылым "
+            "фрагменттерін қолданатынын білдіреді, бірақ жеке техникалық биттің қарапайым оқу атауы бола бермейді."
         ),
         "physchem_note": (
             "Физика-химиялық белгілер елеулі үлес қосты. Оларды LogP, TPSA, MW, HBD/HBA және "
             "жартылай зарядтармен байланыстырып түсіндіруге болады."
         ),
         "bbb_note": (
-            "BBB RF v2 қосымша ML-сигнал болып табылады. Негізгі түсінікті BBB-блок ретінде түзетілген "
-            "Gupta формуласы қалады."
+            "Бұл BBB арқылы өтуге арналған қосымша статистикалық тексеру. Негізгі оқу талдауын "
+            "дескрипторлар және Gupta формуласы арқылы оқыған дұрыс."
         ),
         "pgp_note": (
-            "P-gp RF v2 белсенді эффлюкс қаупін түсіндіреді. Оң классқа жоғары үлес substrate/efflux "
-            "сценарийін қолдайды."
+            "P-gp тосқауыл жасушаларынан молекуланы белсенді шығару қаупі ретінде қаралады. Жоғары сигнал "
+            "ОЖЖ үшін қолжетімділікті төмендетуі мүмкін."
         ),
-        "unavailable_reason": "ML-түсіндірме құру мүмкін емес: модель жүктелмеген, өшірілген немесе SMILES қате.",
+        "unavailable_reason": "ML-талдау қолжетімсіз: модель жүктелмеген, өшірілген немесе SMILES қате.",
     },
     "en": {
         "model.rf_pgp_model": "P-gp RF v2",
@@ -168,30 +168,31 @@ ML_TEXT = {
         "group.GasteigerMin": "Gasteiger min",
         "group.LogP": "LogP",
         "group.other": "Other features",
-        "direction.positive": "increases positive-class score",
-        "direction.negative": "decreases positive-class score",
+        "direction.positive": "strengthens the current model conclusion",
+        "direction.negative": "weakens the current model conclusion",
         "direction.neutral": "small or neutral contribution",
         "direction.importance_only": "unsigned importance",
         "disclaimer": (
-            "SHAP shows local feature contributions for the ML model. For fingerprint models, individual "
-            "bits are difficult to map directly to chemical meaning, so BioSynth-EDU aggregates them into "
-            "educational groups. This explanation is not experimental evidence."
+            "The local explanation shows which features influenced the model conclusion most. For structural "
+            "fingerprints, individual bits are difficult to map directly to chemical meaning, so BioSynth-EDU "
+            "aggregates them into educational groups. This explanation is not experimental evidence."
         ),
         "fingerprint_note": (
-            "A large share of the contribution comes from fingerprint bits. This means the model uses "
-            "structural subpatterns, but individual Morgan/MACCS bits do not always have simple educational names."
+            "A large share of the signal comes from structural fingerprints. This means the model uses "
+            "structural fragments, but individual technical bits do not always have simple educational names."
         ),
         "physchem_note": (
             "Physicochemical features contributed noticeably. These can be linked to the usual educational "
             "breakdown: LogP, TPSA, MW, HBD/HBA and partial charges."
         ),
         "bbb_note": (
-            "BBB RF v2 is a supplementary ML signal. The corrected Gupta formula remains the primary transparent BBB block."
+            "This is a supplementary statistical check for BBB passage. The main teaching interpretation is better "
+            "read through descriptors and the Gupta formula."
         ),
         "pgp_note": (
-            "P-gp RF v2 explains active efflux risk. A high positive-class contribution supports the substrate/efflux scenario."
+            "P-gp is treated as a risk of active removal from barrier cells. A high signal can reduce CNS exposure."
         ),
-        "unavailable_reason": "Cannot build ML explanation: the model is not loaded, disabled, or the SMILES is invalid.",
+        "unavailable_reason": "ML breakdown is unavailable: the model is not loaded, disabled, or the SMILES is invalid.",
     },
 }
 
