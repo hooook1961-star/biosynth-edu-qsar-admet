@@ -1810,3 +1810,17 @@ UI.setdefault("en", {}).update({
     "ml.column.direction": "Direction",
     "ml.column.feature": "Feature",
 })
+
+# Cleanup overrides: localized metric labels for the forecast screen.
+UI.setdefault("ru", {}).update({
+    "metric.bbb_gupta": 'BBB / показатель Gupta',
+    "metric.pgp_class": 'Статус P-gp',
+    "metric.pgp_probability": 'Вероятность P-gp',
+    "metric.clint": 'Clint (метаболизм)',
+})
+UI.setdefault("kk", {}).update({
+    "metric.bbb_gupta": 'BBB / Gupta көрсеткіші',
+    "metric.pgp_class": 'P-gp статусы',
+    "metric.pgp_probability": 'P-gp ықтималдығы',
+    "metric.clint": 'Clint (метаболизм)',
+})

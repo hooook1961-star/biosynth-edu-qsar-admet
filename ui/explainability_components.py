@@ -16,6 +16,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 from core.i18n import normalize_language, t, zone_badge, language_selectbox_options, language_label_to_code
+from core.ml_ui_text import ml_ui_t as _ml_ui_t_802
 from core.what_if import simulate_descriptor_change
 from core.reporting import build_student_report, render_report_markdown, render_report_html, build_report_filename
 from core.batch_explainability import (
@@ -877,262 +878,11 @@ def render_batch_explainability_result(batch_result: Mapping[str, Any], lang: st
     render_batch_explainability_summary(rows, summary, lang=lang)
 
 
-def render_ml_explainability_tab(explanation_dict: Mapping[str, Any], lang: str | None = None) -> None:
-    """Render Stage 8.0 SHAP / ML explanation block.
-
-    This function is intentionally separate from the rule-based explanation tab.
-    It explains selected runtime ML models, currently P-gp RF v2 and BBB RF v2,
-    while keeping the educational descriptor traffic-light explanation as the
-    primary student-facing layer.
-    """
-    from core.ml_explainability import explain_selected_runtime_models_for_smiles
-
-    lang = _lang(explanation_dict, lang)
-    molecule = explanation_dict.get("molecule", {}) or {}
-    smiles = molecule.get("canonical_smiles") or molecule.get("input_smiles")
-
-    st.markdown(t("section.ml_explain", lang))
-    st.info(t("ml.disclaimer", lang))
-
-    if not smiles:
-        st.warning(t("ml.unavailable", lang))
-        return
-
-    with st.spinner("SHAP / ML explanation..."):
-        ml_data = explain_selected_runtime_models_for_smiles(str(smiles), lang=lang)
-
-    models = ml_data.get("models", {}) or {}
-    if not models:
-        st.warning(t("ml.unavailable", lang))
-        return
-
-    for legacy_name, item in models.items():
-        if not isinstance(item, Mapping):
-            continue
-        title = item.get("model_label") or legacy_name
-        status = item.get("status", "unknown")
-        with st.expander(f"{title} — {item.get('status_label', status)}", expanded=(status == "ok")):
-            if status != "ok":
-                st.warning(item.get("reason") or t("ml.unavailable", lang))
-                continue
-
-            prediction = item.get("prediction", {}) or {}
-            c1, c2, c3, c4 = st.columns(4)
-            with c1:
-                st.metric(t("ml.probability", lang), _format_value(prediction.get("probability")))
-            with c2:
-                st.metric(t("ml.class", lang), _format_value(prediction.get("class")))
-            with c3:
-                st.metric(t("ml.threshold", lang), _format_value(prediction.get("threshold")))
-            with c4:
-                st.metric(t("ml.method", lang), item.get("method_label") or item.get("method") or "N/A")
-
-            if item.get("fallback_error"):
-                st.caption(f"Fallback note: {item.get('fallback_error')}")
-
-            st.markdown(f"#### {t('ml.group_contributions', lang)}")
-            group_rows = []
-            for row in item.get("group_contributions", []) or []:
-                group_rows.append(
-                    {
-                        t("ml.column.group", lang): row.get("group_label"),
-                        t("ml.column.value", lang): _format_value(row.get("active_or_value")),
-                        t("ml.column.contribution", lang): _format_value(row.get("contribution")),
-                        t("ml.column.abs_contribution", lang): _format_value(row.get("abs_contribution")),
-                        t("ml.column.direction", lang): row.get("direction_label"),
-                    }
-                )
-            if group_rows:
-                st.dataframe(pd.DataFrame(group_rows), use_container_width=True, hide_index=True)
-
-            commentary = item.get("commentary") or []
-            if commentary:
-                st.markdown(f"#### {t('ml.commentary', lang)}")
-                for note in commentary:
-                    st.write(f"- {note}")
-
-            top_rows = []
-            for row in item.get("top_features", []) or []:
-                top_rows.append(
-                    {
-                        t("ml.column.feature", lang): row.get("feature_label"),
-                        t("ml.column.group", lang): row.get("group_label"),
-                        t("ml.column.value", lang): _format_value(row.get("value")),
-                        t("ml.column.contribution", lang): _format_value(row.get("contribution")),
-                        t("ml.column.direction", lang): row.get("direction_label"),
-                    }
-                )
-            if top_rows:
-                with st.expander(t("ml.top_features", lang), expanded=False):
-                    st.dataframe(pd.DataFrame(top_rows), use_container_width=True, hide_index=True)
-
-    st.download_button(
-        t("ml.download_json", lang),
-        json.dumps(ml_data, ensure_ascii=False, indent=2).encode("utf-8"),
-        "BioSynth_EDU_ML_SHAP_explanation.json",
-        mime="application/json",
-    )
-
 # ---------------------------------------------------------------------------
 # Stage 8.0.2 override: student-facing ML explanation
 # ---------------------------------------------------------------------------
-
-_ML_UI_TEXT_802 = {
-    "ru": {
-        "title": "### 🧠 ML-разбор: какие группы признаков использовала модель",
-        "intro": (
-            "Этот раздел отвечает на другой вопрос, чем обычный разбор дескрипторов. "
-            "Обычный разбор объясняет химию: MW, LogP, TPSA, HBD/HBA, pKa и P-gp. "
-            "ML-разбор показывает, на какие группы признаков опиралась RandomForest-модель при расчёте своего score. "
-            "Используйте его как дополнительную проверку, а не как главный вердикт."
-        ),
-        "how_to": (
-            "Как читать таблицу: положительный вклад повышает score класса, указанного в строке модели; "
-            "отрицательный вклад снижает этот score. Если SHAP недоступен, показывается приближённая групповая важность без направления."
-        ),
-        "student_label": "Учебная интерпретация",
-        "pgp_positive_class": "положительный класс: P-gp substrate / риск эффлюкса",
-        "bbb_positive_class": "положительный класс: BBB+ по дополнительной RF-модели",
-        "pgp_use": "P-gp-модель помогает понять риск активного вымывания молекулы. Если score высокий, молекула может хуже удерживаться в ЦНС даже при хорошей пассивной BBB-проницаемости.",
-        "bbb_use": "BBB RF — дополнительный ML-сигнал. Основной учебный BBB-разбор остаётся в формуле Gupta и дескрипторах, потому что они химически понятнее.",
-        "model_result": "Результат ML-модели",
-        "probability": "Score / вероятность",
-        "class": "Класс",
-        "threshold": "Порог",
-        "method": "Метод объяснения",
-        "method_shap": "локальные вклады признаков",
-        "method_fallback": "приближённая важность групп признаков",
-        "group_table": "Группы признаков, повлиявшие на score",
-        "group": "Группа признаков",
-        "value": "Что увидела модель",
-        "effect": "Учебный смысл",
-        "contribution": "Вклад",
-        "developer_details": "Показать технические детали ML-разбора",
-        "download_json": "Скачать технический JSON",
-        "top_features": "Отдельные технические признаки",
-        "unavailable": "ML-разбор недоступен для этой молекулы или модели.",
-        "structural_fragments": "Структурные фрагменты молекулы",
-        "structural_keys": "Структурные ключи MACCS",
-        "fragments_seen": "активных структурных фрагментов: {value}",
-        "keys_seen": "активных структурных ключей: {value}",
-        "scalar_seen": "значение: {value}",
-        "effect_positive": "поддерживает положительный класс",
-        "effect_negative": "снижает положительный класс",
-        "effect_neutral": "вклад небольшой",
-        "effect_importance": "важная группа признаков; направление не оценивается",
-        "class_pgp_1": "вероятный P-gp substrate",
-        "class_pgp_0": "вероятно не P-gp substrate",
-        "class_bbb_1": "BBB+ по RF",
-        "class_bbb_0": "BBB− по RF",
-        "note_fallback": "SHAP сейчас недоступен, поэтому это не направленный вклад, а приближённая важность групп признаков.",
-    },
-    "kk": {
-        "title": "### 🧠 ML-талдау: модель қандай белгі топтарын қолданды",
-        "intro": (
-            "Бұл бөлім әдеттегі дескрипторлық талдаудан басқа сұраққа жауап береді. "
-            "Әдеттегі талдау химияны түсіндіреді: MW, LogP, TPSA, HBD/HBA, pKa және P-gp. "
-            "ML-талдау RandomForest моделі өз score-ын есептегенде қандай белгі топтарына сүйенгенін көрсетеді. "
-            "Оны негізгі қорытынды емес, қосымша тексеру ретінде қолданыңыз."
-        ),
-        "how_to": (
-            "Кестені оқу: оң үлес модель жолында көрсетілген класстың score-ын арттырады; "
-            "теріс үлес оны төмендетеді. Егер SHAP қолжетімсіз болса, бағытсыз жуық топтық маңыздылық көрсетіледі."
-        ),
-        "student_label": "Оқу түсіндірмесі",
-        "pgp_positive_class": "оң класс: P-gp substrate / эффлюкс қаупі",
-        "bbb_positive_class": "оң класс: қосымша RF-модель бойынша BBB+",
-        "pgp_use": "P-gp моделі молекуланың белсенді шығарылу қаупін түсінуге көмектеседі. Score жоғары болса, пассивті BBB-өтімділік жақсы болғанымен, молекула CNS ішінде нашар ұсталып қалуы мүмкін.",
-        "bbb_use": "BBB RF — қосымша ML-сигнал. Негізгі оқу BBB-талдауы Gupta формуласы мен дескрипторларда қалады, өйткені олар химиялық тұрғыдан түсініктірек.",
-        "model_result": "ML-модель нәтижесі",
-        "probability": "Score / ықтималдық",
-        "class": "Класс",
-        "threshold": "Шек",
-        "method": "Түсіндіру әдісі",
-        "method_shap": "белгілердің жергілікті үлестері",
-        "method_fallback": "белгі топтарының жуық маңыздылығы",
-        "group_table": "Score-ға әсер еткен белгі топтары",
-        "group": "Белгі тобы",
-        "value": "Модель не көрді",
-        "effect": "Оқу мағынасы",
-        "contribution": "Үлес",
-        "developer_details": "ML-талдаудың техникалық мәліметтерін көрсету",
-        "download_json": "Техникалық JSON жүктеу",
-        "top_features": "Жеке техникалық белгілер",
-        "unavailable": "Бұл молекула немесе модель үшін ML-талдау қолжетімсіз.",
-        "structural_fragments": "Молекуланың құрылымдық фрагменттері",
-        "structural_keys": "MACCS құрылымдық кілттері",
-        "fragments_seen": "белсенді құрылымдық фрагменттер: {value}",
-        "keys_seen": "белсенді құрылымдық кілттер: {value}",
-        "scalar_seen": "мәні: {value}",
-        "effect_positive": "оң класты қолдайды",
-        "effect_negative": "оң класты төмендетеді",
-        "effect_neutral": "үлесі аз",
-        "effect_importance": "маңызды белгі тобы; бағыты бағаланбайды",
-        "class_pgp_1": "ықтимал P-gp substrate",
-        "class_pgp_0": "P-gp substrate емес болуы мүмкін",
-        "class_bbb_1": "RF бойынша BBB+",
-        "class_bbb_0": "RF бойынша BBB−",
-        "note_fallback": "Қазір SHAP қолжетімсіз, сондықтан бұл бағытталған үлес емес, белгі топтарының жуық маңыздылығы.",
-    },
-    "en": {
-        "title": "### 🧠 ML breakdown: which feature groups the model used",
-        "intro": (
-            "This section answers a different question from the standard descriptor breakdown. "
-            "The standard breakdown explains the chemistry: MW, LogP, TPSA, HBD/HBA, pKa and P-gp. "
-            "The ML breakdown shows which groups of features the RandomForest model used when calculating its score. "
-            "Use it as an additional check, not as the main conclusion."
-        ),
-        "how_to": (
-            "How to read the table: a positive contribution increases the score of the class shown for that model; "
-            "a negative contribution lowers it. If SHAP is unavailable, the table shows approximate group importance without direction."
-        ),
-        "student_label": "Teaching interpretation",
-        "pgp_positive_class": "positive class: P-gp substrate / efflux risk",
-        "bbb_positive_class": "positive class: BBB+ according to the supplementary RF model",
-        "pgp_use": "The P-gp model helps interpret active efflux risk. A high score means the molecule may be removed from CNS-facing cells even when passive BBB permeability looks good.",
-        "bbb_use": "BBB RF is a supplementary ML signal. The main teaching explanation remains the Gupta formula and descriptors because they are easier to connect to chemistry.",
-        "model_result": "ML model result",
-        "probability": "Score / probability",
-        "class": "Class",
-        "threshold": "Threshold",
-        "method": "Explanation method",
-        "method_shap": "local feature contributions",
-        "method_fallback": "approximate group importance",
-        "group_table": "Feature groups that influenced the score",
-        "group": "Feature group",
-        "value": "What the model saw",
-        "effect": "Teaching meaning",
-        "contribution": "Contribution",
-        "developer_details": "Show technical ML details",
-        "download_json": "Download technical JSON",
-        "top_features": "Individual technical features",
-        "unavailable": "ML breakdown is unavailable for this molecule or model.",
-        "structural_fragments": "Molecular structural fragments",
-        "structural_keys": "MACCS structural keys",
-        "fragments_seen": "active structural fragments: {value}",
-        "keys_seen": "active structural keys: {value}",
-        "scalar_seen": "value: {value}",
-        "effect_positive": "supports the positive class",
-        "effect_negative": "lowers the positive class",
-        "effect_neutral": "small contribution",
-        "effect_importance": "important feature group; direction is not estimated",
-        "class_pgp_1": "likely P-gp substrate",
-        "class_pgp_0": "likely not a P-gp substrate",
-        "class_bbb_1": "BBB+ by RF",
-        "class_bbb_0": "BBB− by RF",
-        "note_fallback": "SHAP is not available now, so this is approximate feature-group importance rather than a directional contribution.",
-    },
-}
-
-
-def _ml_ui_t_802(key: str, lang: str, **kwargs: Any) -> str:
-    lang = normalize_language(lang)
-    template = _ML_UI_TEXT_802.get(lang, _ML_UI_TEXT_802["ru"]).get(key, _ML_UI_TEXT_802["ru"].get(key, key))
-    try:
-        return str(template).format(**kwargs)
-    except Exception:
-        return str(template)
-
+# Student-facing copy lives in core.ml_ui_text; this file keeps only rendering
+# and small view-specific formatting helpers.
 
 def _ml_student_group_label_802(row: Mapping[str, Any], lang: str) -> str:
     key = str(row.get("group_key") or "")
@@ -1253,9 +1003,11 @@ def render_ml_explainability_tab(explanation_dict: Mapping[str, Any], lang: str 
             with c1:
                 st.metric(_ml_ui_t_802("probability", lang), _format_value(prediction.get("probability")))
             with c2:
-                st.metric(_ml_ui_t_802("class", lang), _ml_class_label_802(legacy_name, prediction.get("class"), lang))
+                st.markdown(f"**{_ml_ui_t_802('class', lang)}**")
+                st.write(_ml_class_label_802(legacy_name, prediction.get("class"), lang))
             with c3:
-                st.metric(_ml_ui_t_802("method", lang), _ml_method_label_802(str(item.get("method") or ""), lang))
+                st.markdown(f"**{_ml_ui_t_802('method', lang)}**")
+                st.write(_ml_method_label_802(str(item.get("method") or ""), lang))
 
             if str(item.get("method")) != "shap":
                 st.warning(_ml_ui_t_802("note_fallback", lang))
