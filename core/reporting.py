@@ -12,8 +12,16 @@ from datetime import datetime, timezone
 from hashlib import sha1
 from typing import Any, Mapping
 
-from core.i18n import disclaimer, limitations, methodology_sections, normalize_language, student_questions
-from core.report_text import normalize_report_text, report_labels, score_rows
+from core.i18n import normalize_language
+from core.report_text import (
+    normalize_report_text,
+    report_disclaimer,
+    report_labels,
+    report_limitations,
+    report_methodology,
+    report_questions,
+    score_rows,
+)
 
 REPORT_SCHEMA_VERSION = "student_report_v1.0"
 
@@ -70,12 +78,12 @@ def build_student_report(explanation_dict: Mapping[str, Any], lang: str | None =
             "current_interpretation": matrix.get("current_interpretation"),
         },
         "stepwise_trace": _build_step_rows(explanation_dict),
-        "methodology": methodology_sections(selected_lang),
-        "limitations": limitations(selected_lang),
-        "student_questions": student_questions(selected_lang),
+        "methodology": report_methodology(selected_lang),
+        "limitations": report_limitations(selected_lang),
+        "student_questions": report_questions(selected_lang),
         "disclaimers": {
-            "in_silico": input_disclaimers.get("in_silico") or disclaimer("in_silico", selected_lang),
-            "what_if": input_disclaimers.get("what_if") or disclaimer("what_if", selected_lang),
+            "in_silico": input_disclaimers.get("in_silico") or report_disclaimer("in_silico", selected_lang),
+            "what_if": input_disclaimers.get("what_if") or report_disclaimer("what_if", selected_lang),
         },
     }
     return normalize_report_text(report, selected_lang)

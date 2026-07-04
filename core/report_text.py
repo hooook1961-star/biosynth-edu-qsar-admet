@@ -104,6 +104,44 @@ REPORT_TEXT: dict[str, dict[str, Any]] = {
             "high": "Прогноз нужно трактовать очень осторожно: есть ошибки расчета или признаки выхода за область применимости модели.",
             "unknown": "Уровень неопределенности не определен.",
         },
+        "methodology_sections": [
+            {
+                "title": "1. Проверка структуры",
+                "text": "SMILES преобразуется в молекулярный граф. Если структура не распознается, дескрипторы и учебное объяснение не строятся.",
+            },
+            {
+                "title": "2. Физико-химические дескрипторы",
+                "text": "Для учебного объяснения используются молекулярная масса, липофильность LogP, полярная поверхность TPSA, доноры и акцепторы H-связей, pKa, заряд и оценка P-gp.",
+            },
+            {
+                "title": "3. Прохождение через ГЭБ (BBB)",
+                "text": "Блок ГЭБ оценивает, насколько свойства молекулы совместимы с пассивным прохождением через гематоэнцефалический барьер.",
+            },
+            {
+                "title": "4. P-gp",
+                "text": "P-gp рассматривается как отдельный механизм активного выведения. Он может снижать доступность для ЦНС даже при благоприятных свойствах для пассивного прохождения через ГЭБ.",
+            },
+            {
+                "title": "5. Учебное объяснение",
+                "text": "Вывод строится как учебная интерпретация дескрипторов и модельных оценок. Он не заменяет экспериментальную проверку.",
+            },
+        ],
+        "limitations_list": [
+            "BioSynth-EDU дает расчетный прогноз, а не медицинскую рекомендацию.",
+            "Прогноз не является экспериментальным доказательством прохождения через ГЭБ, токсичности или эффективности.",
+            "Вероятности и оценки моделей следует трактовать как расчетные сигналы, а не как абсолютную биологическую истину.",
+            "What-if режим меняет дескрипторы без изменения структуры, поэтому это учебная симуляция, а не прогноз новой молекулы.",
+        ],
+        "student_questions_list": [
+            "Какие дескрипторы сильнее всего поддерживают прохождение через ГЭБ?",
+            "Какой фактор является главным ограничением для доступности в ЦНС?",
+            "Есть ли конфликт между пассивным прохождением через ГЭБ и P-gp?",
+            "Как изменился бы учебный вывод, если TPSA или вероятность P-gp стали выше?",
+        ],
+        "disclaimer_text": {
+            "in_silico": "Это расчетный прогноз, а не экспериментальное доказательство. Интерпретируйте оценки вместе с дескрипторами и ограничениями модели.",
+            "what_if": "What-if лаборатория является учебной симуляцией изменения дескрипторов, а не расчетом новой химической структуры.",
+        },
     },
     "kk": {
         "title": "BioSynth-EDU: ADMET, BBB және ОЖЖ оқу есебі",
@@ -168,6 +206,29 @@ REPORT_TEXT: dict[str, dict[str, Any]] = {
             "high": "Болжамды өте сақ түсіндіру керек: есептеу қатесі немесе модельдің қолданылу аймағынан шығу белгілері бар.",
             "unknown": "Белгісіздік деңгейі анық емес.",
         },
+        "methodology_sections": [
+            {"title": "1. Құрылымды тексеру", "text": "SMILES молекулалық графқа түрлендіріледі. Құрылым танылмаса, дескрипторлар мен оқу түсіндірмесі құрылмайды."},
+            {"title": "2. Физика-химиялық дескрипторлар", "text": "Оқу түсіндірмесінде молекулалық масса, LogP, TPSA, H-байланыс донорлары мен акцепторлары, pKa, заряд және P-gp бағасы қолданылады."},
+            {"title": "3. BBB арқылы өту", "text": "BBB блогы молекула қасиеттерінің гематоэнцефалдық бөгеттен пассивті өтуге қаншалықты сәйкес келетінін бағалайды."},
+            {"title": "4. P-gp", "text": "P-gp белсенді шығарылу механизмі ретінде қарастырылады. Ол BBB арқылы өту қолайлы болса да ОЖЖ қолжетімділігін төмендетуі мүмкін."},
+            {"title": "5. Оқу түсіндірмесі", "text": "Қорытынды дескрипторлар мен модельдік бағалардың оқу интерпретациясы ретінде беріледі. Ол эксперименттік тексеруді алмастырмайды."},
+        ],
+        "limitations_list": [
+            "BioSynth-EDU есептік болжам береді, медициналық ұсыныс емес.",
+            "Болжам BBB арқылы өту, токсикология немесе тиімділік бойынша эксперименттік дәлел емес.",
+            "Модель ықтималдықтары мен бағаларын абсолют биологиялық шындық емес, есептік сигнал ретінде түсіндіру керек.",
+            "What-if режимі құрылымды өзгертпей дескрипторларды өзгертеді, сондықтан бұл жаңа молекула болжамы емес, оқу симуляциясы.",
+        ],
+        "student_questions_list": [
+            "BBB арқылы өтуді ең көп қолдайтын дескрипторлар қайсы?",
+            "ОЖЖ қолжетімділігі үшін басты шектеуші фактор қандай?",
+            "BBB арқылы пассивті өту мен P-gp арасында қайшылық бар ма?",
+            "TPSA немесе P-gp ықтималдығы жоғарыласа оқу қорытындысы қалай өзгерер еді?",
+        ],
+        "disclaimer_text": {
+            "in_silico": "Бұл есептік болжам, эксперименттік дәлел емес. Бағаларды дескрипторлармен және модель шектеулерімен бірге түсіндіріңіз.",
+            "what_if": "What-if зертханасы дескрипторларды өзгертуге арналған оқу симуляциясы; бұл жаңа химиялық құрылымды есептеу емес.",
+        },
     },
     "en": {
         "title": "BioSynth-EDU: ADMET, BBB and CNS student report",
@@ -221,6 +282,29 @@ REPORT_TEXT: dict[str, dict[str, Any]] = {
         ],
         "decision_text": {},
         "uncertainty_messages": {},
+        "methodology_sections": [
+            {"title": "1. Structure check", "text": "The SMILES string is converted into a molecular graph. If parsing fails, descriptors and the teaching explanation are not generated."},
+            {"title": "2. Physicochemical descriptors", "text": "The teaching explanation uses molecular weight, LogP, TPSA, H-bond donors and acceptors, pKa, charge and the P-gp estimate."},
+            {"title": "3. BBB passage", "text": "The BBB block estimates whether the molecular properties are compatible with passive passage across the blood-brain barrier."},
+            {"title": "4. P-gp", "text": "P-gp is treated as a separate active efflux mechanism that may reduce CNS exposure even when passive BBB properties look favourable."},
+            {"title": "5. Teaching explanation", "text": "The conclusion is an educational interpretation of descriptors and model estimates. It does not replace experimental validation."},
+        ],
+        "limitations_list": [
+            "BioSynth-EDU provides a computational prediction, not medical advice.",
+            "The prediction is not experimental proof of BBB passage, toxicity or efficacy.",
+            "Model probabilities and indicators should be treated as computational signals, not absolute biological truth.",
+            "The What-if mode changes descriptors without changing the structure, so it is a teaching simulation rather than a new-molecule prediction.",
+        ],
+        "student_questions_list": [
+            "Which descriptors most strongly support BBB passage?",
+            "What is the main limitation for CNS exposure?",
+            "Is there a conflict between passive BBB passage and P-gp?",
+            "How would the teaching conclusion change if TPSA or P-gp probability increased?",
+        ],
+        "disclaimer_text": {
+            "in_silico": "This is a computational prediction, not experimental proof. Interpret the estimates together with descriptors and model limitations.",
+            "what_if": "The What-if lab is a teaching simulation of descriptor changes, not a calculation of a new chemical structure.",
+        },
     },
 }
 
@@ -231,6 +315,22 @@ def report_labels(lang: str) -> dict[str, Any]:
 
 def score_rows(lang: str) -> list[tuple[str, str]]:
     return list(report_labels(lang)["scores_table"])
+
+
+def report_methodology(lang: str) -> list[dict[str, str]]:
+    return deepcopy(report_labels(lang).get("methodology_sections", []))
+
+
+def report_limitations(lang: str) -> list[str]:
+    return list(report_labels(lang).get("limitations_list", []))
+
+
+def report_questions(lang: str) -> list[str]:
+    return list(report_labels(lang).get("student_questions_list", []))
+
+
+def report_disclaimer(kind: str, lang: str) -> str:
+    return str(report_labels(lang).get("disclaimer_text", {}).get(kind, ""))
 
 
 def normalize_report_text(report: Mapping[str, Any], lang: str) -> dict[str, Any]:
