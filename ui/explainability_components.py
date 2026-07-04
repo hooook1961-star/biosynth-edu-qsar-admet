@@ -828,8 +828,6 @@ def render_student_report_tab(explanation_dict: Mapping[str, Any], lang: str | N
         st.metric(t("metric.pgp", lang), _format_value(scores.get("pgp_probability")))
     with c3:
         st.metric(t("metric.pka", lang), _format_value(scores.get("pka_pred")))
-    summary = report.get("executive_summary", {})
-    st.warning(f"**{summary.get('final_label_ru', 'N/A')}**\n\n{summary.get('summary', '')}\n\n{summary.get('student_interpretation', '')}")
     with st.expander(t("report.preview", lang), expanded=False):
         st.code(markdown_report[:12000], language="markdown")
     import json
