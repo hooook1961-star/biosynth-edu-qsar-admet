@@ -19,6 +19,7 @@ import streamlit as st
 from rdkit import Chem
 from rdkit.Chem import Draw
 
+from core.app_text import tx
 from core.i18n import (
     language_label_to_code,
     language_options,
@@ -51,163 +52,6 @@ DEFAULT_SMILES = "CC1=CC2C3(O1)C=CC(C)(C4C3C(=C)C(=O)O4)C2"
 DEFAULT_BATCH_TEXT = "CCN(CC)CC(=O)Nc1c(C)cccc1C\nCCO\ninvalid_smiles"
 
 
-APP_TEXT = {
-    "ru": {
-        "sidebar.stage": "**Учебная лаборатория Explainable ADMET / QSAR**",
-        "sidebar.developer_mode": "Показать технические детали",
-        "sidebar.developer_help": "Показывает runtime model selection, JSON-статусы моделей и другие детали для разработчика.",
-        "sidebar.model_selection_hint": "Источник runtime-моделей:",
-        "single.learning_note_title": "Цель анализа",
-        "single.learning_note": (
-            "Эта страница устроена как учебная лаборатория. Сначала посмотрите прогноз, затем разберите, "
-            "какие свойства молекулы помогают или мешают BBB-проницаемости. После этого можно открыть "
-            "What-if лабораторию и проверить, как меняется учебный CNS-score при изменении дескрипторов. "
-            "ML-разбор нужен как дополнительный слой: он показывает, какие группы признаков использовала "
-            "RandomForest-модель, но основной учебный вывод строится через дескрипторы и матрицу BBB × P-gp."
-        ),
-        "nav.main_mode": "Режим работы",
-        "nav.single_section": "Раздел индивидуального анализа",
-        "nav.batch_section": "Раздел массового анализа",
-        "forecast.qsar_bridge_title": "QSAR-смысл прогноза",
-        "forecast.qsar_bridge_text": (
-            "Каждая метрика здесь — это модельный сигнал, а не экспериментальное доказательство. "
-            "В учебном режиме важно понять связь: структура → дескрипторы → модельный score → ADMET-интерпретация."
-        ),
-        "forecast.model_status_title": "Технический статус моделей",
-        "forecast.model_status_caption": "Этот блок нужен для отладки локальной установки и не обязателен для студента.",
-        "metric.catmos_score": "CATMoS score",
-        "help.catmos_score": (
-            "Показывается как модельный score. Шкала consensus_LD50 выглядит log/transformed, "
-            "поэтому значение не следует автоматически интерпретировать как mg/kg."
-        ),
-        "metric.bbb_rf": "BBB RF probability",
-        "help.bbb_rf": "Дополнительный ML-сигнал BBB. Основной BBB-блок — исправленная формула Gupta.",
-        "metric.bbb_formula_version": "Gupta formula",
-        "batch.learning_intro": (
-            "Массовый режим добавляет к каждой молекуле краткое учебное объяснение: итоговый CNS-класс, "
-            "сценарий BBB × P-gp, факторы за/против, warnings и уровень неопределённости."
-        ),
-        "batch.result_stored": "Результаты сохранены. Можно переключаться между разделами без повторного расчёта.",
-        "common.na": "N/A",
-        "section.forecast": "📈 Прогноз",
-        "section.explain": "🧩 Разбор решения модели",
-        "section.ml": "🧠 ML-разбор",
-        "section.what_if": "🧪 What-if лаборатория",
-        "section.report": "📄 Учебный отчёт",
-        "section.matrix": "🧬 Матрица BBB × P-gp",
-        "section.methodology": "🔬 Методология",
-        "section.limitations": "⚠️ Ограничения модели",
-        "batch.section.summary": "📊 Учебная сводка",
-        "batch.section.table": "🧪 Полная таблица ADMET + XAI",
-        "batch.section.export": "📥 Экспорт",
-    },
-    "kk": {
-        "sidebar.stage": "**Explainable ADMET / QSAR оқу зертханасы**",
-        "sidebar.developer_mode": "Техникалық мәліметтерді көрсету",
-        "sidebar.developer_help": "Runtime model selection, модельдердің JSON-статустары және әзірлеушіге арналған мәліметтерді көрсетеді.",
-        "sidebar.model_selection_hint": "Runtime-модельдер көзі:",
-        "single.learning_note_title": "Талдаудың мақсаты",
-        "single.learning_note": (
-            "Бұл бет оқу зертханасы ретінде құрылған. Алдымен болжамды қараңыз, содан кейін молекуланың "
-            "қай қасиеттері BBB-өтімділігін қолдайтынын немесе тежейтінін талдаңыз. Одан кейін What-if "
-            "зертханасында дескрипторларды өзгерткенде оқу CNS-score қалай өзгеретінін тексеруге болады. "
-            "ML-талдау қосымша қабат ретінде қажет: ол RandomForest моделі қандай белгі топтарын қолданғанын "
-            "көрсетеді, бірақ негізгі оқу қорытындысы дескрипторлар мен BBB × P-gp матрицасы арқылы беріледі."
-        ),
-        "nav.main_mode": "Жұмыс режимі",
-        "nav.single_section": "Жеке талдау бөлімі",
-        "nav.batch_section": "Массалық талдау бөлімі",
-        "forecast.qsar_bridge_title": "Болжамның QSAR мағынасы",
-        "forecast.qsar_bridge_text": (
-            "Мұндағы әр метрика — модельдік сигнал, эксперименттік дәлел емес. Оқу режимінде байланыс маңызды: "
-            "құрылым → дескрипторлар → модельдік score → ADMET түсіндірмесі."
-        ),
-        "forecast.model_status_title": "Модельдердің техникалық статусы",
-        "forecast.model_status_caption": "Бұл блок локалды орнатуды тексеруге арналған, студент үшін міндетті емес.",
-        "metric.catmos_score": "CATMoS score",
-        "help.catmos_score": (
-            "Модельдік score ретінде көрсетіледі. consensus_LD50 шкаласы log/transformed болуы мүмкін, "
-            "сондықтан мәнді автоматты түрде mg/kg деп түсіндіруге болмайды."
-        ),
-        "metric.bbb_rf": "BBB RF ықтималдығы",
-        "help.bbb_rf": "Қосымша BBB ML-сигналы. Негізгі BBB-блок — түзетілген Gupta формуласы.",
-        "metric.bbb_formula_version": "Gupta формуласы",
-        "batch.learning_intro": (
-            "Массалық режим әр молекулаға қысқа оқу түсіндірмесін қосады: қорытынды CNS-класс, "
-            "BBB × P-gp сценарийі, қолдайтын/қарсы факторлар, warnings және белгісіздік деңгейі."
-        ),
-        "batch.result_stored": "Нәтижелер сақталды. Қайта есептемей бөлімдер арасында ауысуға болады.",
-        "common.na": "N/A",
-        "section.forecast": "📈 Болжам",
-        "section.explain": "🧩 Модель шешімін талдау",
-        "section.ml": "🧠 ML-талдау",
-        "section.what_if": "🧪 What-if зертханасы",
-        "section.report": "📄 Оқу есебі",
-        "section.matrix": "🧬 BBB × P-gp матрицасы",
-        "section.methodology": "🔬 Әдістеме",
-        "section.limitations": "⚠️ Модель шектеулері",
-        "batch.section.summary": "📊 Оқу қорытындысы",
-        "batch.section.table": "🧪 Толық ADMET + XAI кестесі",
-        "batch.section.export": "📥 Экспорт",
-    },
-    "en": {
-        "sidebar.stage": "**Explainable ADMET / QSAR teaching lab**",
-        "sidebar.developer_mode": "Show technical details",
-        "sidebar.developer_help": "Shows runtime model selection, model JSON statuses and developer diagnostics.",
-        "sidebar.model_selection_hint": "Runtime model source:",
-        "single.learning_note_title": "Purpose of the analysis",
-        "single.learning_note": (
-            "This page is designed as a teaching lab. Start with the prediction, then inspect which molecular "
-            "properties support or oppose BBB penetration. Then use the What-if lab to see how the educational "
-            "CNS score changes when descriptors are modified. The ML breakdown is an additional layer: it shows "
-            "which groups of features the RandomForest model used, while the main teaching conclusion remains "
-            "descriptor-based and uses the BBB × P-gp matrix."
-        ),
-        "nav.main_mode": "Mode",
-        "nav.single_section": "Single-molecule analysis section",
-        "nav.batch_section": "Batch analysis section",
-        "forecast.qsar_bridge_title": "QSAR meaning of the prediction",
-        "forecast.qsar_bridge_text": (
-            "Each metric here is a model signal, not experimental evidence. In teaching mode, the goal is to see "
-            "the connection: structure → descriptors → model score → ADMET interpretation."
-        ),
-        "forecast.model_status_title": "Technical model status",
-        "forecast.model_status_caption": "This block is for local debugging and is not required for students.",
-        "metric.catmos_score": "CATMoS score",
-        "help.catmos_score": (
-            "Displayed as a model score. The consensus_LD50 scale appears log/transformed, "
-            "so the value should not automatically be interpreted as mg/kg."
-        ),
-        "metric.bbb_rf": "BBB RF probability",
-        "help.bbb_rf": "Supplementary BBB ML signal. The primary BBB block is the corrected Gupta formula.",
-        "metric.bbb_formula_version": "Gupta formula",
-        "batch.learning_intro": (
-            "Batch mode adds a compact teaching explanation for each molecule: final CNS class, "
-            "BBB × P-gp scenario, supporting/opposing factors, warnings and uncertainty level."
-        ),
-        "batch.result_stored": "Results are stored. You can switch sections without recalculating.",
-        "common.na": "N/A",
-        "section.forecast": "📈 Prediction",
-        "section.explain": "🧩 Model decision breakdown",
-        "section.ml": "🧠 ML breakdown",
-        "section.what_if": "🧪 What-if lab",
-        "section.report": "📄 Student report",
-        "section.matrix": "🧬 BBB × P-gp matrix",
-        "section.methodology": "🔬 Methodology",
-        "section.limitations": "⚠️ Model limitations",
-        "batch.section.summary": "📊 Teaching summary",
-        "batch.section.table": "🧪 Full ADMET + XAI table",
-        "batch.section.export": "📥 Export",
-    },
-}
-
-
-def tx(key: str, lang: str, **kwargs: Any) -> str:
-    template = APP_TEXT.get(lang, APP_TEXT["ru"]).get(key, APP_TEXT["ru"].get(key, key))
-    try:
-        return template.format(**kwargs)
-    except Exception:
-        return template
 
 
 def init_state() -> None:
@@ -244,41 +88,41 @@ def _status_key(value: Any) -> str | None:
     raw = str(value).strip()
     lowered = raw.lower()
     mapping = {
-        "да": "status.yes",
+        "РґР°": "status.yes",
         "yes": "status.yes",
         "true": "status.yes",
         "1": "status.yes",
-        "нет": "status.no",
+        "РЅРµС‚": "status.no",
         "no": "status.no",
         "false": "status.no",
         "0": "status.no",
         "high": "status.high",
-        "высокая": "status.high",
-        "жоғары": "status.high",
+        "РІС‹СЃРѕРєР°СЏ": "status.high",
+        "Р¶РѕТ“Р°СЂС‹": "status.high",
         "medium": "status.medium",
-        "средняя": "status.medium",
-        "орташа": "status.medium",
+        "СЃСЂРµРґРЅСЏСЏ": "status.medium",
+        "РѕСЂС‚Р°С€Р°": "status.medium",
         "low": "status.low",
-        "низкая": "status.low",
-        "төмен": "status.low",
-        "высокий риск": "status.high_risk",
+        "РЅРёР·РєР°СЏ": "status.low",
+        "С‚У©РјРµРЅ": "status.low",
+        "РІС‹СЃРѕРєРёР№ СЂРёСЃРє": "status.high_risk",
         "high risk": "status.high_risk",
-        "жоғары қауіп": "status.high_risk",
-        "стабильное": "status.stable",
+        "Р¶РѕТ“Р°СЂС‹ Т›Р°СѓС–Рї": "status.high_risk",
+        "СЃС‚Р°Р±РёР»СЊРЅРѕРµ": "status.stable",
         "stable": "status.stable",
-        "тұрақты": "status.stable",
-        "ошибка": "status.error",
+        "С‚Т±СЂР°Т›С‚С‹": "status.stable",
+        "РѕС€РёР±РєР°": "status.error",
         "error": "status.error",
-        "қате": "status.error",
+        "Т›Р°С‚Рµ": "status.error",
         "n/a": "status.na",
         "disabled_by_selection": "status.na",
         "fallback_error": "status.error",
         "ok": "status.stable",
         "ok_units_unverified": "status.medium",
-        "не субстрат": "status.not_substrate",
+        "РЅРµ СЃСѓР±СЃС‚СЂР°С‚": "status.not_substrate",
         "non-substrate": "status.not_substrate",
-        "субстрат емес": "status.not_substrate",
-        "субстрат (вымывается)": "status.substrate_efflux",
+        "СЃСѓР±СЃС‚СЂР°С‚ РµРјРµСЃ": "status.not_substrate",
+        "СЃСѓР±СЃС‚СЂР°С‚ (РІС‹РјС‹РІР°РµС‚СЃСЏ)": "status.substrate_efflux",
         "substrate (efflux)": "status.substrate_efflux",
     }
     return mapping.get(lowered)
@@ -678,3 +522,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
