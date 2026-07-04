@@ -23,7 +23,6 @@ from .teaching_templates import (
     BASE_DESCRIPTOR_EXPLANATIONS_RU,
     BBB_HIGH_THRESHOLD,
     BBB_LOW_THRESHOLD,
-    BBB_PGP_MATRIX_CELLS,
     BORDERLINE_DISTANCE,
     DEFAULT_APPLICABILITY_MESSAGE_RU,
     DESCRIPTOR_ALIASES,
@@ -32,13 +31,13 @@ from .teaching_templates import (
     EFFECT_LABELS_RU,
     FINAL_DECISION_TEXTS,
     IN_SILICO_DISCLAIMER_RU,
-    MATRIX_INTRO_TEXT,
     PGP_HIGH_THRESHOLD,
     PGP_LOW_THRESHOLD,
     WHAT_IF_DISCLAIMER_RU,
     ZONE_COMMENTS_RU,
     ZONE_LABELS_RU,
 )
+from core.matrix_text import matrix_cells as teaching_matrix_cells, matrix_intro as teaching_matrix_intro
 
 from core.i18n import (
     descriptor_base_text,
@@ -49,7 +48,6 @@ from core.i18n import (
     effect_label as localized_effect_label,
     final_decision_text,
     localize_warning,
-    matrix_cells as localized_matrix_cells,
     normalize_language,
     t,
     zone_label as localized_zone_label,
@@ -530,23 +528,23 @@ def _explain_descriptor_ru(
 def classify_bbb_score(bbb_score: Any) -> str:
     numeric = _safe_float(bbb_score)
     if numeric is None:
-        return "BBB Unknown"
+        return "bbb_unknown"
     if numeric >= BBB_HIGH_THRESHOLD:
-        return "BBB High"
+        return "bbb_high"
     if numeric < BBB_LOW_THRESHOLD:
-        return "BBB Low"
-    return "BBB Borderline"
+        return "bbb_low"
+    return "bbb_borderline"
 
 
 def classify_pgp_score(pgp_score: Any) -> str:
     numeric = _safe_float(pgp_score)
     if numeric is None:
-        return "P-gp Unknown"
+        return "pgp_unknown"
     if numeric >= PGP_HIGH_THRESHOLD:
-        return "P-gp Substrate"
+        return "pgp_likely_substrate"
     if numeric < PGP_LOW_THRESHOLD:
-        return "P-gp Non-substrate"
-    return "P-gp Borderline"
+        return "pgp_not_substrate_like"
+    return "pgp_borderline"
 
 
 def classify_final_cns_profile(bbb_score: Any, pgp_score: Any) -> str:
@@ -632,9 +630,9 @@ def _generate_bbb_pgp_matrix_ru(bbb_score: Any, pgp_score: Any) -> dict[str, Any
         current_cell = "borderline"
 
     lang = "ru"
-    cells = localized_matrix_cells(lang)
+    cells = teaching_matrix_cells(lang)
     return {
-        "intro_text": t("matrix.intro", lang),
+        "intro_text": teaching_matrix_intro(lang),
         "current_cell": current_cell,
         "current_interpretation": cells[current_cell]["interpretation"],
         "bbb_score": bbb,
@@ -1160,24 +1158,22 @@ def _generate_stepwise_model_trace(
         step2_message = t("msg.descriptors_unavailable", lang)
 
     bbb_prob = model_outputs.get("bbb_classifier_probability")
-    bbb_class = model_outputs.get("bbb_class", classify_bbb_score(bbb_prob))
     if bbb_prob is None:
         step3_status = "warning"
         step3_message = {"ru": "BBB score недоступен; пассивную BBB-проницаемость можно оценить только по дескрипторам.", "kk": "BBB score қолжетімсіз; пассивті BBB өткізгіштігін тек дескрипторлар бойынша бағалауға болады.", "en": "BBB score is unavailable; passive BBB permeability can only be assessed from descriptors."}.get(lang, "BBB score недоступен; пассивную BBB-проницаемость можно оценить только по дескрипторам.")
     else:
         bbb_zone = classify_descriptor_zone("BBB_probability", bbb_prob)["zone"]
         step3_status = _status_from_zone(bbb_zone)
-        step3_message = {"ru": f"BBB-модель вернула {bbb_class} со score {_format_value(bbb_prob)}.", "kk": f"BBB моделі {bbb_class} нәтижесін score {_format_value(bbb_prob)} мәнімен берді.", "en": f"The BBB model returned {bbb_class} with score {_format_value(bbb_prob)}."}.get(lang, f"BBB-модель вернула {bbb_class} со score {_format_value(bbb_prob)}.")
+        step3_message = {"ru": f"Оценка прохождения через гематоэнцефалический барьер (ГЭБ, BBB): {_format_value(bbb_prob)}.", "kk": f"Қан-ми тосқауылынан (BBB) өту бағасы: {_format_value(bbb_prob)}.", "en": f"Blood-brain barrier (BBB) passage estimate: {_format_value(bbb_prob)}."}.get(lang, f"Оценка прохождения через гематоэнцефалический барьер (ГЭБ, BBB): {_format_value(bbb_prob)}.")
 
     pgp_prob = model_outputs.get("pgp_probability")
-    pgp_class = model_outputs.get("pgp_class", classify_pgp_score(pgp_prob))
     if pgp_prob is None:
         step4_status = "warning"
         step4_message = {"ru": "P-gp score недоступен; риск активного эффлюкса не оценён.", "kk": "P-gp score қолжетімсіз; белсенді efflux қаупі бағаланбады.", "en": "P-gp score is unavailable; active efflux risk was not evaluated."}.get(lang, "P-gp score недоступен; риск активного эффлюкса не оценён.")
     else:
         pgp_zone = classify_descriptor_zone("Pgp_probability", pgp_prob)["zone"]
         step4_status = _status_from_zone(pgp_zone)
-        step4_message = {"ru": f"P-gp-модель вернула {pgp_class} со score {_format_value(pgp_prob)}.", "kk": f"P-gp моделі {pgp_class} нәтижесін score {_format_value(pgp_prob)} мәнімен берді.", "en": f"The P-gp model returned {pgp_class} with score {_format_value(pgp_prob)}."}.get(lang, f"P-gp-модель вернула {pgp_class} со score {_format_value(pgp_prob)}.")
+        step4_message = {"ru": f"Оценка риска активного выведения через P-gp: {_format_value(pgp_prob)}.", "kk": f"P-gp арқылы белсенді шығарылу қаупінің бағасы: {_format_value(pgp_prob)}.", "en": f"P-gp active-efflux risk estimate: {_format_value(pgp_prob)}."}.get(lang, f"Оценка риска активного выведения через P-gp: {_format_value(pgp_prob)}.")
 
     final_class = decision_explanation.get("final_class", "uncertain_or_borderline")
     step5_status = "ok" if final_class == "likely_cns_active" else "warning"
@@ -1306,16 +1302,16 @@ def generate_cns_decision_explanation(
 
 def generate_bbb_pgp_matrix(bbb_score: Any, pgp_score: Any, lang: str = "ru") -> dict[str, Any]:
     """Return the BBB x P-gp educational matrix in ru/kk/en."""
-    from core.i18n import normalize_language, matrix_intro, matrix_cells
+    from core.i18n import normalize_language
+    from core.matrix_text import matrix_cells, matrix_intro
 
     lang = normalize_language(lang)
     result = _generate_bbb_pgp_matrix_ru(bbb_score, pgp_score)
-    if lang != "ru":
-        cells = matrix_cells(lang)
-        current = str(result.get("current_cell", "insufficient_data"))
-        result["intro_text"] = matrix_intro(lang)
-        result["cells"] = cells
-        result["current_interpretation"] = cells.get(current, cells.get("insufficient_data", {})).get("interpretation", "")
+    cells = matrix_cells(lang)
+    current = str(result.get("current_cell", "insufficient_data"))
+    result["intro_text"] = matrix_intro(lang)
+    result["cells"] = cells
+    result["current_interpretation"] = cells.get(current, cells.get("insufficient_data", {})).get("interpretation", "")
     return result
 
 

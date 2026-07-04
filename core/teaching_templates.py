@@ -383,9 +383,9 @@ ZONE_COMMENTS_RU = {
         "gray": "Частичные заряды зависят от метода расчёта и требуют контекста.",
     },
     "BBB_probability": {
-        "green": "Модель относит молекулу к BBB High зоне.",
+        "green": "Модель относит молекулу к зоне высокой оценки прохождения через ГЭБ (BBB).",
         "yellow": "Вероятность близка к переходной зоне; вывод лучше считать пограничным.",
-        "red": "Модель относит молекулу к BBB Low зоне.",
+        "red": "Модель относит молекулу к зоне низкой оценки прохождения через ГЭБ (BBB).",
         "gray": "BBB score недоступен.",
     },
     "Pgp_probability": {
@@ -463,51 +463,6 @@ FINAL_DECISION_TEXTS = {
         ),
     },
 }
-
-BBB_PGP_MATRIX_CELLS = {
-    "bbb_high_pgp_low": {
-        "bbb_label": "BBB High",
-        "pgp_label": "P-gp Non-substrate",
-        "label": "BBB High + P-gp Non-substrate",
-        "interpretation": "Потенциально ЦНС-активна: проходит и остаётся.",
-    },
-    "bbb_high_pgp_high": {
-        "bbb_label": "BBB High",
-        "pgp_label": "P-gp Substrate",
-        "label": "BBB High + P-gp Substrate",
-        "interpretation": "Пассивно проходит, но может вымываться P-gp; вероятна сниженная CNS-доступность.",
-    },
-    "bbb_low_pgp_low": {
-        "bbb_label": "BBB Low",
-        "pgp_label": "P-gp Non-substrate",
-        "label": "BBB Low + P-gp Non-substrate",
-        "interpretation": "Не проходит главным образом из-за неблагоприятных физико-химических свойств.",
-    },
-    "bbb_low_pgp_high": {
-        "bbb_label": "BBB Low",
-        "pgp_label": "P-gp Substrate",
-        "label": "BBB Low + P-gp Substrate",
-        "interpretation": "Двойной барьер: плохо проходит и дополнительно может вымываться P-gp.",
-    },
-    "borderline": {
-        "bbb_label": "BBB Borderline",
-        "pgp_label": "P-gp Borderline",
-        "label": "Пограничный сценарий",
-        "interpretation": "Один или оба score находятся в переходной зоне; вывод следует трактовать осторожно.",
-    },
-    "insufficient_data": {
-        "bbb_label": "BBB unknown",
-        "pgp_label": "P-gp unknown",
-        "label": "Недостаточно данных",
-        "interpretation": "Недоступен BBB score или P-gp score для матричной интерпретации.",
-    },
-}
-
-MATRIX_INTRO_TEXT = (
-    "BBB-модель оценивает пассивную проницаемость по физико-химическим свойствам. P-gp-модель "
-    "оценивает риск активного вымывания молекулы из клеток эндотелия обратно в кровь. Поэтому "
-    "молекула может выглядеть BBB+, но иметь сниженную CNS-доступность из-за P-gp."
-)
 
 IN_SILICO_DISCLAIMER_RU = (
     "BioSynth-EDU предоставляет in silico-прогноз. Это не медицинская рекомендация и не "

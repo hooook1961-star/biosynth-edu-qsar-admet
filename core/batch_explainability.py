@@ -25,6 +25,7 @@ from rdkit import Chem
 from core.explainability import build_explanation_dict
 from core.explainability_adapter import build_pipeline_result_from_current_app
 from core.i18n import normalize_language, batch_priority_label, batch_summary_text, warning_message
+from core.matrix_text import matrix_current_label
 
 
 BATCH_XAI_SCHEMA_VERSION = "batch_xai_v1.0"
@@ -68,7 +69,7 @@ XAI_EXPORT_COLUMNS: tuple[str, ...] = (
 
 FINAL_LABEL_FALLBACK_RU: dict[str, str] = {
     "likely_cns_active": "Вероятно ЦНС-активный профиль",
-    "peripheral_action_risk": "BBB High, но риск P-gp эффлюкса",
+    "peripheral_action_risk": "Хорошая оценка ГЭБ, но есть риск активного выведения через P-gp",
     "likely_not_bbb_penetrant": "Вероятно не проходит BBB",
     "full_barrier": "Полный барьер BBB + P-gp",
     "uncertain_or_borderline": "Неопределённо / погранично",
@@ -196,7 +197,7 @@ def build_batch_explanation_row_from_explanation(
         "xai_pgp_probability": _round_or_none(model_outputs.get("pgp_probability")),
         "xai_pgp_class": model_outputs.get("pgp_class"),
         "xai_pka_pred": _round_or_none(model_outputs.get("pka_pred")),
-        "xai_bbb_pgp_scenario": matrix.get("current_cell"),
+        "xai_bbb_pgp_scenario": matrix_current_label(str(matrix.get("current_cell") or "insufficient_data"), lang),
         "xai_matrix_interpretation": matrix.get("current_interpretation"),
         "xai_positive_factors": _join_names(positive),
         "xai_negative_factors": _join_names(negative),
@@ -418,7 +419,7 @@ def _build_invalid_xai_row(input_smiles: str, *, results: Mapping[str, Any], inc
         "xai_pgp_probability": None,
         "xai_pgp_class": None,
         "xai_pka_pred": None,
-        "xai_bbb_pgp_scenario": "invalid_or_error",
+        "xai_bbb_pgp_scenario": matrix_current_label("invalid_or_error", lang),
         "xai_matrix_interpretation": {"ru": "Матрица BBB × P-gp недоступна для некорректной структуры.", "kk": "Қате құрылым үшін BBB × P-gp матрицасы қолжетімсіз.", "en": "The BBB × P-gp matrix is unavailable for an invalid structure."}[lang],
         "xai_positive_factors": "",
         "xai_negative_factors": "",
@@ -496,7 +497,7 @@ def _teacher_note_from_xai_priority(label: str) -> str:
 def _build_review_reasons(explanation_dict: Mapping[str, Any], final_class: str, warnings: str) -> str:
     reasons: list[str] = []
     if final_class == "peripheral_action_risk":
-        reasons.append("конфликт BBB High + P-gp High: пассивная проницаемость против активного эффлюкса")
+        reasons.append("конфликт ???????? ???/P-gp: пассивная проницаемость против активного эффлюкса")
     if final_class == "full_barrier":
         reasons.append("двойной барьер: плохая пассивная BBB-проницаемость и P-gp efflux")
     if final_class == "likely_not_bbb_penetrant":
@@ -567,7 +568,7 @@ def _build_recommended_next_steps(
     if priority_counts.get("CNS candidate") or priority_counts.get("CNS candidate / caution"):
         steps.append("Начать ручной разбор с CNS-кандидатов, затем проверить предупреждения о домене применимости.")
     if final_class_counts.get("peripheral_action_risk"):
-        steps.append("Отдельно разобрать молекулы BBB High + P-gp High как примеры конфликта пассивной проницаемости и эффлюкса.")
+        steps.append("Отдельно разобрать молекулы ???????? ???/P-gp как примеры конфликта пассивной проницаемости и эффлюкса.")
     if final_class_counts.get("uncertain_or_borderline"):
         steps.append("Для пограничных молекул посмотреть значения TPSA, LogP, pKa и P-gp probability около порогов.")
     if n_invalid:
@@ -949,7 +950,7 @@ def build_batch_explanation_row_from_explanation(
         "xai_pgp_probability": _round_or_none(model_outputs.get("pgp_probability")),
         "xai_pgp_class": model_outputs.get("pgp_class"),
         "xai_pka_pred": _round_or_none(model_outputs.get("pka_pred")),
-        "xai_bbb_pgp_scenario": matrix.get("current_cell"),
+        "xai_bbb_pgp_scenario": matrix_current_label(str(matrix.get("current_cell") or "insufficient_data"), lang),
         "xai_matrix_interpretation": matrix.get("current_interpretation"),
         "xai_positive_factors": _join_names(positive),
         "xai_negative_factors": _join_names(negative),
@@ -1112,9 +1113,9 @@ def _build_recommended_next_steps(
         }[lang])
     if final_class_counts.get("peripheral_action_risk"):
         steps.append({
-            "ru": "Отдельно разобрать молекулы BBB High + P-gp High как примеры конфликта пассивной проницаемости и эффлюкса.",
-            "kk": "BBB High + P-gp High молекулаларын пассивті өткізгіштік пен efflux қақтығысының мысалы ретінде бөлек талдаңыз.",
-            "en": "Review BBB High + P-gp High molecules separately as examples of passive permeability versus efflux conflict.",
+            "ru": "Отдельно разобрать молекулы ???????? ???/P-gp как примеры конфликта пассивной проницаемости и эффлюкса.",
+            "kk": "???????? ???/P-gp молекулаларын пассивті өткізгіштік пен efflux қақтығысының мысалы ретінде бөлек талдаңыз.",
+            "en": "Review ???????? ???/P-gp molecules separately as examples of passive permeability versus efflux conflict.",
         }[lang])
     if final_class_counts.get("uncertain_or_borderline"):
         steps.append({
@@ -1179,7 +1180,7 @@ def _build_review_reasons(explanation_dict: Mapping[str, Any], final_class: str,
     lang = _i18n_normalize_language(lang or str(explanation_dict.get("language", "ru")))
     reasons: list[str] = []
     if final_class == "peripheral_action_risk":
-        reasons.append({"ru": "конфликт BBB High + P-gp High: пассивная проницаемость против активного эффлюкса", "kk": "BBB High + P-gp High қақтығысы: пассивті өткізгіштік пен белсенді efflux", "en": "BBB High + P-gp High conflict: passive permeability versus active efflux"}[lang])
+        reasons.append({"ru": "конфликт ???????? ???/P-gp: пассивная проницаемость против активного эффлюкса", "kk": "???????? ???/P-gp қақтығысы: пассивті өткізгіштік пен белсенді efflux", "en": "???????? ???/P-gp conflict: passive permeability versus active efflux"}[lang])
     if final_class == "full_barrier":
         reasons.append({"ru": "двойной барьер: плохая пассивная BBB-проницаемость и P-gp efflux", "kk": "қос бөгет: төмен пассивті BBB өткізгіштігі және P-gp efflux", "en": "double barrier: poor passive BBB permeability plus P-gp efflux"}[lang])
     if final_class == "likely_not_bbb_penetrant":

@@ -23,7 +23,7 @@ def normalize_gupta_score_to_educational_bbb_score(gupta_score: Any) -> float | 
     The current app interprets ``gupta_bbb_score >= 3.0`` as high passive BBB
     permeability. The explainability matrix expects a probability-like 0..1
     score. This function maps 3.0 to 0.70, so the old threshold aligns with the
-    Stage 1 ``BBB High`` threshold.
+    Stage 1 ``high BBB-estimate threshold.
 
     This is not a calibrated biological probability. It is only a UI bridge for
     educational interpretation until a real BBB classifier probability is added.

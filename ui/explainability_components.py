@@ -16,6 +16,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 from core.i18n import normalize_language, t, zone_badge, language_selectbox_options, language_label_to_code
+from core.matrix_text import matrix_current_label, matrix_labels
 from core.ml_ui_text import ml_ui_t as _ml_ui_t_802
 from core.what_if import simulate_descriptor_change
 from core.reporting import build_student_report, render_report_markdown, render_report_html, build_report_filename
@@ -326,12 +327,13 @@ def render_stepwise_trace(explanation_dict: Mapping[str, Any], lang: str | None 
 def render_bbb_pgp_matrix(explanation_dict: Mapping[str, Any], lang: str | None = None) -> None:
     lang = _ui_lang(explanation_dict, lang)
     matrix = explanation_dict.get("bbb_pgp_matrix", {})
+    labels = matrix_labels(lang)
     st.markdown(t("section.matrix", lang))
     if matrix.get("intro_text"):
         st.info(matrix.get("intro_text"))
-    current = matrix.get("current_cell", "insufficient_data")
+    current = str(matrix.get("current_cell", "insufficient_data"))
     current_text = matrix.get("current_interpretation", "")
-    st.markdown(f"**{t('matrix.current', lang)}:** `{current}`")
+    st.markdown(f"**{labels['current']}:** {matrix_current_label(current, lang)}")
     if current in {"bbb_high_pgp_high", "borderline"}:
         st.warning(current_text)
     else:
@@ -339,11 +341,16 @@ def render_bbb_pgp_matrix(explanation_dict: Mapping[str, Any], lang: str | None 
     rows = []
     for key in ["bbb_high_pgp_low", "bbb_high_pgp_high", "bbb_low_pgp_low", "bbb_low_pgp_high"]:
         cell = (matrix.get("cells") or {}).get(key, {})
-        rows.append({"BBB": cell.get("bbb_label", ""), "P-gp": cell.get("pgp_label", ""), t("matrix.col.scenario", lang): cell.get("label", ""), t("matrix.col.interpretation", lang): cell.get("interpretation", ""), t("matrix.col.current", lang): "⬅" if key == current else ""})
+        rows.append({
+            labels["columns"]["bbb"]: cell.get("bbb_label", ""),
+            labels["columns"]["pgp"]: cell.get("pgp_label", ""),
+            labels["columns"]["scenario"]: cell.get("label", ""),
+            labels["columns"]["interpretation"]: cell.get("interpretation", ""),
+            labels["columns"]["current"]: "<-" if key == current else "",
+        })
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
-    with st.expander(t("matrix.pgp_expander", lang), expanded=True):
-        st.write(matrix.get("intro_text", ""))
-
+    with st.expander(labels["expander"], expanded=True):
+        st.write(labels["expander_text"])
 
 def render_what_if_lab(explanation_dict: Mapping[str, Any], lang: str | None = None) -> None:
     lang = _ui_lang(explanation_dict, lang)

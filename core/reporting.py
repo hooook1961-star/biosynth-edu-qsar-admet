@@ -13,6 +13,7 @@ from hashlib import sha1
 from typing import Any, Mapping
 
 from core.i18n import normalize_language
+from core.matrix_text import matrix_current_label
 from core.report_text import (
     normalize_report_text,
     report_disclaimer,
@@ -176,7 +177,7 @@ def render_report_markdown(report: Mapping[str, Any], lang: str | None = None) -
     matrix = report.get("bbb_pgp_matrix", {})
     a(f"## 6. {labels['matrix']}")
     a("")
-    a(f"- {labels['current']}: `{_fmt(matrix.get('current_cell'))}`")
+    a(f"- {labels['current']}: {_fmt(matrix_current_label(str(matrix.get('current_cell') or 'insufficient_data'), selected_lang))}")
     a(f"- {labels['interpretation']}: {_fmt(matrix.get('current_interpretation'))}")
     a("")
 
@@ -257,7 +258,7 @@ def render_report_html(report: Mapping[str, Any], lang: str | None = None) -> st
         ),
         (
             f"<section><h2>6. {_e(labels['matrix'])}</h2>"
-            f"<p><strong>{_e(labels['current'])}:</strong> <code>{_e(matrix.get('current_cell'))}</code></p>"
+            f"<p><strong>{_e(labels['current'])}:</strong> {_e(matrix_current_label(str(matrix.get('current_cell') or 'insufficient_data'), selected_lang))}</p>"
             f"<p><strong>{_e(labels['interpretation'])}:</strong> {_e(matrix.get('current_interpretation'))}</p></section>"
         ),
         (

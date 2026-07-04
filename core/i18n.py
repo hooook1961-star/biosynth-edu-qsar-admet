@@ -14,8 +14,6 @@ try:  # RU fallback comes from the accepted Stage 1 templates.
         BASE_DESCRIPTOR_EXPLANATIONS_RU,
         ZONE_COMMENTS_RU,
         FINAL_DECISION_TEXTS,
-        BBB_PGP_MATRIX_CELLS,
-        MATRIX_INTRO_TEXT,
         IN_SILICO_DISCLAIMER_RU,
         WHAT_IF_DISCLAIMER_RU,
         DESCRIPTOR_META,
@@ -24,8 +22,6 @@ except Exception:  # pragma: no cover - defensive for partial installs
     BASE_DESCRIPTOR_EXPLANATIONS_RU = {}
     ZONE_COMMENTS_RU = {}
     FINAL_DECISION_TEXTS = {}
-    BBB_PGP_MATRIX_CELLS = {}
-    MATRIX_INTRO_TEXT = ""
     IN_SILICO_DISCLAIMER_RU = ""
     WHAT_IF_DISCLAIMER_RU = ""
     DESCRIPTOR_META = {}
@@ -358,37 +354,11 @@ FINAL_DECISIONS = {
     },
     "en": {
         "likely_cns_active": {"title": "Likely CNS-active profile", "final_label_ru": "Likely CNS-active profile", "summary": "The model sees favourable passive BBB permeability and low P-gp efflux risk.", "student_interpretation": "This profile supports a hypothesis of CNS exposure, but it is not experimental proof."},
-        "peripheral_action_risk": {"title": "Likely peripheral action / reduced CNS exposure risk", "final_label_ru": "Efflux risk despite BBB High", "summary": "Passive BBB permeability looks favourable, but P-gp efflux risk is high.", "student_interpretation": "The molecule may enter the barrier region but then be actively removed by P-gp."},
+        "peripheral_action_risk": {"title": "Likely peripheral action / reduced CNS exposure risk", "final_label_ru": "Efflux risk despite favourable BBB estimate", "summary": "Passive BBB permeability looks favourable, but P-gp efflux risk is high.", "student_interpretation": "The molecule may enter the barrier region but then be actively removed by P-gp."},
         "likely_not_bbb_penetrant": {"title": "Likely not BBB-penetrant", "final_label_ru": "Likely not BBB-penetrant", "summary": "P-gp does not look like the main limitation, but the physicochemical profile does not support passive BBB passage.", "student_interpretation": "The main limitation is an unfavourable physicochemical profile for passive diffusion."},
         "full_barrier": {"title": "Full barrier", "final_label_ru": "Full barrier: poor passive BBB plus P-gp efflux", "summary": "The molecule combines an unfavourable passive BBB profile with high P-gp efflux risk.", "student_interpretation": "This is a double limitation for CNS exposure."},
         "uncertain_or_borderline": {"title": "Uncertain / borderline", "final_label_ru": "Uncertain / borderline", "summary": "Scores are close to thresholds or model blocks provide partly conflicting signals.", "student_interpretation": "Use this result as a prompt for further analysis rather than a firm conclusion."},
         "insufficient_data": {"title": "Insufficient data for final interpretation", "final_label_ru": "Insufficient data", "summary": "BBB probability or P-gp probability is missing.", "student_interpretation": "Check that BBB and P-gp models returned numerical scores."},
-    },
-}
-
-MATRIX_INTRO = {
-    "ru": MATRIX_INTRO_TEXT,
-    "kk": "BBB моделі физика-химиялық қасиеттер бойынша пассивті өткізгіштікті бағалайды. P-gp моделі молекуланың эндотелий жасушаларынан қанға қайта шығарылу қаупін бағалайды. Сондықтан молекула BBB+ көрінгенімен, P-gp әсерінен CNS қолжетімділігі төмен болуы мүмкін.",
-    "en": "The BBB model estimates passive permeability from physicochemical properties. The P-gp model estimates active efflux back to blood. Therefore, a molecule may look BBB+ but still have reduced CNS exposure due to P-gp.",
-}
-
-MATRIX_CELLS = {
-    "ru": BBB_PGP_MATRIX_CELLS,
-    "kk": {
-        "bbb_high_pgp_low": {"bbb_label": "BBB High", "pgp_label": "P-gp Non-substrate", "label": "BBB High + P-gp Non-substrate", "interpretation": "CNS-белсенді болуы ықтимал: өтеді және сақталады."},
-        "bbb_high_pgp_high": {"bbb_label": "BBB High", "pgp_label": "P-gp Substrate", "label": "BBB High + P-gp Substrate", "interpretation": "Пассивті түрде өтеді, бірақ P-gp арқылы шығарылуы мүмкін; CNS қолжетімділігі төмендеуі ықтимал."},
-        "bbb_low_pgp_low": {"bbb_label": "BBB Low", "pgp_label": "P-gp Non-substrate", "label": "BBB Low + P-gp Non-substrate", "interpretation": "Негізінен қолайсыз физика-химиялық қасиеттерге байланысты өтпейді."},
-        "bbb_low_pgp_high": {"bbb_label": "BBB Low", "pgp_label": "P-gp Substrate", "label": "BBB Low + P-gp Substrate", "interpretation": "Қос бөгет: нашар өтеді және P-gp арқылы шығарылуы мүмкін."},
-        "borderline": {"bbb_label": "BBB Borderline", "pgp_label": "P-gp Borderline", "label": "Шекаралық сценарий", "interpretation": "Бір немесе екі score өтпелі аймақта; қорытындыны сақтықпен түсіндіру керек."},
-        "insufficient_data": {"bbb_label": "BBB unknown", "pgp_label": "P-gp unknown", "label": "Дерек жеткіліксіз", "interpretation": "Матрицалық интерпретация үшін BBB немесе P-gp score жоқ."},
-    },
-    "en": {
-        "bbb_high_pgp_low": {"bbb_label": "BBB High", "pgp_label": "P-gp Non-substrate", "label": "BBB High + P-gp Non-substrate", "interpretation": "Potentially CNS-active: crosses and is not actively effluxed."},
-        "bbb_high_pgp_high": {"bbb_label": "BBB High", "pgp_label": "P-gp Substrate", "label": "BBB High + P-gp Substrate", "interpretation": "Passively permeable, but may be removed by P-gp efflux; CNS exposure may be reduced."},
-        "bbb_low_pgp_low": {"bbb_label": "BBB Low", "pgp_label": "P-gp Non-substrate", "label": "BBB Low + P-gp Non-substrate", "interpretation": "Poor passage is mainly explained by unfavourable physicochemical properties."},
-        "bbb_low_pgp_high": {"bbb_label": "BBB Low", "pgp_label": "P-gp Substrate", "label": "BBB Low + P-gp Substrate", "interpretation": "Double barrier: poor passive passage plus possible P-gp efflux."},
-        "borderline": {"bbb_label": "BBB Borderline", "pgp_label": "P-gp Borderline", "label": "Borderline scenario", "interpretation": "One or both scores are in a transition zone; interpret cautiously."},
-        "insufficient_data": {"bbb_label": "BBB unknown", "pgp_label": "P-gp unknown", "label": "Insufficient data", "interpretation": "BBB or P-gp score is unavailable for matrix interpretation."},
     },
 }
 
@@ -441,7 +411,7 @@ WARNING_MESSAGES = {
         "extreme_logp_high": "Очень высокий LogP: возможны проблемы растворимости и неспецифического связывания.",
         "polyphenol_like": "Структура похожа на полифенольное природное соединение; модели BBB/P-gp могут быть менее надёжны.",
         "glycoside_like": "Обнаружены признаки гликозидного/сахарного фрагмента; возможен выход за домен применимости.",
-        "bbb_pgp_conflict": "BBB High сочетается с высоким P-gp: пассивная проницаемость может конфликтовать с активным эффлюксом.",
+        "bbb_pgp_conflict": "Высокая оценка прохождения через ГЭБ (BBB) сочетается с высоким P-gp: пассивное прохождение может конфликтовать с активным выведением.",
     },
     "kk": {
         "invalid_smiles": "SMILES дұрыс танылмады.",
@@ -458,7 +428,7 @@ WARNING_MESSAGES = {
         "extreme_logp_high": "LogP өте жоғары: ерігіштік және бейспецификалық байланысу мәселелері болуы мүмкін.",
         "polyphenol_like": "Құрылым полифенолдық табиғи қосылысқа ұқсайды; BBB/P-gp модельдері сенімсіз болуы мүмкін.",
         "glycoside_like": "Гликозидтік/қант фрагментінің белгілері бар; қолданылу доменінен шығуы мүмкін.",
-        "bbb_pgp_conflict": "BBB High және жоғары P-gp бірге байқалады: пассивті өткізгіштік активті эффлюкспен қайшы келуі мүмкін.",
+        "bbb_pgp_conflict": "BBB арқылы өту бағасы жоғары және P-gp қаупі жоғары: пассивті өту белсенді шығарылумен қайшы келуі мүмкін.",
     },
     "en": {
         "invalid_smiles": "The SMILES could not be parsed correctly.",
@@ -475,7 +445,7 @@ WARNING_MESSAGES = {
         "extreme_logp_high": "Very high LogP: solubility and nonspecific binding may become problematic.",
         "polyphenol_like": "The structure looks polyphenol-like; BBB/P-gp models may be less reliable.",
         "glycoside_like": "A glycoside/sugar-like fragment is detected; the molecule may be outside the applicability domain.",
-        "bbb_pgp_conflict": "BBB High combined with high P-gp: passive permeability may conflict with active efflux.",
+        "bbb_pgp_conflict": "Favourable BBB estimate combined with high P-gp: passive permeability may conflict with active efflux.",
     },
 }
 
@@ -567,9 +537,9 @@ BATCH_PRIORITY_LABELS = {
 }
 
 BATCH_SUMMARY_TEMPLATES = {
-    "ru": "Обработано молекул: {total}. Валидных: {valid}. Ошибок/invalid: {invalid}. CNS-кандидатов: {cns}. BBB High + P-gp High: {efflux}. Пограничных: {borderline}.",
-    "kk": "Өңделген молекулалар: {total}. Валидті: {valid}. Қате/invalid: {invalid}. CNS кандидаттары: {cns}. BBB High + P-gp High: {efflux}. Шекаралық: {borderline}.",
-    "en": "Processed molecules: {total}. Valid: {valid}. Errors/invalid: {invalid}. CNS candidates: {cns}. BBB High + P-gp High: {efflux}. Borderline: {borderline}.",
+    "ru": "Обработано молекул: {total}. Валидных: {valid}. Ошибок/invalid: {invalid}. CNS-кандидатов: {cns}. ???????? ???/P-gp: {efflux}. Пограничных: {borderline}.",
+    "kk": "Өңделген молекулалар: {total}. Валидті: {valid}. Қате/invalid: {invalid}. CNS кандидаттары: {cns}. ???????? ???/P-gp: {efflux}. Шекаралық: {borderline}.",
+    "en": "Processed molecules: {total}. Valid: {valid}. Errors/invalid: {invalid}. CNS candidates: {cns}. ???????? ???/P-gp: {efflux}. Borderline: {borderline}.",
 }
 
 WHAT_IF_TEXTS = {
@@ -969,13 +939,15 @@ def final_decision_text(final_class: str, lang: str = DEFAULT_LANGUAGE) -> dict[
 
 
 def matrix_intro(lang: str = DEFAULT_LANGUAGE) -> str:
-    lang = normalize_language(lang)
-    return MATRIX_INTRO.get(lang, MATRIX_INTRO[DEFAULT_LANGUAGE])
+    from core.matrix_text import matrix_intro as _matrix_intro
+
+    return _matrix_intro(normalize_language(lang))
 
 
 def matrix_cells(lang: str = DEFAULT_LANGUAGE) -> dict[str, dict[str, str]]:
-    lang = normalize_language(lang)
-    return deepcopy(MATRIX_CELLS.get(lang, MATRIX_CELLS[DEFAULT_LANGUAGE]))
+    from core.matrix_text import matrix_cells as _matrix_cells
+
+    return _matrix_cells(normalize_language(lang))
 
 
 def disclaimer(kind: str, lang: str = DEFAULT_LANGUAGE) -> str:
@@ -1626,7 +1598,6 @@ UI.setdefault("ru", {}).update({
     "label.valid_smiles": "SMILES распознан",
     "label.value": "Значение",
     "label.zone": "Зона",
-    "matrix.intro": MATRIX_INTRO.get("ru", ""),
     "msg.insufficient_what_if": "Недостаточно дескрипторов для What-if симуляции.",
     "msg.pgp_vs_bbb": "P-gp может снижать CNS-доступность даже при хорошем пассивном BBB-профиле.",
     "msg.what_if_intro": "Изменение ползунков является учебной симуляцией, а не прогнозом новой структуры.",
@@ -1654,7 +1625,6 @@ UI.setdefault("kk", {}).update({
     "label.valid_smiles": "SMILES танылды",
     "label.value": "Мәні",
     "label.zone": "Аймақ",
-    "matrix.intro": MATRIX_INTRO.get("kk", ""),
     "msg.insufficient_what_if": "What-if симуляциясы үшін дескрипторлар жеткіліксіз.",
     "msg.pgp_vs_bbb": "P-gp жақсы пассивті BBB профилі болса да CNS қолжетімділігін төмендетуі мүмкін.",
     "msg.what_if_intro": "Жүгірткілерді өзгерту - жаңа құрылымның болжамы емес, оқу симуляциясы.",
@@ -1682,7 +1652,6 @@ UI.setdefault("en", {}).update({
     "label.valid_smiles": "SMILES parsed",
     "label.value": "Value",
     "label.zone": "Zone",
-    "matrix.intro": MATRIX_INTRO.get("en", ""),
     "msg.insufficient_what_if": "Not enough descriptors for the What-if simulation.",
     "msg.pgp_vs_bbb": "P-gp may reduce CNS exposure even when passive BBB properties look favourable.",
     "msg.what_if_intro": "Changing sliders is an educational simulation, not a prediction for a new structure.",
