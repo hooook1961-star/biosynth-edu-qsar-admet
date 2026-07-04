@@ -720,15 +720,15 @@ def render_what_if_lab(explanation_dict: Mapping[str, Any], lang: str | None = N
     st.markdown(t("what_if.slider_title", lang))
     col1, col2, col3 = st.columns(3)
     with col1:
-        mw = st.slider("MW, Da", 50.0, 800.0, _slider_float(base_descriptors.get("MW"), default=300.0, low=50.0, high=800.0), 1.0, key=f"{prefix}_{lang}_mw")
-        logp = st.slider("LogP", -2.0, 7.0, _slider_float(base_descriptors.get("LogP"), default=2.5, low=-2.0, high=7.0), 0.1, key=f"{prefix}_{lang}_logp")
+        mw = st.slider(t("what_if.slider.mw", lang), 50.0, 800.0, _slider_float(base_descriptors.get("MW"), default=300.0, low=50.0, high=800.0), 1.0, key=f"{prefix}_{lang}_mw")
+        logp = st.slider(t("what_if.slider.logp", lang), -2.0, 7.0, _slider_float(base_descriptors.get("LogP"), default=2.5, low=-2.0, high=7.0), 0.1, key=f"{prefix}_{lang}_logp")
     with col2:
-        tpsa = st.slider("TPSA, Å²", 0.0, 220.0, _slider_float(base_descriptors.get("TPSA"), default=70.0, low=0.0, high=220.0), 1.0, key=f"{prefix}_{lang}_tpsa")
-        pka = st.slider("pKa", 0.0, 14.0, _slider_float(base_descriptors.get("pKa_pred"), default=7.4, low=0.0, high=14.0), 0.1, key=f"{prefix}_{lang}_pka")
+        tpsa = st.slider(t("what_if.slider.tpsa", lang), 0.0, 220.0, _slider_float(base_descriptors.get("TPSA"), default=70.0, low=0.0, high=220.0), 1.0, key=f"{prefix}_{lang}_tpsa")
+        pka = st.slider(t("what_if.slider.pka", lang), 0.0, 14.0, _slider_float(base_descriptors.get("pKa_pred"), default=7.4, low=0.0, high=14.0), 0.1, key=f"{prefix}_{lang}_pka")
     with col3:
-        hbd = st.slider("HBD", 0, 8, _slider_int(base_descriptors.get("HBD"), default=1, low=0, high=8), 1, key=f"{prefix}_{lang}_hbd")
-        hba = st.slider("HBA", 0, 15, _slider_int(base_descriptors.get("HBA"), default=4, low=0, high=15), 1, key=f"{prefix}_{lang}_hba")
-        pgp = st.slider("P-gp probability", 0.0, 1.0, _slider_float(base_descriptors.get("Pgp_probability"), default=0.5, low=0.0, high=1.0), 0.01, key=f"{prefix}_{lang}_pgp")
+        hbd = st.slider(t("what_if.slider.hbd", lang), 0, 8, _slider_int(base_descriptors.get("HBD"), default=1, low=0, high=8), 1, key=f"{prefix}_{lang}_hbd")
+        hba = st.slider(t("what_if.slider.hba", lang), 0, 15, _slider_int(base_descriptors.get("HBA"), default=4, low=0, high=15), 1, key=f"{prefix}_{lang}_hba")
+        pgp = st.slider(t("what_if.slider.pgp", lang), 0.0, 1.0, _slider_float(base_descriptors.get("Pgp_probability"), default=0.5, low=0.0, high=1.0), 0.01, key=f"{prefix}_{lang}_pgp")
     simulation = simulate_descriptor_change(base_descriptors, {"MW": mw, "LogP": logp, "TPSA": tpsa, "HBD": hbd, "HBA": hba, "pKa_pred": pka, "Pgp_probability": pgp}, lang=lang)
     _render_what_if_scores_localized(simulation, lang)
     st.divider()

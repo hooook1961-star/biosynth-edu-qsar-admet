@@ -1824,3 +1824,44 @@ UI.setdefault("kk", {}).update({
     "metric.pgp_probability": 'P-gp ықтималдығы',
     "metric.clint": 'Clint (метаболизм)',
 })
+
+# Cleanup overrides: student-facing What-if labels.
+UI.setdefault("ru", {}).update({
+    "metric.bbb": "Оценка ГЭБ (BBB)",
+    "metric.pgp": "Вероятность P-gp",
+    "what_if.base_passive_bbb": "Исходная оценка прохождения через ГЭБ (BBB)",
+    "what_if.base_cns": "Исходная оценка доступности для ЦНС",
+    "what_if.passive_bbb": "Прохождение через ГЭБ (BBB)",
+    "what_if.educational_cns": "Доступность для ЦНС",
+    "what_if.slider.mw": "Молекулярная масса (MW), Да",
+    "what_if.slider.logp": "Липофильность (LogP)",
+    "what_if.slider.tpsa": "Полярная поверхность (TPSA), Å²",
+    "what_if.slider.pka": "Кислотность/основность (pKa)",
+    "what_if.slider.hbd": "Доноры H-связей (HBD)",
+    "what_if.slider.hba": "Акцепторы H-связей (HBA)",
+    "what_if.slider.pgp": "Вероятность P-gp",
+})
+UI.setdefault("kk", {}).update({
+    "metric.bbb": "BBB арқылы өту бағасы",
+    "metric.pgp": "P-gp ықтималдығы",
+    "what_if.base_passive_bbb": "BBB арқылы өтудің бастапқы бағасы",
+    "what_if.base_cns": "ЦНС қолжетімділігінің бастапқы бағасы",
+    "what_if.passive_bbb": "BBB арқылы өту",
+    "what_if.educational_cns": "ЦНС қолжетімділігі",
+    "what_if.slider.mw": "Молекулалық масса (MW), Да",
+    "what_if.slider.logp": "Липофильділік (LogP)",
+    "what_if.slider.tpsa": "Полярлық бет ауданы (TPSA), Å²",
+    "what_if.slider.pka": "Қышқылдық/негіздік (pKa)",
+    "what_if.slider.hbd": "H-байланыс донорлары (HBD)",
+    "what_if.slider.hba": "H-байланыс акцепторлары (HBA)",
+    "what_if.slider.pgp": "P-gp ықтималдығы",
+})
+UI.setdefault("en", {}).update({
+    "what_if.slider.mw": "Molecular weight (MW), Da",
+    "what_if.slider.logp": "Lipophilicity (LogP)",
+    "what_if.slider.tpsa": "Polar surface area (TPSA), Å²",
+    "what_if.slider.pka": "Acidity/basicity (pKa)",
+    "what_if.slider.hbd": "H-bond donors (HBD)",
+    "what_if.slider.hba": "H-bond acceptors (HBA)",
+    "what_if.slider.pgp": "P-gp probability",
+})
