@@ -101,7 +101,7 @@ REPORT_TEXT: dict[str, dict[str, Any]] = {
         "methodology_sections": [
             {"title": "1. Проверка структуры", "text": "SMILES преобразуется в молекулярный граф. Если структуру не удаётся распознать, дескрипторы и учебное объяснение не строятся."},
             {"title": "2. Физико-химические дескрипторы", "text": "Для учебного объяснения используются молекулярная масса, LogP, TPSA, доноры и акцепторы водородных связей, pKa, заряд и оценка P-gp."},
-            {"title": "3. Прохождение через ГЭБ", "text": "ГЭБ означает гематоэнцефалический барьер. Этот блок оценивает, насколько свойства молекулы совместимы с пассивным прохождением через такой барьер."},
+            {"title": "3. Прохождение через ГЭБ", "text": "ГЭБ означает гематоэнцефалический барьер. Этот блок оценивает, насколько свойства молекулы совместимы с пассивным прохождением через такой барьер. Используется модифицированная формула Gupta: вместо фиксированного pKa 8.81 подставляется предсказанное pKa, если оно доступно. Исходная формула: Gupta, M., Lee, H. J., Barden, C. J., & Weaver, D. F. (2019). The blood-brain barrier (BBB) score. Journal of Medicinal Chemistry, 62(21)."},
             {"title": "4. P-gp", "text": "P-gp рассматривается как отдельный механизм активного выведения молекулы обратно в кровь. Он может снижать доступность для ЦНС даже при благоприятных свойствах для прохождения через ГЭБ."},
             {"title": "5. Учебное объяснение", "text": "Вывод строится как учебная интерпретация дескрипторов и модельных оценок. Он помогает разобрать ход рассуждения, но не заменяет экспериментальную проверку."},
         ],
@@ -183,7 +183,7 @@ REPORT_TEXT: dict[str, dict[str, Any]] = {
         "methodology_sections": [
             {"title": "1. Құрылымды тексеру", "text": "SMILES молекулалық графқа түрлендіріледі. Құрылым танылмаса, дескрипторлар мен оқу түсіндірмесі құрылмайды."},
             {"title": "2. Физика-химиялық дескрипторлар", "text": "Оқу түсіндірмесінде молекулалық масса, LogP, TPSA, сутектік байланыс донорлары мен акцепторлары, pKa, заряд және P-gp бағасы қолданылады."},
-            {"title": "3. Қан-ми тосқауылынан өту", "text": "Бұл блок молекула қасиеттерінің қан-ми тосқауылынан пассивті өтуге қаншалықты сәйкес келетінін бағалайды."},
+            {"title": "3. Қан-ми тосқауылынан өту", "text": "Бұл блок молекула қасиеттерінің қан-ми тосқауылынан пассивті өтуге қаншалықты сәйкес келетінін бағалайды. Модификацияланған Gupta формуласы қолданылады: тұрақты pKa 8.81 орнына, қолжетімді болса, болжанған pKa қойылады. Бастапқы формула: Gupta, M., Lee, H. J., Barden, C. J., & Weaver, D. F. (2019). The blood-brain barrier (BBB) score. Journal of Medicinal Chemistry, 62(21)."},
             {"title": "4. P-gp", "text": "P-gp молекуланы қайтадан қанға белсенді шығара алатын бөлек механизм ретінде қарастырылады. Сондықтан қан-ми тосқауылынан өту қолайлы болса да, ОЖЖ қолжетімділігі төмендеуі мүмкін."},
             {"title": "5. Оқу түсіндірмесі", "text": "Қорытынды дескрипторлар мен модельдік бағалардың оқу интерпретациясы ретінде беріледі. Ол ойлау логикасын түсіндіреді, бірақ эксперименттік тексеруді алмастырмайды."},
         ],
@@ -265,7 +265,7 @@ REPORT_TEXT: dict[str, dict[str, Any]] = {
         "methodology_sections": [
             {"title": "1. Structure check", "text": "The SMILES string is converted into a molecular graph. If parsing fails, descriptors and the teaching explanation are not generated."},
             {"title": "2. Physicochemical descriptors", "text": "The teaching explanation uses molecular weight, LogP, TPSA, H-bond donors and acceptors, pKa, charge and the P-gp estimate."},
-            {"title": "3. BBB passage", "text": "BBB means blood-brain barrier. This block estimates whether molecular properties are compatible with passive passage across that barrier."},
+            {"title": "3. BBB passage", "text": "BBB means blood-brain barrier. This block estimates whether molecular properties are compatible with passive passage across that barrier. A modified Gupta formula is used: predicted pKa is used when available instead of the fixed pKa value 8.81. Original formula: Gupta, M., Lee, H. J., Barden, C. J., & Weaver, D. F. (2019). The blood-brain barrier (BBB) score. Journal of Medicinal Chemistry, 62(21)."},
             {"title": "4. P-gp", "text": "P-gp is treated as a separate active efflux mechanism that can return a molecule to blood and reduce CNS exposure."},
             {"title": "5. Teaching explanation", "text": "The conclusion is an educational interpretation of descriptors and model estimates. It explains the reasoning but does not replace experimental validation."},
         ],
