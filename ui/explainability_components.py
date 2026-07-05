@@ -20,14 +20,7 @@ from core.matrix_text import matrix_current_label, matrix_labels
 from core.ml_ui_text import ml_ui_t as _ml_ui_t_802
 from core.what_if import simulate_descriptor_change
 from core.reporting import build_student_report, render_report_markdown, render_report_html, build_report_filename
-from core.batch_explainability import (
-    summarize_batch_explanations,
-    build_batch_summary_dataframe,
-    build_frequency_dataframe,
-    build_batch_student_view_dataframe,
-    sort_batch_by_explainability_priority,
-    select_batch_display_columns,
-)
+import core.batch_explainability as batch_xai
 
 STATUS_RENDERERS = {
     "ok": st.success,
@@ -35,6 +28,14 @@ STATUS_RENDERERS = {
     "error": st.error,
     "info": st.info,
 }
+
+
+def _batch_student_table(batch_df: pd.DataFrame, lang: str) -> pd.DataFrame:
+    builder = getattr(batch_xai, "build_batch_student_view_dataframe", None)
+    if callable(builder):
+        return builder(batch_df, lang=lang)
+    display_columns = batch_xai.select_batch_display_columns(batch_df)
+    return batch_df[display_columns] if display_columns else batch_df
 
 
 def render_language_selector(default: str = "ru") -> str:
@@ -500,7 +501,7 @@ def render_batch_explainability_summary(batch_df: pd.DataFrame, summary: Mapping
     if batch_df is None or batch_df.empty:
         st.warning(t("batch.empty", lang))
         return
-    summary = summary or summarize_batch_explanations(batch_df, lang=lang)
+    summary = summary or batch_xai.summarize_batch_explanations(batch_df, lang=lang)
     counts = summary.get("final_class_counts") or {}
     priority_counts = summary.get("priority_counts") or {}
     c1, c2, c3, c4 = st.columns(4)
@@ -522,8 +523,8 @@ def render_batch_explainability_summary(batch_df: pd.DataFrame, summary: Mapping
     st.markdown(t("batch.summary", lang))
     st.success(str(summary.get("teaching_summary") or summary.get("teaching_summary_ru") or ""))
     with st.expander(t("batch.table", lang), expanded=True):
-        sorted_df = sort_batch_by_explainability_priority(batch_df)
-        st.dataframe(build_batch_student_view_dataframe(sorted_df, lang=lang), use_container_width=True)
+        sorted_df = batch_xai.sort_batch_by_explainability_priority(batch_df)
+        st.dataframe(_batch_student_table(sorted_df, lang=lang), use_container_width=True)
 
 
 def render_batch_explainability_result(batch_result: Mapping[str, Any], lang: str = "ru") -> None:
@@ -533,7 +534,7 @@ def render_batch_explainability_result(batch_result: Mapping[str, Any], lang: st
         st.warning(t("batch.result_empty", lang))
         return
     rows = pd.DataFrame(batch_result.get("explanation_rows") or [])
-    summary = batch_result.get("summary") or (summarize_batch_explanations(rows, lang=lang) if not rows.empty else {})
+    summary = batch_result.get("summary") or (batch_xai.summarize_batch_explanations(rows, lang=lang) if not rows.empty else {})
     render_batch_explainability_summary(rows, summary, lang=lang)
 
 

@@ -29,14 +29,7 @@ from core.descriptors import calculate_bbb_descriptors
 from core.bbb_calculation import analyze_molecule_cns_profile, generate_admet_visualizations
 from core.explainability import build_explanation_dict
 from core.explainability_adapter import build_pipeline_result_from_current_app
-from core.batch_explainability import (
-    build_batch_excel_sheets,
-    build_batch_export_dataframe,
-    build_batch_student_view_dataframe,
-    build_screening_interpretation_markdown,
-    select_batch_display_columns,
-    summarize_batch_explanations,
-)
+import core.batch_explainability as batch_xai
 from ui.explainability_components import (
     render_batch_explainability_summary,
     render_bbb_pgp_matrix,
@@ -169,6 +162,21 @@ def _main_mode_fallback() -> str:
     if isinstance(st.session_state.get("batch_input_df"), pd.DataFrame):
         return "batch"
     return "single"
+
+
+def _batch_student_table(batch_df: pd.DataFrame, lang: str) -> pd.DataFrame:
+    builder = getattr(batch_xai, "build_batch_student_view_dataframe", None)
+    if callable(builder):
+        return builder(batch_df, lang=lang)
+    display_columns = batch_xai.select_batch_display_columns(batch_df)
+    return batch_df[display_columns] if display_columns else batch_df
+
+
+def _batch_interpretation_markdown(lang: str) -> str:
+    builder = getattr(batch_xai, "build_screening_interpretation_markdown", None)
+    if callable(builder):
+        return builder(lang)
+    return ""
 
 
 def descriptor_table(results: dict[str, Any], lang: str) -> pd.DataFrame:
@@ -449,13 +457,13 @@ def render_batch_screening(lang: str) -> None:
                     }
                 )
 
-        batch_df = build_batch_export_dataframe(
+        batch_df = batch_xai.build_batch_export_dataframe(
             results_rows,
             smiles_key="SMILES",
             include_long_text=False,
             lang=lang,
         )
-        batch_summary = summarize_batch_explanations(batch_df, lang=lang)
+        batch_summary = batch_xai.summarize_batch_explanations(batch_df, lang=lang)
 
         st.session_state["batch_xai_df"] = batch_df
         st.session_state["batch_xai_summary"] = batch_summary
@@ -465,7 +473,7 @@ def render_batch_screening(lang: str) -> None:
 
     if "batch_xai_df" in st.session_state:
         batch_df = st.session_state["batch_xai_df"]
-        batch_summary = st.session_state.get("batch_xai_summary") or summarize_batch_explanations(batch_df, lang=lang)
+        batch_summary = st.session_state.get("batch_xai_summary") or batch_xai.summarize_batch_explanations(batch_df, lang=lang)
 
         section_labels = {
             "summary": tx("batch.section.summary", lang),
@@ -482,16 +490,16 @@ def render_batch_screening(lang: str) -> None:
         if section == "summary":
             render_batch_explainability_summary(batch_df, batch_summary, lang=lang)
             with st.expander(t("batch.interpretation_title", lang), expanded=False):
-                st.markdown(build_screening_interpretation_markdown(lang))
+                st.markdown(_batch_interpretation_markdown(lang))
         elif section == "table":
-            student_df = build_batch_student_view_dataframe(batch_df, lang=lang)
+            student_df = _batch_student_table(batch_df, lang=lang)
             st.dataframe(student_df, use_container_width=True)
             with st.expander(t("batch.show_all_columns", lang), expanded=False):
-                display_columns = select_batch_display_columns(batch_df)
+                display_columns = batch_xai.select_batch_display_columns(batch_df)
                 st.dataframe(batch_df[display_columns] if display_columns else batch_df, use_container_width=True)
         elif section == "export":
-            sheets = build_batch_excel_sheets(batch_df, batch_summary)
-            interpretation_md = build_screening_interpretation_markdown(lang)
+            sheets = batch_xai.build_batch_excel_sheets(batch_df, batch_summary)
+            interpretation_md = _batch_interpretation_markdown(lang)
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
                 for sheet_name, sheet_df in sheets.items():
