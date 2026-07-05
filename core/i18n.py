@@ -17,7 +17,7 @@ from core.text_catalog import (
     ZONE_COMMENTS,
 )
 
-try:  # RU fallback comes from the accepted Stage 1 templates.
+try:  # RU fallback comes from the base teaching templates.
     from core.teaching_templates import (
         BASE_DESCRIPTOR_EXPLANATIONS_RU,
         FINAL_DECISION_TEXTS,
@@ -994,7 +994,7 @@ def t(key: str, lang: str = DEFAULT_LANGUAGE, **kwargs: Any) -> str:
             return str(ui_template).format(**kwargs)
         except Exception:
             return str(ui_template)
-    # Compatibility keys used by earlier Stage 1-5 modules.
+    # Keys used by integration modules.
     if key == "msg.in_silico":
         template = disclaimer("in_silico", lang)
     elif key == "msg.what_if_disclaimer":
@@ -1073,7 +1073,7 @@ def final_decision_text(final_class: str, lang: str = DEFAULT_LANGUAGE) -> dict[
     table = FINAL_DECISIONS.get(lang, FINAL_DECISIONS[DEFAULT_LANGUAGE])
     fallback = FINAL_DECISIONS[DEFAULT_LANGUAGE].get("uncertain_or_borderline", {})
     result = deepcopy(table.get(str(final_class), fallback))
-    # Stage 1-5 used final_label; Russian templates used final_label_ru.
+    # Some templates use final_label; Russian templates used final_label_ru.
     if "final_label" not in result and "final_label_ru" in result:
         result["final_label"] = result["final_label_ru"]
     if "final_label_ru" not in result and "final_label" in result:
@@ -1352,7 +1352,7 @@ def _format_value(value: Any, unit: str = "") -> str:
 
 
 # ---------------------------------------------------------------------------
-# Compatibility aliases used by integration modules.
+# Aliases used by integration modules.
 # ---------------------------------------------------------------------------
 
 def language_selectbox_options() -> list[str]:
@@ -1491,7 +1491,7 @@ def localize_explanation_dict(explanation_dict: Mapping[str, Any], lang: str = D
                 factor["reason"] = descriptor_zone_comment(name, zone, lang)
     return data
 
-# Legacy uncertainty/reason note localization.
+# Uncertainty/reason note localization for older source messages.
 def _localize_notes(notes: Any, lang: str) -> list[str]:
     lang = normalize_language(lang)
     if not notes:

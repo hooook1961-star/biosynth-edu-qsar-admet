@@ -1,14 +1,14 @@
-"""Stage 7.5 runtime model loader for BioSynth-EDU.
+"""Runtime model loader for BioSynth-EDU.
 
-This module connects the Stage 7.4 ``model_selection.json`` artifact with the
+This module connects the ``model_selection.json`` artifact with the
 working inference core. It prefers selected v2 models when a selection artifact
-is available and falls back to legacy ``models/rf_*.joblib`` paths otherwise.
+is available and falls back to older ``models/rf_*.joblib`` paths otherwise.
 
 Design goals
 ------------
 * Do not require the main Streamlit app to know where each model lives.
-* Do not load models disabled by Stage 7.4 policy, for example weak Clint v2.
-* Preserve backward compatibility when ``model_selection.json`` does not exist.
+* Do not load models disabled by model-selection policy, for example weak Clint v2.
+* Preserve runtime compatibility when ``model_selection.json`` does not exist.
 * Expose thresholds, roles and QA/selection metadata to ``bbb_calculation.py``.
 """
 
@@ -111,7 +111,7 @@ def find_model_selection_path(explicit_path: str | Path | None = None) -> Option
 def resolve_runtime_path(raw_path: Any, *, selection_path: Path | None = None) -> Optional[Path]:
     """Resolve model paths stored in model_selection/model_registry files.
 
-    Stage 7.3 artifacts usually store paths such as
+    Model-selection artifacts usually store paths such as
     ``models/v2_experiment/rf_pgp_model_v2.joblib``. This is correct when the
     process runs from the project root. For tests or copied artifacts, the same
     file may live next to ``model_selection.json``; this function supports both.
@@ -160,7 +160,7 @@ def _selection_model_entry(selection: Mapping[str, Any], legacy_name: str) -> Op
 
 
 def build_runtime_plan(selection_path: str | Path | None = None) -> Dict[str, RuntimeModelPlan]:
-    """Build a runtime loading plan from Stage 7.4 selection or legacy fallback."""
+    """Build a runtime loading plan from model selection or fallback paths."""
     path = find_model_selection_path(selection_path)
     selection: Dict[str, Any] = {}
     if path is not None:

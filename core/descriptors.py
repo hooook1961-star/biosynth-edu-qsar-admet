@@ -1,7 +1,7 @@
 """RDKit descriptor helpers for BioSynth-EDU.
 
-Stage 7.1 keeps the old public function name ``calculate_bbb_descriptors``
-but avoids rounding the MWHBN value before it enters the Gupta polynomial.
+The public function name ``calculate_bbb_descriptors`` is kept for existing
+imports, but MWHBN is not rounded before it enters the Gupta polynomial.
 Rounded values are provided separately for display.
 """
 
@@ -17,8 +17,8 @@ import rdkit.Chem.rdMolDescriptors as Descriptor
 def calculate_bbb_descriptors(smiles: str) -> Dict[str, Any]:
     """Validate SMILES and calculate descriptors used by the Gupta BBB score.
 
-    The previous implementation rounded ``MWHBN`` to two decimals before using
-    it in a cubic polynomial. Stage 7.1 returns the precise value under
+    Earlier code rounded ``MWHBN`` to two decimals before using it in a cubic
+    polynomial. This function returns the precise value under
     ``MWHBN`` and keeps display-only rounded values under ``*_display`` keys.
     """
     mol = Chem.MolFromSmiles(str(smiles).strip())

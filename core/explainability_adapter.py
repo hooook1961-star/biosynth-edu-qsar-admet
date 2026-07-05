@@ -1,7 +1,7 @@
 """Adapter layer between the current BioSynth-EDU app result format and explanation_dict.
 
 The current app uses a flat ``results`` dict returned by
-``analyze_molecule_cns_profile``. Stage 1 explainability expects a stable
+``analyze_molecule_cns_profile``. The explainability layer expects a stable
 pipeline-like contract with molecule/descriptors/model_outputs sections.
 This adapter keeps the existing ML code untouched and creates that contract.
 """
@@ -23,7 +23,7 @@ def normalize_gupta_score_to_educational_bbb_score(gupta_score: Any) -> float | 
     The current app interprets ``gupta_bbb_score >= 3.0`` as high passive BBB
     permeability. The explainability matrix expects a probability-like 0..1
     score. This function maps 3.0 to 0.70, so the old threshold aligns with the
-    Stage 1 ``high BBB-estimate threshold.
+    current ``high BBB-estimate`` threshold.
 
     This is not a calibrated biological probability. It is only a UI bridge for
     educational interpretation until a real BBB classifier probability is added.
@@ -50,7 +50,7 @@ def build_pipeline_result_from_current_app(
     results: Mapping[str, Any] | None,
     lang: str = "ru",
 ) -> dict[str, Any]:
-    """Build a Stage 1 compatible pipeline_result from the current flat app data."""
+    """Build an explainability-compatible pipeline_result from flat app data."""
     lang = normalize_language(lang)
     descriptors = descriptors or {}
     results = results or {}

@@ -1,6 +1,5 @@
 """BioSynth-EDU full student-facing Streamlit app.
 
-Stage 8.0.2 fixes the student UX around the ML/SHAP layer:
 - keeps the full educational QSAR/ADMET workflow;
 - hides runtime/debug details from normal student mode;
 - treats ML/SHAP as an optional advanced explanation, not as the main lesson;

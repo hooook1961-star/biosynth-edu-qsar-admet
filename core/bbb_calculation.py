@@ -1,13 +1,11 @@
 """Runtime ADMET/BBB inference core for BioSynth-EDU.
 
-Stage 7.5 runtime integration summary
------------------------
 1. Gupta BBB score uses the corrected ``p_mwhbn`` term via ``core.gupta_bbb``.
 2. pKa, P-gp, Caco-2, CATMoS, optional BBB RF and disabled Clint handling are
    driven by ``models/v2_experiment/model_selection.json`` when available.
-3. Runtime loading falls back to legacy ``models/rf_*.joblib`` when no model
+3. Runtime loading falls back to older ``models/rf_*.joblib`` paths when no model
    selection artifact exists.
-4. Stage 7.4 thresholds are applied at inference time for selected classifiers.
+4. Model-selection thresholds are applied at inference time for selected classifiers.
 5. CATMoS remains score-only when its target units are not confirmed.
 
 The public functions from the earlier app are preserved:
@@ -60,9 +58,9 @@ from core.runtime_models import (
 
 logger = logging.getLogger(__name__)
 
-# Stage 7.5: runtime context is selection-aware. If a Stage 7.4
-# ``model_selection.json`` artifact is available, selected v2 models are loaded
-# from that artifact. Otherwise the loader falls back to legacy model paths.
+# Runtime context is selection-aware. If a ``model_selection.json`` artifact is
+# available, selected v2 models are loaded from that artifact. Otherwise the
+# loader falls back to older model paths.
 RUNTIME_CONTEXT = get_runtime_context()
 MODEL_LOAD_STATUS: Dict[str, Dict[str, Any]] = get_runtime_load_status_by_short_label(RUNTIME_CONTEXT)
 
@@ -182,7 +180,7 @@ def _class_from_probability_or_model(model: Any, x: np.ndarray, probability: flo
 
 
 # ---------------------------------------------------------------------------
-# Gupta BBB compatibility wrappers
+# Gupta BBB wrappers kept for existing imports.
 # ---------------------------------------------------------------------------
 
 
@@ -192,7 +190,7 @@ def calculate_gupta_bbb_score(descriptors: Mapping[str, Any], pka: Optional[floa
 
 
 def calculate_gupta_bbb_score_legacy(descriptors: Mapping[str, Any], pka: Optional[float] = None) -> float:
-    """Legacy Gupta score that used raw MWHBN. Kept for audit comparisons."""
+    """Earlier Gupta score that used raw MWHBN. Kept for audit comparisons."""
     return _calculate_gupta_bbb_score_legacy(descriptors, pka=pka)
 
 
@@ -353,8 +351,8 @@ def predict_clint(mol: Chem.Mol) -> Tuple[str, float]:
 def predict_catmos_detailed(mol: Chem.Mol) -> Dict[str, Any]:
     """Predict CATMoS target value with explicit unit caution.
 
-    Stage 7.1 intentionally labels the value as ``CATMoS score`` because the
-    training target scale must be confirmed before displaying it as mg/kg.
+    The value is labelled as ``CATMoS score`` because the training target scale
+    must be confirmed before displaying it as mg/kg.
     """
     if catmos_model is None:
         return _prediction_dict(
@@ -610,7 +608,7 @@ def analyze_molecule_cns_profile(smiles: str, descriptors: Mapping[str, Any]) ->
     if bbb_rf_result.get("status") in {"model_missing", "error"}:
         qa_warnings.append("RF BBB model is not used as the primary BBB score; corrected Gupta score is primary.")
     if clint_result.get("status") == "disabled_by_selection":
-        qa_warnings.append("Clint model is disabled by Stage 7.4 model selection because validation was weak.")
+        qa_warnings.append("Clint model is disabled by model selection because validation was weak.")
 
     runtime_summary = build_runtime_status_summary(RUNTIME_CONTEXT)
 

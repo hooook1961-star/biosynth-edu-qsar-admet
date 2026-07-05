@@ -735,6 +735,6 @@ def _fmt(value: Any) -> str:
         return f"{numeric:.3g}"
     return f"{numeric:.1f}"
 
-# Backward-compatible name from the first Stage 3 draft.
+# Backward-compatible name kept for existing imports.
 def build_base_descriptors_from_explanation(explanation_dict: Mapping[str, Any]) -> dict[str, float]:
     return extract_what_if_base_descriptors(explanation_dict)

@@ -1,4 +1,4 @@
-"""Applicability-domain heuristics for BioSynth-EDU Stage 6.
+"""Applicability-domain heuristics for BioSynth-EDU.
 
 The module is intentionally rule-based and educational. It does not claim to be
 a statistical applicability-domain model; it exposes transparent flags that can

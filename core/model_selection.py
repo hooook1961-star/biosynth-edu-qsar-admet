@@ -1,6 +1,6 @@
-"""Stage 7.4 model selection layer for BioSynth-EDU.
+"""Model selection layer for BioSynth-EDU.
 
-This module consumes the Stage 7.3 training registry/model cards and produces a
+This module consumes the training registry/model cards and produces a
 runtime-oriented model selection contract. It does not train models and does not
 modify joblib files. Its job is to decide how each v2 artifact should be used:
 primary, supplementary, helper, score-only, or disabled by default.
@@ -259,7 +259,7 @@ def _default_reason_ru(legacy_name: str, metrics: Mapping[str, Any]) -> str:
         return "CATMoS v2 можно использовать только как score, потому что шкала consensus_LD50 выглядит log/transformed и единицы требуют подтверждения."
     if legacy_name == "rf_clint_model":
         return "Clint v2 показывает слабые classification-метрики и отключается по умолчанию."
-    return "Runtime decision was assigned by Stage 7.4 model selection policy."
+    return "Runtime decision was assigned by model selection policy."
 
 
 def _default_reason_en(legacy_name: str, metrics: Mapping[str, Any]) -> str:
@@ -275,7 +275,7 @@ def _default_reason_en(legacy_name: str, metrics: Mapping[str, Any]) -> str:
         return "CATMoS v2 is score-only because consensus_LD50 looks log/transformed and units require confirmation."
     if legacy_name == "rf_clint_model":
         return "Clint v2 shows weak classification metrics and is disabled by default."
-    return "Runtime decision was assigned by the Stage 7.4 model selection policy."
+    return "Runtime decision was assigned by the model selection policy."
 
 
 def _default_reason_kk(legacy_name: str, metrics: Mapping[str, Any]) -> str:
@@ -291,7 +291,7 @@ def _default_reason_kk(legacy_name: str, metrics: Mapping[str, Any]) -> str:
         return "CATMoS v2 тек score ретінде қолданылады, себебі consensus_LD50 шкаласы log/transformed болып көрінеді және бірліктерді растау қажет."
     if legacy_name == "rf_clint_model":
         return "Clint v2 classification метрикалары әлсіз, сондықтан әдепкіде өшіріледі."
-    return "Runtime шешімі Stage 7.4 model selection policy арқылы берілді."
+    return "Runtime шешімі model selection policy арқылы берілді."
 
 
 def corrected_gupta_entry() -> Dict[str, Any]:
@@ -329,7 +329,7 @@ def select_one_model(
     card_error: Optional[str] = None,
     policy: MetricThresholds = DEFAULT_POLICY,
 ) -> Dict[str, Any]:
-    """Apply Stage 7.4 selection rules to one registry entry."""
+    """Apply model-selection rules to one registry entry."""
 
     metrics = _metrics(entry, card)
     qa_status = str(entry.get("qa_status") or (card or {}).get("qa_status") or "unknown")
@@ -546,7 +546,7 @@ def build_model_selection(
 
 def render_model_selection_markdown(selection: Mapping[str, Any]) -> str:
     lines: List[str] = []
-    lines.append("# BioSynth-EDU Stage 7.4 Model Selection Report")
+    lines.append("# BioSynth-EDU Model Selection Report")
     lines.append("")
     lines.append(f"Schema version: `{selection.get('schema_version')}`")
     lines.append(f"Created at: `{selection.get('created_at')}`")

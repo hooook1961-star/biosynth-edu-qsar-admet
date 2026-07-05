@@ -1,7 +1,7 @@
 """Auditable Gupta-style BBB score helpers for BioSynth-EDU.
 
-Stage 7.0 fixes the consistency issue where p_mwhbn was calculated but raw MWHBN
-was used in the final score.
+The current calculation uses the normalized ``p_mwhbn`` component in the final
+score. Earlier audit helpers are kept for comparison with the raw-MWHBN variant.
 """
 
 from __future__ import annotations

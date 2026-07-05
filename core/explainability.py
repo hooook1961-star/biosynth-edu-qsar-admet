@@ -1,7 +1,5 @@
 """Rule-based educational explainability backend for BioSynth-EDU.
 
-Stage 1 goal
-------------
 This module does not run RDKit or ML models.  It takes the ordinary output of
 ``process_smiles_pipeline`` and transforms it into a stable ``explanation_dict``
 that Streamlit can render later.
@@ -399,7 +397,7 @@ def classify_descriptor_zone(name: str, value: Any, context: Mapping[str, Any] |
         zone, effect = _classify_ordinal_risk(value, low_green=True)
 
     elif canonical == "CATMoS_LD50":
-        # LD50 units may differ between models. Do not overclaim in Stage 1.
+        # LD50 units may differ between models. Do not overclaim here.
         zone, effect = "gray", "context_dependent"
 
     else:
@@ -740,7 +738,7 @@ def _sort_factors(factors: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _build_explanation_dict_ru(pipeline_result: Mapping[str, Any]) -> ExplanationDict:
     """Transform ordinary ``process_smiles_pipeline`` output into explanation_dict.
 
-    This is the Stage 1 public entry point.
+    This is the primary public entry point for explanation generation.
     """
     if not isinstance(pipeline_result, Mapping):
         raise TypeError("pipeline_result must be a mapping/dict")
@@ -1255,7 +1253,7 @@ def _build_what_if_base_info(
 
 
 # ---------------------------------------------------------------------------
-# Stage 6 multilingual wrappers
+# Multilingual explanation helpers
 # ---------------------------------------------------------------------------
 
 

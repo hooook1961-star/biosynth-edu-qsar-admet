@@ -1,7 +1,7 @@
 """Shared feature builders and numerical safeguards for BioSynth-EDU models.
 
-Stage 7.0 centralizes model feature generation so training scripts and inference code
-can use the same vector order and the same NaN/inf handling.
+Training scripts and inference code use the same vector order and the same
+NaN/inf handling.
 """
 
 from __future__ import annotations
