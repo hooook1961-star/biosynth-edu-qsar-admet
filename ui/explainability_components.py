@@ -24,6 +24,7 @@ from core.batch_explainability import (
     summarize_batch_explanations,
     build_batch_summary_dataframe,
     build_frequency_dataframe,
+    build_batch_student_view_dataframe,
     sort_batch_by_explainability_priority,
     select_batch_display_columns,
 )
@@ -500,21 +501,29 @@ def render_batch_explainability_summary(batch_df: pd.DataFrame, summary: Mapping
         st.warning(t("batch.empty", lang))
         return
     summary = summary or summarize_batch_explanations(batch_df, lang=lang)
+    counts = summary.get("final_class_counts") or {}
+    priority_counts = summary.get("priority_counts") or {}
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.metric(t("batch.total", lang), _format_value(summary.get("total")))
     with c2:
         st.metric(t("batch.valid", lang), _format_value(summary.get("valid_count")))
     with c3:
-        st.metric(t("batch.invalid", lang), _format_value(summary.get("invalid_count")))
+        st.metric(t("batch.candidates", lang), _format_value(counts.get("likely_bbb_penetrant_profile", 0)))
     with c4:
-        st.metric(t("batch.candidates", lang), _format_value((summary.get("final_class_counts") or {}).get("likely_cns_active", 0)))
+        st.metric(t("batch.review_needed", lang), _format_value(priority_counts.get("review", 0) + priority_counts.get("manual_review", 0)))
+    c5, c6, c7 = st.columns(3)
+    with c5:
+        st.metric(t("batch.borderline", lang), _format_value(counts.get("borderline_bbb_profile", 0)))
+    with c6:
+        st.metric(t("batch.low_bbb", lang), _format_value(counts.get("likely_low_bbb_profile", 0)))
+    with c7:
+        st.metric(t("batch.invalid", lang), _format_value(summary.get("invalid_count")))
     st.markdown(t("batch.summary", lang))
     st.success(str(summary.get("teaching_summary") or summary.get("teaching_summary_ru") or ""))
     with st.expander(t("batch.table", lang), expanded=True):
         sorted_df = sort_batch_by_explainability_priority(batch_df)
-        visible = [col for col in select_batch_display_columns(sorted_df) if col in sorted_df.columns]
-        st.dataframe(sorted_df[visible] if visible else sorted_df, use_container_width=True)
+        st.dataframe(build_batch_student_view_dataframe(sorted_df, lang=lang), use_container_width=True)
 
 
 def render_batch_explainability_result(batch_result: Mapping[str, Any], lang: str = "ru") -> None:

@@ -32,6 +32,7 @@ from core.explainability_adapter import build_pipeline_result_from_current_app
 from core.batch_explainability import (
     build_batch_excel_sheets,
     build_batch_export_dataframe,
+    build_batch_student_view_dataframe,
     build_screening_interpretation_markdown,
     select_batch_display_columns,
     summarize_batch_explanations,
@@ -62,6 +63,9 @@ def init_state() -> None:
     st.session_state.setdefault("single_smiles", DEFAULT_SMILES)
     st.session_state.setdefault("batch_source", "text")
     st.session_state.setdefault("batch_text", DEFAULT_BATCH_TEXT)
+    st.session_state.setdefault("batch_input_df", None)
+    st.session_state.setdefault("batch_smiles_col_value", None)
+    st.session_state.setdefault("batch_keep_mode", False)
     st.session_state.setdefault("developer_mode", False)
 
 
@@ -70,6 +74,7 @@ def section_selector(
     options: list[str],
     label_func: Callable[[str], str],
     key: str,
+    fallback: str | None = None,
 ) -> str:
     """Stable section selector.
 
@@ -79,7 +84,7 @@ def section_selector(
     RU/KZ/EN switching.
     """
     if st.session_state.get(key) not in options:
-        st.session_state[key] = options[0]
+        st.session_state[key] = fallback if fallback in options else options[0]
 
     return st.radio(label, options=options, format_func=label_func, key=key, horizontal=True)
 
@@ -156,6 +161,14 @@ def value_or_na(value: Any, lang: str) -> str:
     if str(value).lower() in {"none", "nan", "n/a"}:
         return tx("common.na", lang)
     return str(value)
+
+
+def _main_mode_fallback() -> str:
+    if "batch_xai_df" in st.session_state:
+        return "batch"
+    if isinstance(st.session_state.get("batch_input_df"), pd.DataFrame):
+        return "batch"
+    return "single"
 
 
 def descriptor_table(results: dict[str, Any], lang: str) -> pd.DataFrame:
@@ -370,7 +383,23 @@ def render_batch_screening(lang: str) -> None:
         f = st.file_uploader(t("batch.file_label", lang), key="batch_file_upload")
         if f:
             df = pd.read_csv(f) if f.name.endswith(".csv") else pd.read_excel(f)
+            st.session_state["batch_input_df"] = df
+            st.session_state["batch_keep_mode"] = True
             smiles_col = st.selectbox(t("batch.smiles_col_label", lang), df.columns, key="batch_smiles_col")
+            st.session_state["batch_smiles_col_value"] = smiles_col
+        elif isinstance(st.session_state.get("batch_input_df"), pd.DataFrame):
+            df = st.session_state["batch_input_df"]
+            st.session_state["batch_keep_mode"] = True
+            smiles_col = st.session_state.get("batch_smiles_col_value")
+            if smiles_col not in list(df.columns):
+                smiles_col = df.columns[0]
+            smiles_col = st.selectbox(
+                t("batch.smiles_col_label", lang),
+                df.columns,
+                index=list(df.columns).index(smiles_col),
+                key="batch_smiles_col_restored",
+            )
+            st.session_state["batch_smiles_col_value"] = smiles_col
     else:
         text = st.text_area(
             t("batch.text_area_label", lang),
@@ -378,7 +407,10 @@ def render_batch_screening(lang: str) -> None:
         )
         if text:
             df = pd.DataFrame({"SMILES": [s.strip() for s in text.split("\n") if s.strip()]})
+            st.session_state["batch_input_df"] = df
+            st.session_state["batch_keep_mode"] = True
             smiles_col = "SMILES"
+            st.session_state["batch_smiles_col_value"] = smiles_col
 
     if df is not None:
         st.caption(t("batch.loaded_rows", lang, n=len(df)))
@@ -427,6 +459,7 @@ def render_batch_screening(lang: str) -> None:
 
         st.session_state["batch_xai_df"] = batch_df
         st.session_state["batch_xai_summary"] = batch_summary
+        st.session_state["batch_keep_mode"] = True
         status.success(t("batch.done", lang))
         st.caption(tx("batch.result_stored", lang))
 
@@ -451,13 +484,11 @@ def render_batch_screening(lang: str) -> None:
             with st.expander(t("batch.interpretation_title", lang), expanded=False):
                 st.markdown(build_screening_interpretation_markdown(lang))
         elif section == "table":
-            display_columns = select_batch_display_columns(batch_df)
-            if display_columns:
-                st.dataframe(batch_df[display_columns], use_container_width=True)
-                with st.expander(t("batch.show_all_columns", lang), expanded=False):
-                    st.dataframe(batch_df, use_container_width=True)
-            else:
-                st.dataframe(batch_df, use_container_width=True)
+            student_df = build_batch_student_view_dataframe(batch_df, lang=lang)
+            st.dataframe(student_df, use_container_width=True)
+            with st.expander(t("batch.show_all_columns", lang), expanded=False):
+                display_columns = select_batch_display_columns(batch_df)
+                st.dataframe(batch_df[display_columns] if display_columns else batch_df, use_container_width=True)
         elif section == "export":
             sheets = build_batch_excel_sheets(batch_df, batch_summary)
             interpretation_md = build_screening_interpretation_markdown(lang)
@@ -491,7 +522,7 @@ def render_batch_screening(lang: str) -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title="BioSynth-EDU | Explainable ADMET/QSAR", layout="wide")
+    st.set_page_config(page_title="BioSynth-EDU | ADMET/QSAR", layout="wide")
     init_state()
 
     with st.sidebar:
@@ -514,6 +545,10 @@ def main() -> None:
                 st.code(os.environ.get("BIOSYNTH_MODEL_SELECTION_PATH", "auto: models/v2_experiment/model_selection.json"))
 
     st.title(t("app.title", lang))
+    if st.session_state.get("batch_keep_mode") and _main_mode_fallback() == "batch":
+        st.session_state["main_mode"] = "batch"
+        st.session_state["batch_keep_mode"] = False
+
     mode_labels = {
         "single": t("tabs.single", lang),
         "batch": t("tabs.batch", lang),
@@ -523,6 +558,7 @@ def main() -> None:
         ["single", "batch"],
         lambda item: mode_labels[item],
         key="main_mode",
+        fallback=_main_mode_fallback(),
     )
 
     if mode == "single":

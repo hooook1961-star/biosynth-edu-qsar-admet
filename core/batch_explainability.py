@@ -108,6 +108,57 @@ COMPACT_BATCH_COLUMNS: tuple[str, ...] = (
     "batch_priority",
 )
 
+STUDENT_BATCH_COLUMNS: dict[str, tuple[str, ...]] = {
+    "ru": (
+        "#",
+        "SMILES",
+        "Итог",
+        "ГЭБ-профиль",
+        "Gupta",
+        "ГЭБ RF",
+        "P-gp",
+        "Статус P-gp",
+        "pKa",
+        "MW",
+        "TPSA",
+        "LogP",
+        "Главные предупреждения",
+        "Приоритет",
+    ),
+    "kk": (
+        "#",
+        "SMILES",
+        "Қорытынды",
+        "Қан-ми тосқауылы профилі",
+        "Gupta",
+        "Қан-ми RF",
+        "P-gp",
+        "P-gp статусы",
+        "pKa",
+        "MW",
+        "TPSA",
+        "LogP",
+        "Негізгі ескертулер",
+        "Басымдық",
+    ),
+    "en": (
+        "#",
+        "SMILES",
+        "Final decision",
+        "BBB profile",
+        "Gupta",
+        "BBB RF",
+        "P-gp",
+        "P-gp status",
+        "pKa",
+        "MW",
+        "TPSA",
+        "LogP",
+        "Main warnings",
+        "Priority",
+    ),
+}
+
 LONG_BATCH_TEXT_COLUMNS: set[str] = {
     "xai_short_summary",
     "xai_decision_summary_long",
@@ -272,15 +323,15 @@ def build_screening_interpretation_markdown(lang: str = "ru") -> str:
     """Return a standalone interpretation note for compact batch exports."""
     lang = normalize_language(lang)
     return {
-        "ru": """# Интерпретация результатов группового ADMET/BBB-скрининга
+        "ru": """# Интерпретация результатов группового ADMET/ГЭБ-скрининга
 
 Групповой отчёт предназначен для предварительного сравнения молекул по набору расчётных ADMET-дескрипторов. Результаты не являются экспериментальным доказательством проникновения через гематоэнцефалический барьер или биологической активности в ЦНС.
 
 ## Основные показатели
 
-`Gupta indicator for BBB` — расчётный показатель, используемый для оценки профиля прохождения через гематоэнцефалический барьер. В текущей версии применяется модифицированная формула `gupta_fixed_v2_use_p_mwhbn`, которая использует предсказанный `pKa` и нормализованный компонент `p_MWHBN`.
+`Показатель Gupta для ГЭБ` — расчётный показатель, используемый для оценки профиля прохождения через гематоэнцефалический барьер. В текущей версии применяется модифицированная формула `gupta_fixed_v2_use_p_mwhbn`, которая использует предсказанный `pKa` и нормализованный компонент `p_MWHBN`.
 
-`RF estimate of BBB passage` — вероятность прохождения через ГЭБ по Random Forest-модели. Это независимая модельная оценка, которую следует рассматривать вместе с Gupta indicator.
+`RF-оценка прохождения через ГЭБ` — вероятность прохождения через ГЭБ по Random Forest-модели. Это независимая модельная оценка, которую следует рассматривать вместе с показателем Gupta.
 
 `P-gp risk estimate` — расчётная вероятность того, что молекула может быть связана с P-gp-опосредованным выведением. Высокое значение может снижать уверенность в доступности молекулы для ЦНС даже при благоприятном BBB-профиле.
 
@@ -290,57 +341,57 @@ def build_screening_interpretation_markdown(lang: str = "ru") -> str:
 
 ## Как читать итоговый класс
 
-`likely_bbb_penetrant_profile` означает, что молекула имеет благоприятный расчётный профиль для прохождения через ГЭБ.
+`Вероятно благоприятный ГЭБ-профиль` означает, что молекула имеет благоприятный расчётный профиль для прохождения через ГЭБ.
 
-`borderline_bbb_profile` означает, что результат неоднозначен: часть дескрипторов благоприятна, но есть факторы риска или пограничные значения.
+`Пограничный ГЭБ-профиль` означает, что результат неоднозначен: часть дескрипторов благоприятна, но есть факторы риска или пограничные значения.
 
-`likely_low_bbb_profile` означает, что расчётные признаки указывают на слабое пассивное прохождение через ГЭБ.
+`Вероятно слабый ГЭБ-профиль` означает, что расчётные признаки указывают на слабое пассивное прохождение через ГЭБ.
 
-`high_pgp_risk` означает, что даже при приемлемом BBB-профиле возможен риск активного выведения через P-gp.
+`Высокий риск P-gp` означает, что даже при приемлемом ГЭБ-профиле возможен риск активного выведения через P-gp.
 
-`outside_applicability_domain` означает, что молекула находится вне надёжной области применения модели, поэтому результат требует ручной проверки.
+`Вне надёжной области` означает, что молекула находится вне надёжной области применения модели, поэтому результат требует ручной проверки.
 
 ## Важные ограничения
 
 Карбоновые кислоты, аминокислоты, цвиттер-ионные структуры, полифенолы, очень простые углеводороды и молекулы с экстремальным LogP требуют осторожной интерпретации.
 
-Для таких соединений высокий численный BBB-score не должен автоматически трактоваться как доказательство хорошего проникновения в ЦНС.
+Для таких соединений высокий численный показатель ГЭБ не должен автоматически трактоваться как доказательство хорошего проникновения в ЦНС.
 
 Групповой скрининг следует использовать как инструмент ранжирования и отбора кандидатов для дальнейшей проверки, а не как окончательное заключение.
 """,
-        "kk": """# Топтық ADMET/BBB-скрининг нәтижелерін түсіндіру
+        "kk": """# Топтық ADMET / қан-ми тосқауылы скринингі нәтижелерін түсіндіру
 
 Топтық есеп молекулаларды есептік ADMET-дескрипторлар бойынша алдын ала салыстыруға арналған. Бұл нәтижелер гематоэнцефалдық бөгеттен өтуін немесе ОЖЖ-дегі биологиялық белсенділігін эксперименттік түрде дәлелдемейді.
 
 ## Негізгі көрсеткіштер
 
-`Gupta indicator for BBB` — гематоэнцефалдық бөгеттен өту профилін бағалауға арналған есептік көрсеткіш. Қазіргі нұсқада `gupta_fixed_v2_use_p_mwhbn` модификацияланған формуласы қолданылады. Ол болжанған `pKa` мәнін және нормаланған `p_MWHBN` компонентін пайдаланады.
+`Қан-ми тосқауылы үшін Gupta көрсеткіші` — қан-ми тосқауылынан өту профилін бағалауға арналған есептік көрсеткіш. Қазіргі нұсқада `gupta_fixed_v2_use_p_mwhbn` модификацияланған формуласы қолданылады. Ол болжанған `pKa` мәнін және нормаланған `p_MWHBN` компонентін пайдаланады.
 
-`RF estimate of BBB passage` — Random Forest моделі бойынша ГЭБ-тен өту ықтималдығы. Бұл Gupta көрсеткішінен бөлек модельдік баға, сондықтан оны басқа дескрипторлармен бірге қарастыру керек.
+`RF-модель бойынша қан-ми тосқауылынан өту бағасы` — Random Forest моделі бойынша қан-ми тосқауылынан өту ықтималдығы. Бұл Gupta көрсеткішінен бөлек модельдік баға, сондықтан оны басқа дескрипторлармен бірге қарастыру керек.
 
-`P-gp risk estimate` — молекуланың P-gp арқылы шығарылу қаупінің есептік ықтималдығы. Бұл көрсеткіш жоғары болса, BBB-профиль жақсы болғанымен, ОЖЖ-ге қолжетімділікке сенімділік төмендеуі мүмкін.
+`P-gp risk estimate` — молекуланың P-gp арқылы шығарылу қаупінің есептік ықтималдығы. Бұл көрсеткіш жоғары болса, қан-ми тосқауылы профилі жақсы болғанымен, ОЖЖ-ге қолжетімділікке сенімділік төмендеуі мүмкін.
 
-`Caco-2` — ішектік өткізгіштіктің есептік көрсеткіші. Ол BBB-өткізгіштікпен бірдей емес, бірақ мембраналық өткізгіштік профилін жалпы бағалауға көмектеседі.
+`Caco-2` — ішектік өткізгіштіктің есептік көрсеткіші. Ол қан-ми тосқауылы арқылы өтумен бірдей емес, бірақ мембраналық өткізгіштік профилін жалпы бағалауға көмектеседі.
 
 `pKa` — молекуланың болжанған қышқыл-негіздік сипаттамасы. Бұл көрсеткіш маңызды, себебі физиологиялық pH жағдайындағы иондалу дәрежесі мембрана арқылы пассивті өтуге әсер етеді.
 
 ## Қорытынды класты қалай оқу керек
 
-`likely_bbb_penetrant_profile` молекуланың ГЭБ-тен өтуге қолайлы есептік профилі бар екенін білдіреді.
+`Қан-ми тосқауылы профилі қолайлы болуы мүмкін` молекуланың қан-ми тосқауылынан өтуге қолайлы есептік профилі бар екенін білдіреді.
 
-`borderline_bbb_profile` нәтиженің бірмәнді емес екенін білдіреді: кейбір дескрипторлар қолайлы, бірақ қауіп факторлары немесе шекаралық мәндер бар.
+`Қан-ми тосқауылы профилі шекаралық` нәтиженің бірмәнді емес екенін білдіреді: кейбір дескрипторлар қолайлы, бірақ қауіп факторлары немесе шекаралық мәндер бар.
 
-`likely_low_bbb_profile` есептік белгілер ГЭБ арқылы пассивті өтудің әлсіз болуы мүмкін екенін көрсетеді.
+`Қан-ми тосқауылы профилі әлсіз болуы мүмкін` есептік белгілер қан-ми тосқауылы арқылы пассивті өтудің әлсіз болуы мүмкін екенін көрсетеді.
 
-`high_pgp_risk` BBB-профиль қолайлы болса да, P-gp арқылы белсенді шығарылу қаупі болуы мүмкін екенін білдіреді.
+`P-gp қаупі жоғары` қан-ми тосқауылы профилі қолайлы болса да, P-gp арқылы белсенді шығарылу қаупі болуы мүмкін екенін білдіреді.
 
-`outside_applicability_domain` молекула модельдің сенімді қолдану аймағынан тыс екенін білдіреді, сондықтан нәтижені қолмен тексеру қажет.
+`Сенімді қолдану аймағынан тыс` молекула модельдің сенімді қолдану аймағынан тыс екенін білдіреді, сондықтан нәтижені қолмен тексеру қажет.
 
 ## Маңызды шектеулер
 
 Карбон қышқылдары, аминқышқылдары, цвиттер-иондық құрылымдар, полифенолдар, өте қарапайым көмірсутектер және LogP мәні шектен тыс молекулалар сақтықпен түсіндірілуі керек.
 
-Мұндай қосылыстар үшін жоғары BBB-score автоматты түрде ОЖЖ-ге жақсы өтеді деген қорытынды бермейді.
+Мұндай қосылыстар үшін қан-ми тосқауылының жоғары сандық көрсеткіші автоматты түрде ОЖЖ-ге жақсы өтеді деген қорытынды бермейді.
 
 Топтық скринингті соңғы қорытынды ретінде емес, әрі қарай тексеруге арналған кандидаттарды алдын ала іріктеу және ранжирлеу құралы ретінде қолдану керек.
 """,
@@ -362,15 +413,15 @@ The batch report is intended for preliminary comparison of molecules using calcu
 
 ## How to read the final class
 
-`likely_bbb_penetrant_profile` means that the molecule has a favorable calculated profile for BBB penetration.
+`Likely favourable BBB profile` means that the molecule has a favorable calculated profile for BBB penetration.
 
-`borderline_bbb_profile` means that the result is uncertain: some descriptors are favorable, but risk factors or borderline values are present.
+`Borderline BBB profile` means that the result is uncertain: some descriptors are favorable, but risk factors or borderline values are present.
 
-`likely_low_bbb_profile` means that the calculated properties suggest weak passive BBB penetration.
+`Likely low BBB profile` means that the calculated properties suggest weak passive BBB penetration.
 
-`high_pgp_risk` means that P-gp-mediated efflux may be a concern even if the passive BBB profile is acceptable.
+`High P-gp risk` means that P-gp-mediated efflux may be a concern even if the passive BBB profile is acceptable.
 
-`outside_applicability_domain` means that the molecule is outside the reliable applicability domain of the model and requires manual review.
+`Outside reliable domain` means that the molecule is outside the reliable applicability domain of the model and requires manual review.
 
 ## Important limitations
 
@@ -396,9 +447,68 @@ def build_batch_excel_sheets(batch_df: pd.DataFrame, summary: Mapping[str, Any] 
     }
 
 
+def build_batch_student_view_dataframe(batch_df: pd.DataFrame, lang: str = "ru") -> pd.DataFrame:
+    """Build a localized compact table for on-screen student review."""
+    lang = normalize_language(lang)
+    df = _ensure_dataframe(batch_df)
+    rows: list[dict[str, Any]] = []
+    columns = STUDENT_BATCH_COLUMNS[lang]
+    for index, row in df.reset_index(drop=True).iterrows():
+        warnings = _split_semicolon(row.get("warning_flags"))
+        review = _split_semicolon(row.get("review_flags"))
+        main_warnings = _student_warning_summary(warnings, review, lang)
+        values = {
+            "#": index + 1,
+            "SMILES": _na(row.get("input_smiles")),
+            "Итог": _final_class_label(row.get("final_screening_class"), lang),
+            "Қорытынды": _final_class_label(row.get("final_screening_class"), lang),
+            "Final decision": _final_class_label(row.get("final_screening_class"), lang),
+            "ГЭБ-профиль": _bbb_profile_label(row.get("bbb_class"), row.get("final_screening_class"), row.get("review_flags"), lang),
+            "Қан-ми тосқауылы профилі": _bbb_profile_label(row.get("bbb_class"), row.get("final_screening_class"), row.get("review_flags"), lang),
+            "BBB profile": _bbb_profile_label(row.get("bbb_class"), row.get("final_screening_class"), row.get("review_flags"), lang),
+            "Gupta": _na(row.get("bbb_gupta_score_normalized")),
+            "ГЭБ RF": _na(row.get("bbb_rf_probability")),
+            "Қан-ми RF": _na(row.get("bbb_rf_probability")),
+            "BBB RF": _na(row.get("bbb_rf_probability")),
+            "P-gp": _na(row.get("pgp_probability")),
+            "Статус P-gp": _pgp_status_label(row.get("pgp_status"), lang),
+            "P-gp статусы": _pgp_status_label(row.get("pgp_status"), lang),
+            "P-gp status": _pgp_status_label(row.get("pgp_status"), lang),
+            "pKa": _na(row.get("pKa_pred")),
+            "MW": _na(row.get("MW")),
+            "TPSA": _na(row.get("TPSA")),
+            "LogP": _na(row.get("LogP")),
+            "Главные предупреждения": main_warnings,
+            "Негізгі ескертулер": main_warnings,
+            "Main warnings": main_warnings,
+            "Приоритет": _priority_label(row.get("batch_priority"), lang),
+            "Басымдық": _priority_label(row.get("batch_priority"), lang),
+            "Priority": _priority_label(row.get("batch_priority"), lang),
+        }
+        rows.append({column: values.get(column, "N/A") for column in columns})
+    return pd.DataFrame(rows, columns=list(columns))
+
+
 def sort_batch_by_explainability_priority(batch_df: pd.DataFrame) -> pd.DataFrame:
     """Sort batch rows so likely CNS candidates appear first."""
     df = batch_df.copy()
+    if "batch_priority" in df.columns:
+        order = {
+            "candidate": 0,
+            "review": 1,
+            "borderline_review": 2,
+            "pgp_risk_review": 3,
+            "manual_review": 4,
+            "low_priority": 5,
+            "invalid_structure": 6,
+        }
+        score_col = "bbb_gupta_score_normalized" if "bbb_gupta_score_normalized" in df.columns else None
+        df["_batch_priority_order"] = df["batch_priority"].map(order).fillna(99).astype(int)
+        if score_col:
+            df = df.sort_values(["_batch_priority_order", score_col], ascending=[True, False])
+        else:
+            df = df.sort_values(["_batch_priority_order"], ascending=[True])
+        return df.drop(columns=["_batch_priority_order"])
     if "xai_batch_priority" not in df.columns:
         return df
     df["_xai_priority_order"] = df["xai_batch_priority"].map(XAI_PRIORITY_ORDER).fillna(99).astype(int)
@@ -747,6 +857,161 @@ def _batch_priority_from_final_class(final_class: str, review_flags: Sequence[st
     if final_class == "borderline_bbb_profile":
         return "borderline_review"
     return "low_priority"
+
+
+def _final_class_label(value: Any, lang: str) -> str:
+    key = str(value or "")
+    labels = {
+        "ru": {
+            "likely_bbb_penetrant_profile": "Вероятно благоприятный ГЭБ-профиль",
+            "borderline_bbb_profile": "Пограничный ГЭБ-профиль",
+            "likely_low_bbb_profile": "Вероятно слабый ГЭБ-профиль",
+            "high_pgp_risk": "Высокий риск P-gp",
+            "outside_applicability_domain": "Вне надёжной области",
+            "invalid_structure": "Некорректная структура",
+        },
+        "kk": {
+            "likely_bbb_penetrant_profile": "Қан-ми тосқауылы профилі қолайлы болуы мүмкін",
+            "borderline_bbb_profile": "Қан-ми тосқауылы профилі шекаралық",
+            "likely_low_bbb_profile": "Қан-ми тосқауылы профилі әлсіз болуы мүмкін",
+            "high_pgp_risk": "P-gp қаупі жоғары",
+            "outside_applicability_domain": "Сенімді қолдану аймағынан тыс",
+            "invalid_structure": "Құрылым қате",
+        },
+        "en": {
+            "likely_bbb_penetrant_profile": "Likely favourable BBB profile",
+            "borderline_bbb_profile": "Borderline BBB profile",
+            "likely_low_bbb_profile": "Likely low BBB profile",
+            "high_pgp_risk": "High P-gp risk",
+            "outside_applicability_domain": "Outside reliable domain",
+            "invalid_structure": "Invalid structure",
+        },
+    }
+    return labels[lang].get(key, key or "N/A")
+
+
+def _priority_label(value: Any, lang: str) -> str:
+    key = str(value or "")
+    labels = {
+        "ru": {
+            "candidate": "Кандидат",
+            "review": "Требует проверки",
+            "manual_review": "Ручная проверка",
+            "pgp_risk_review": "Проверить P-gp",
+            "borderline_review": "Погранично",
+            "low_priority": "Низкий приоритет",
+            "invalid_structure": "Исправить структуру",
+        },
+        "kk": {
+            "candidate": "Кандидат",
+            "review": "Тексеру қажет",
+            "manual_review": "Қолмен тексеру",
+            "pgp_risk_review": "P-gp тексеру",
+            "borderline_review": "Шекаралық",
+            "low_priority": "Төмен басымдық",
+            "invalid_structure": "Құрылымды түзету",
+        },
+        "en": {
+            "candidate": "Candidate",
+            "review": "Needs review",
+            "manual_review": "Manual review",
+            "pgp_risk_review": "Check P-gp",
+            "borderline_review": "Borderline",
+            "low_priority": "Low priority",
+            "invalid_structure": "Fix structure",
+        },
+    }
+    return labels[lang].get(key, key or "N/A")
+
+
+def _bbb_profile_label(bbb_class: Any, final_class: Any, review_flags: Any, lang: str) -> str:
+    bbb_key = str(bbb_class or "")
+    base = {
+        "ru": {"bbb_high": "оценка ГЭБ высокая", "bbb_low": "оценка ГЭБ низкая", "N/A": "нет данных"},
+        "kk": {
+            "bbb_high": "қан-ми тосқауылы бағасы жоғары",
+            "bbb_low": "қан-ми тосқауылы бағасы төмен",
+            "N/A": "деректер жоқ",
+        },
+        "en": {"bbb_high": "BBB high", "bbb_low": "BBB low", "N/A": "N/A"},
+    }[lang].get(bbb_key, bbb_key or "N/A")
+    if bbb_key == "bbb_high" and str(final_class) == "borderline_bbb_profile":
+        reasons = _student_warning_summary([], _split_semicolon(review_flags), lang)
+        if reasons != "N/A":
+            return {
+                "ru": f"{base}, но итог понижен: {reasons}",
+                "kk": f"{base}, бірақ қорытынды төмендетілді: {reasons}",
+                "en": f"{base}, downgraded: {reasons}",
+            }[lang]
+    return base
+
+
+def _pgp_status_label(value: Any, lang: str) -> str:
+    raw = str(value or "").strip().lower()
+    if raw in {"не субстрат", "non-substrate", "субстрат емес"}:
+        return {"ru": "низкий риск", "kk": "қауіп төмен", "en": "low risk"}[lang]
+    if "substrate" in raw or "субстрат" in raw:
+        return {"ru": "возможен P-gp", "kk": "P-gp мүмкін", "en": "possible P-gp"}[lang]
+    return str(value or "N/A")
+
+
+def _student_warning_summary(warning_flags: Sequence[str], review_flags: Sequence[str], lang: str) -> str:
+    labels = {
+        "ru": {
+            "carboxylic_acid_flag": "требует проверки: кислотная группа вне типичного профиля модели",
+            "amino_acid_or_zwitterion_flag": "ручная проверка: возможная цвиттер-ионная структура",
+            "polyphenol_flag": "ручная проверка: полифенольный профиль",
+            "simple_hydrocarbon_flag": "ручная проверка: слишком простая структура для уверенного вывода",
+            "very_high_logp_flag": "ручная проверка: экстремально высокий LogP",
+            "very_low_logp_flag": "ручная проверка: экстремально низкий LogP",
+            "outside_applicability_domain": "вне надёжной области",
+            "default_pka_used": "pKa по умолчанию",
+            "borderline_gupta_score": "Gupta около порога",
+            "high_pgp_risk": "высокий риск P-gp",
+            "bbb_model_disagreement": "Gupta и RF расходятся",
+            "medium_uncertainty": "средняя неопределённость",
+            "high_uncertainty": "высокая неопределённость",
+            "caution_applicability": "требуется осторожность",
+            "outside_applicability": "вне надёжной области",
+        },
+        "kk": {
+            "carboxylic_acid_flag": "тексеру қажет: қышқыл топ модельдің типтік профилінен тыс",
+            "amino_acid_or_zwitterion_flag": "қолмен тексеру: цвиттер-иондық құрылым болуы мүмкін",
+            "polyphenol_flag": "қолмен тексеру: полифенолдық профиль",
+            "simple_hydrocarbon_flag": "қолмен тексеру: сенімді қорытынды үшін құрылым тым қарапайым",
+            "very_high_logp_flag": "қолмен тексеру: LogP өте жоғары",
+            "very_low_logp_flag": "қолмен тексеру: LogP өте төмен",
+            "outside_applicability_domain": "сенімді аймақтан тыс",
+            "default_pka_used": "әдепкі pKa",
+            "borderline_gupta_score": "Gupta шекке жақын",
+            "high_pgp_risk": "P-gp қаупі жоғары",
+            "bbb_model_disagreement": "Gupta және RF сәйкес емес",
+            "medium_uncertainty": "орташа белгісіздік",
+            "high_uncertainty": "жоғары белгісіздік",
+            "caution_applicability": "сақтық қажет",
+            "outside_applicability": "сенімді аймақтан тыс",
+        },
+        "en": {
+            "carboxylic_acid_flag": "manual review: acidic group may reduce prediction reliability",
+            "amino_acid_or_zwitterion_flag": "manual review: possible zwitterionic structure",
+            "polyphenol_flag": "manual review: polyphenol-like profile",
+            "simple_hydrocarbon_flag": "manual review: structure is too simple for a confident conclusion",
+            "very_high_logp_flag": "manual review: very high LogP",
+            "very_low_logp_flag": "manual review: very low LogP",
+            "outside_applicability_domain": "outside reliable domain",
+            "default_pka_used": "default pKa",
+            "borderline_gupta_score": "Gupta near threshold",
+            "high_pgp_risk": "high P-gp risk",
+            "bbb_model_disagreement": "Gupta/RF disagreement",
+            "medium_uncertainty": "medium uncertainty",
+            "high_uncertainty": "high uncertainty",
+            "caution_applicability": "caution",
+            "outside_applicability": "outside reliable domain",
+        },
+    }[lang]
+    merged = list(dict.fromkeys([*warning_flags, *review_flags]))
+    visible = [labels.get(flag, flag) for flag in merged if flag and flag != "N/A"]
+    return "; ".join(visible[:4]) if visible else "N/A"
 
 
 def _build_invalid_xai_row(input_smiles: str, *, results: Mapping[str, Any], include_long_text: bool, lang: str = "ru") -> dict[str, Any]:
@@ -1362,7 +1627,13 @@ def _build_review_reasons(explanation_dict: Mapping[str, Any], final_class: str,
     if str(applicability.get("level") or "") in {"caution", "outside"}:
         reasons.append({"ru": "есть предупреждение о надёжности модели для этой молекулы", "kk": "бұл молекула үшін модель сенімділігі туралы ескерту бар", "en": "applicability-domain warning is present"}[lang])
     if warnings:
-        reasons.append({"ru": "есть структурные/model warnings", "kk": "құрылымдық немесе модельдік ескертулер бар", "en": "structural or model warnings are present"}[lang])
+        reasons.append(
+            {
+                "ru": "есть структурные или модельные предупреждения",
+                "kk": "құрылымдық немесе модельдік ескертулер бар",
+                "en": "structural or model warnings are present",
+            }[lang]
+        )
     negative = _factor_names(explanation_dict, "negative")
     borderline = _factor_names(explanation_dict, "borderline")
     if negative:

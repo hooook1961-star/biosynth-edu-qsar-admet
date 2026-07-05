@@ -7,7 +7,7 @@ from typing import Any
 
 APP_TEXT: dict[str, dict[str, str]] = {
     "ru": {
-        "sidebar.stage": "**Учебная лаборатория ADMET / QSAR**",
+        "sidebar.stage": "**Учебная лаборатория ADMET, ГЭБ и P-gp**",
         "sidebar.developer_mode": "Показать технические детали",
         "sidebar.developer_help": "Показывает статусы моделей и сведения для разработчика.",
         "sidebar.model_selection_hint": "Источник моделей:",
@@ -53,7 +53,7 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "batch.section.export": "Экспорт",
     },
     "kk": {
-        "sidebar.stage": "**ADMET / QSAR оқу зертханасы**",
+        "sidebar.stage": "**ADMET, қан-ми тосқауылы және P-gp оқу зертханасы**",
         "sidebar.developer_mode": "Техникалық мәліметтерді көрсету",
         "sidebar.developer_help": "Модельдердің статустары мен әзірлеушіге арналған мәліметтерді көрсетеді.",
         "sidebar.model_selection_hint": "Модельдер көзі:",
