@@ -1,12 +1,10 @@
 """Batch explainability helpers for BioSynth-EDU mass screening.
 
-Stage 5 goal
-------------
 Mass screening needs compact, spreadsheet-friendly explanations. This module
 turns current flat ADMET rows into ``xai_*`` columns, summarizes a whole batch,
 and prepares multi-sheet Excel exports.
 
-The implementation reuses the accepted Stage 1-4 pipeline:
+The implementation reuses the accepted explanation pipeline:
 
 ``current app row -> adapter -> explanation_dict -> compact xai row``
 
@@ -70,8 +68,8 @@ XAI_EXPORT_COLUMNS: tuple[str, ...] = (
 FINAL_LABEL_FALLBACK_RU: dict[str, str] = {
     "likely_cns_active": "Вероятно ЦНС-активный профиль",
     "peripheral_action_risk": "Хорошая оценка ГЭБ, но есть риск активного выведения через P-gp",
-    "likely_not_bbb_penetrant": "Вероятно не проходит BBB",
-    "full_barrier": "Полный барьер BBB + P-gp",
+    "likely_not_bbb_penetrant": "Вероятно слабое прохождение через ГЭБ",
+    "full_barrier": "Два ограничения: слабое прохождение через ГЭБ и P-gp",
     "uncertain_or_borderline": "Неопределённо / погранично",
     "invalid_or_error": "Некорректный SMILES / ошибка расчёта",
 }
@@ -145,84 +143,6 @@ def build_batch_explanation_row(
     )
 
 
-def build_batch_explanation_row_from_explanation(
-    explanation_dict: Mapping[str, Any],
-    *,
-    include_long_text: bool = False,
-    lang: str | None = None,
-) -> dict[str, Any]:
-    """Build compact ``xai_*`` columns from an existing ``explanation_dict``."""
-    lang = normalize_language(lang or explanation_dict.get("language"))
-    molecule = _as_mapping(explanation_dict.get("molecule"))
-    model_outputs = _as_mapping(explanation_dict.get("model_outputs"))
-    decision = _as_mapping(explanation_dict.get("decision_explanation"))
-    matrix = _as_mapping(explanation_dict.get("bbb_pgp_matrix"))
-    applicability = _as_mapping(explanation_dict.get("applicability_domain"))
-    uncertainty = _as_mapping(explanation_dict.get("uncertainty"))
-
-    if not bool(molecule.get("valid")):
-        return _build_invalid_xai_row(
-            str(molecule.get("input_smiles") or ""),
-            results={},
-            include_long_text=include_long_text,
-            lang=lang,
-        )
-
-    final_class = str(
-        decision.get("final_class")
-        or model_outputs.get("final_cns_class")
-        or "uncertain_or_borderline"
-    )
-    final_label = str(
-        decision.get("final_label_ru")
-        or decision.get("title")
-        or FINAL_LABEL_FALLBACK_RU.get(final_class, final_class)
-    )
-
-    positive = _factor_names(explanation_dict, "positive")
-    negative = _factor_names(explanation_dict, "negative")
-    borderline = _factor_names(explanation_dict, "borderline")
-    warnings = _join_warnings(molecule.get("warnings"))
-
-    row: dict[str, Any] = {
-        "xai_schema_version": BATCH_XAI_SCHEMA_VERSION,
-        "xai_valid_smiles": True,
-        "xai_canonical_smiles": molecule.get("canonical_smiles"),
-        "xai_final_class": final_class,
-        "xai_final_label": final_label,
-        "xai_short_summary": _build_short_summary(final_label, matrix, negative, borderline),
-        "xai_bbb_normalized_score": _round_or_none(model_outputs.get("bbb_classifier_probability")),
-        "xai_bbb_gupta_score": _round_or_none(model_outputs.get("bbb_v2_score")),
-        "xai_bbb_class": model_outputs.get("bbb_class"),
-        "xai_pgp_probability": _round_or_none(model_outputs.get("pgp_probability")),
-        "xai_pgp_class": model_outputs.get("pgp_class"),
-        "xai_pka_pred": _round_or_none(model_outputs.get("pka_pred")),
-        "xai_bbb_pgp_scenario": matrix_current_label(str(matrix.get("current_cell") or "insufficient_data"), lang),
-        "xai_matrix_interpretation": matrix.get("current_interpretation"),
-        "xai_positive_factors": _join_names(positive),
-        "xai_negative_factors": _join_names(negative),
-        "xai_borderline_factors": _join_names(borderline),
-        "xai_applicability_level": applicability.get("level", "unknown"),
-        "xai_uncertainty_level": uncertainty.get("level", "unknown"),
-        "xai_warnings": warnings,
-        "xai_review_reasons": _build_review_reasons(explanation_dict, final_class, warnings),
-        "xai_batch_priority": _classify_xai_priority(explanation_dict, final_class),
-    }
-    row["xai_batch_priority_label"] = batch_priority_label(str(row["xai_batch_priority"]), lang)
-
-    if include_long_text:
-        row.update(
-            {
-                "xai_decision_summary_long": decision.get("summary", ""),
-                "xai_student_interpretation_long": decision.get("student_interpretation", ""),
-                "xai_applicability_message_long": applicability.get("student_message", ""),
-                "xai_uncertainty_message_long": uncertainty.get("student_message", ""),
-            }
-        )
-
-    return row
-
-
 def build_batch_explainability_row(
     explanation_dict: Mapping[str, Any],
     *,
@@ -267,82 +187,9 @@ def build_batch_explainability_row(
     return row
 
 
-def build_batch_export_dataframe(
-    rows: Sequence[Mapping[str, Any]],
-    *,
-    smiles_key: str = "SMILES",
-    include_long_text: bool = False,
-    lang: str = "ru",
-) -> pd.DataFrame:
-    """Append compact ``xai_*`` columns to current-app batch rows."""
-    lang = normalize_language(lang)
-    output_rows: list[dict[str, Any]] = []
-    for row in rows:
-        base = dict(row)
-        smi = str(base.get(smiles_key) or base.get("SMILES") or base.get("smiles") or "").strip()
-        mol = Chem.MolFromSmiles(smi) if smi else None
-        xai = build_batch_explanation_row(
-            smi,
-            descriptors=base,
-            results=base,
-            mol=mol,
-            include_long_text=include_long_text,
-            lang=lang,
-        )
-        output_rows.append({**base, **xai})
-    return pd.DataFrame(output_rows)
-
-
 # ---------------------------------------------------------------------------
 # Batch summaries and Excel sheets
 # ---------------------------------------------------------------------------
-
-
-def _summarize_batch_explanations_ru(batch_df: pd.DataFrame | Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """Build summary statistics for a batch table with ``xai_*`` columns."""
-    df = _ensure_dataframe(batch_df)
-    n_total = int(len(df))
-    if n_total == 0:
-        return _empty_summary()
-
-    n_valid = int(df.get("xai_valid_smiles", pd.Series(dtype=bool)).fillna(False).astype(bool).sum())
-    n_invalid = n_total - n_valid
-
-    final_class_counts = _value_counts(df, "xai_final_class")
-    scenario_counts = _value_counts(df, "xai_bbb_pgp_scenario")
-    priority_counts = _value_counts(df, "xai_batch_priority")
-    uncertainty_counts = _value_counts(df, "xai_uncertainty_level")
-    applicability_counts = _value_counts(df, "xai_applicability_level")
-
-    top_negative_factors = _top_semicolon_values(df, "xai_negative_factors", item_key="factor")
-    top_warnings = _top_semicolon_values(df, "xai_warnings", item_key="warning")
-
-    summary_text = _build_summary_text(
-        n_total=n_total,
-        n_valid=n_valid,
-        n_invalid=n_invalid,
-        final_class_counts=final_class_counts,
-    )
-
-    return {
-        "schema_version": BATCH_XAI_SCHEMA_VERSION,
-        "n_total": n_total,
-        "n_valid": n_valid,
-        "n_invalid": n_invalid,
-        "total": n_total,
-        "valid_count": n_valid,
-        "invalid_count": n_invalid,
-        "final_class_counts": final_class_counts,
-        "scenario_counts": scenario_counts,
-        "priority_counts": priority_counts,
-        "uncertainty_counts": uncertainty_counts,
-        "applicability_counts": applicability_counts,
-        "top_negative_factors": top_negative_factors,
-        "top_warnings": top_warnings,
-        "summary_text": summary_text,
-        "teaching_summary_ru": summary_text,
-        "recommended_next_steps": _build_recommended_next_steps(final_class_counts, priority_counts, n_invalid),
-    }
 
 
 def build_batch_summary_dataframe(summary: Mapping[str, Any]) -> pd.DataFrame:
@@ -393,9 +240,6 @@ def sort_batch_by_explainability_priority(batch_df: pd.DataFrame) -> pd.DataFram
     else:
         df = df.sort_values(["_xai_priority_order"], ascending=[True])
     return df.drop(columns=["_xai_priority_order"])
-
-
-# Compatibility alias is assigned after the Stage 6 localized summary override.
 
 
 # ---------------------------------------------------------------------------
@@ -480,47 +324,6 @@ def _priority_flag_from_xai_label(label: str) -> str:
     return mapping.get(label, "unknown")
 
 
-def _teacher_note_from_xai_priority(label: str) -> str:
-    flag = _priority_flag_from_xai_label(label)
-    notes = {
-        "cns_candidate": "Хороший пример согласованного BBB/P-gp профиля для обсуждения CNS-доступности.",
-        "cns_candidate_with_caution": "Кандидат интересен, но стоит разобрать предупреждения и пограничные признаки.",
-        "pgp_efflux_risk": "Полезный учебный пример конфликта: пассивная проницаемость против активного эффлюкса.",
-        "full_barrier": "Пример двойного ограничения: физико-химический BBB-барьер плюс P-gp.",
-        "poor_passive_bbb": "Пример неблагоприятного физико-химического профиля для BBB.",
-        "outside_domain": "Использовать для обсуждения домена применимости модели и ограничений in silico-прогноза.",
-        "invalid_smiles": "Сначала исправить структуру SMILES; модельный вывод недоступен.",
-    }
-    return notes.get(flag, "Пограничный случай для ручного разбора.")
-
-
-def _build_review_reasons(explanation_dict: Mapping[str, Any], final_class: str, warnings: str) -> str:
-    reasons: list[str] = []
-    if final_class == "peripheral_action_risk":
-        reasons.append("конфликт ???????? ???/P-gp: пассивная проницаемость против активного эффлюкса")
-    if final_class == "full_barrier":
-        reasons.append("двойной барьер: плохая пассивная BBB-проницаемость и P-gp efflux")
-    if final_class == "likely_not_bbb_penetrant":
-        reasons.append("основное ограничение — физико-химический профиль пассивной BBB-проницаемости")
-    if final_class == "uncertain_or_borderline":
-        reasons.append("пограничные вероятности или противоречивые сигналы модели")
-
-    applicability = _as_mapping(explanation_dict.get("applicability_domain"))
-    if str(applicability.get("level") or "") in {"caution", "outside"}:
-        reasons.append("есть предупреждение о домене применимости")
-    if warnings:
-        reasons.append("есть структурные/model warnings")
-
-    negative = _factor_names(explanation_dict, "negative")
-    borderline = _factor_names(explanation_dict, "borderline")
-    if negative:
-        reasons.append("негативные факторы: " + ", ".join(negative[:3]))
-    elif borderline:
-        reasons.append("пограничные факторы: " + ", ".join(borderline[:3]))
-
-    return "; ".join(reasons)
-
-
 def _build_short_summary(
     final_label: str,
     matrix: Mapping[str, Any],
@@ -553,29 +356,10 @@ def _build_summary_text(
 
     return (
         f"Обработано молекул: {n_total}; валидных: {n_valid}; ошибок/invalid: {n_invalid}. "
-        f"CNS-кандидаты: {cns}; риск P-gp эффлюкса при хорошем BBB: {efflux}; "
-        f"низкая пассивная BBB-проницаемость: {low_bbb}; полный барьер: {full_barrier}; "
+        f"кандидаты для ЦНС: {cns}; конфликт ГЭБ/P-gp: {efflux}; "
+        f"слабое прохождение через ГЭБ: {low_bbb}; два ограничения: {full_barrier}; "
         f"пограничных случаев: {review}."
     )
-
-
-def _build_recommended_next_steps(
-    final_class_counts: Mapping[str, int],
-    priority_counts: Mapping[str, int],
-    n_invalid: int,
-) -> list[str]:
-    steps: list[str] = []
-    if priority_counts.get("CNS candidate") or priority_counts.get("CNS candidate / caution"):
-        steps.append("Начать ручной разбор с CNS-кандидатов, затем проверить предупреждения о домене применимости.")
-    if final_class_counts.get("peripheral_action_risk"):
-        steps.append("Отдельно разобрать молекулы ???????? ???/P-gp как примеры конфликта пассивной проницаемости и эффлюкса.")
-    if final_class_counts.get("uncertain_or_borderline"):
-        steps.append("Для пограничных молекул посмотреть значения TPSA, LogP, pKa и P-gp probability около порогов.")
-    if n_invalid:
-        steps.append("Исправить invalid SMILES до повторного запуска batch-анализа.")
-    if not steps:
-        steps.append("Использовать таблицу xai_* как учебный чек-лист факторов BBB/P-gp для каждой молекулы.")
-    return steps
 
 
 def _empty_summary() -> dict[str, Any]:
@@ -700,7 +484,6 @@ def _safe_float(value: Any) -> float | None:
             return None
     return None
 
-# Stage 5 small compatibility helpers.
 def build_batch_explainability_rows(
     explanation_dicts: Iterable[Mapping[str, Any]],
     *,
@@ -712,46 +495,6 @@ def build_batch_explainability_rows(
     ]
 
 
-def select_batch_display_columns(table: Any) -> list[str]:
-    columns = list(getattr(table, "columns", []) or [])
-    preferred = [
-        "SMILES",
-        "smiles",
-        "explain_canonical_smiles",
-        "explain_final_label_ru",
-        "explain_short_summary_ru",
-        "explain_bbb_score_normalized",
-        "explain_gupta_score",
-        "explain_pgp_probability",
-        "explain_priority_label_ru",
-        "explain_negative_factors",
-        "explain_uncertainty_level",
-        "explain_applicability_level",
-        "explain_warnings",
-    ]
-    selected = [name for name in preferred if name in columns]
-    selected.extend([name for name in columns if name.startswith("explain_") and name not in selected])
-    return selected
-
-
-def build_batch_teaching_summary(
-    *,
-    total: int,
-    valid_count: int,
-    invalid_count: int,
-    final_class_counts: Mapping[str, int],
-    priority_counts: Mapping[str, int] | None = None,
-    pgp_high_count: int | None = None,
-    warning_count: int | None = None,
-) -> str:
-    return _build_summary_text(
-        n_total=total,
-        n_valid=valid_count,
-        n_invalid=invalid_count,
-        final_class_counts=final_class_counts,
-    )
-
-# Override with pandas-safe implementation.
 def select_batch_display_columns(table: Any) -> list[str]:
     columns = list(getattr(table, "columns", []))
     preferred = [
@@ -778,85 +521,6 @@ def select_batch_display_columns(table: Any) -> list[str]:
     selected = [name for name in preferred if name in columns]
     selected.extend([name for name in columns if (name.startswith("xai_") or name.startswith("explain_")) and name not in selected])
     return selected
-
-# Override with additional bbb_high_count / pgp_high_count aliases for Stage 5 UI and tests.
-def _summarize_batch_explanations_stage5(batch_df: pd.DataFrame | Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    df = _ensure_dataframe(batch_df)
-    n_total = int(len(df))
-    if n_total == 0:
-        summary = _empty_summary()
-        summary["bbb_high_count"] = 0
-        summary["pgp_high_count"] = 0
-        return summary
-
-    n_valid = int(df.get("xai_valid_smiles", pd.Series(dtype=bool)).fillna(False).astype(bool).sum())
-    n_invalid = n_total - n_valid
-    final_class_counts = _value_counts(df, "xai_final_class")
-    scenario_counts = _value_counts(df, "xai_bbb_pgp_scenario")
-    priority_counts = _value_counts(df, "xai_batch_priority")
-    uncertainty_counts = _value_counts(df, "xai_uncertainty_level")
-    applicability_counts = _value_counts(df, "xai_applicability_level")
-    top_negative_factors = _top_semicolon_values(df, "xai_negative_factors", item_key="factor")
-    top_warnings = _top_semicolon_values(df, "xai_warnings", item_key="warning")
-    bbb_high_count = int((pd.to_numeric(df.get("xai_bbb_normalized_score"), errors="coerce") >= 0.70).sum()) if "xai_bbb_normalized_score" in df else 0
-    pgp_high_count = int((pd.to_numeric(df.get("xai_pgp_probability"), errors="coerce") >= 0.65).sum()) if "xai_pgp_probability" in df else 0
-
-    summary_text = _build_summary_text(
-        n_total=n_total,
-        n_valid=n_valid,
-        n_invalid=n_invalid,
-        final_class_counts=final_class_counts,
-    )
-    return {
-        "schema_version": BATCH_XAI_SCHEMA_VERSION,
-        "n_total": n_total,
-        "n_valid": n_valid,
-        "n_invalid": n_invalid,
-        "total": n_total,
-        "valid_count": n_valid,
-        "invalid_count": n_invalid,
-        "bbb_high_count": bbb_high_count,
-        "pgp_high_count": pgp_high_count,
-        "final_class_counts": final_class_counts,
-        "scenario_counts": scenario_counts,
-        "bbb_pgp_scenario_counts": scenario_counts,
-        "priority_counts": priority_counts,
-        "uncertainty_counts": uncertainty_counts,
-        "applicability_counts": applicability_counts,
-        "top_negative_factors": top_negative_factors,
-        "top_warnings": top_warnings,
-        "summary_text": summary_text,
-        "teaching_summary_ru": summary_text,
-        "recommended_next_steps": _build_recommended_next_steps(final_class_counts, priority_counts, n_invalid),
-    }
-
-
-# Stage 6 localized summary override.
-def summarize_batch_explanations(batch_df: pd.DataFrame | Sequence[Mapping[str, Any]], lang: str = "ru") -> dict[str, Any]:
-    lang = normalize_language(lang)
-    summary = _summarize_batch_explanations_stage5(batch_df)
-    final_counts = summary.get("final_class_counts") or {}
-    summary_text = batch_summary_text(
-        total=int(summary.get("total", summary.get("n_total", 0)) or 0),
-        valid=int(summary.get("valid_count", summary.get("n_valid", 0)) or 0),
-        invalid=int(summary.get("invalid_count", summary.get("n_invalid", 0)) or 0),
-        cns=int(final_counts.get("likely_cns_active", 0)),
-        efflux=int(final_counts.get("peripheral_action_risk", 0)),
-        borderline=int(final_counts.get("uncertain_or_borderline", 0)),
-        lang=lang,
-    )
-    summary["language"] = lang
-    summary["summary_text"] = summary_text
-    summary["teaching_summary_ru"] = summary_text
-    summary["teaching_summary"] = summary_text
-    return summary
-
-# Compatibility alias for code that uses the longer name.
-summarize_batch_explainability = summarize_batch_explanations
-
-# ---------------------------------------------------------------------------
-# Stage 6 multilingual overrides
-# ---------------------------------------------------------------------------
 
 from core.i18n import normalize_language as _i18n_normalize_language, t as _i18n_t, batch_priority_label as _i18n_batch_priority_label, batch_summary_text as _i18n_batch_summary_text
 
@@ -958,7 +622,7 @@ def build_batch_explanation_row_from_explanation(
         "xai_applicability_level": applicability.get("level", "unknown"),
         "xai_uncertainty_level": uncertainty.get("level", "unknown"),
         "xai_warnings": warnings,
-        "xai_review_reasons": _build_review_reasons(explanation_dict, final_class, warnings),
+        "xai_review_reasons": _build_review_reasons(explanation_dict, final_class, warnings, lang=lang),
         "xai_batch_priority": priority,
         "xai_batch_priority_label": localized_priority,
     }
@@ -1056,7 +720,7 @@ def summarize_batch_explanations(batch_df: pd.DataFrame | Sequence[Mapping[str, 
         "summary_text": summary_text,
         "teaching_summary": summary_text,
         "teaching_summary_ru": summary_text,
-        "recommended_next_steps": _build_recommended_next_steps(final_class_counts, priority_counts, n_invalid),
+        "recommended_next_steps": _build_recommended_next_steps(final_class_counts, priority_counts, n_invalid, lang=lang),
     }
 
 
@@ -1093,10 +757,6 @@ def _localized_short_summary(final_label: str, matrix: Mapping[str, Any], negati
         pieces.append(("Borderline" if lang == "en" else ("Шекаралық" if lang == "kk" else "Пограничные")) + ": " + _join_names(borderline[:3]))
     return " | ".join(piece for piece in pieces if piece)
 
-# ---------------------------------------------------------------------------
-# Stage 6.2 localization overrides for batch review text
-# ---------------------------------------------------------------------------
-
 def _build_recommended_next_steps(
     final_class_counts: Mapping[str, int],
     priority_counts: Mapping[str, int],
@@ -1107,32 +767,32 @@ def _build_recommended_next_steps(
     steps: list[str] = []
     if priority_counts.get("CNS candidate") or priority_counts.get("CNS candidate / caution"):
         steps.append({
-            "ru": "Начать ручной разбор с CNS-кандидатов, затем проверить предупреждения о домене применимости.",
-            "kk": "Қолмен талдауды CNS-кандидаттарынан бастап, кейін қолданылу домені туралы ескертулерді тексеріңіз.",
+            "ru": "Начать ручной разбор с кандидатов для ЦНС, затем проверить предупреждения о надёжности модели.",
+            "kk": "Қолмен талдауды ОЖЖ кандидаттарынан бастап, кейін модель сенімділігі туралы ескертулерді тексеріңіз.",
             "en": "Start manual review with CNS candidates, then check applicability-domain warnings.",
         }[lang])
     if final_class_counts.get("peripheral_action_risk"):
         steps.append({
-            "ru": "Отдельно разобрать молекулы ???????? ???/P-gp как примеры конфликта пассивной проницаемости и эффлюкса.",
-            "kk": "???????? ???/P-gp молекулаларын пассивті өткізгіштік пен efflux қақтығысының мысалы ретінде бөлек талдаңыз.",
-            "en": "Review ???????? ???/P-gp molecules separately as examples of passive permeability versus efflux conflict.",
+            "ru": "Отдельно разобрать молекулы с конфликтом ГЭБ/P-gp как примеры пассивного прохождения и активного выведения.",
+            "kk": "Қан-ми тосқауылы/P-gp қайшылығы бар молекулаларды пассивті өту мен белсенді шығарылу мысалы ретінде бөлек талдаңыз.",
+            "en": "Review BBB/P-gp conflict molecules separately as examples of passive permeability versus active removal.",
         }[lang])
     if final_class_counts.get("uncertain_or_borderline"):
         steps.append({
-            "ru": "Для пограничных молекул посмотреть TPSA, LogP, pKa и P-gp probability около порогов.",
-            "kk": "Шекаралық молекулалар үшін TPSA, LogP, pKa және P-gp probability мәндерін шектер маңында тексеріңіз.",
+            "ru": "Для пограничных молекул посмотреть TPSA, LogP, pKa и оценку P-gp около порогов.",
+            "kk": "Шекаралық молекулалар үшін TPSA, LogP, pKa және P-gp бағасын шектер маңында тексеріңіз.",
             "en": "For borderline molecules, inspect TPSA, LogP, pKa and P-gp probability near the thresholds.",
         }[lang])
     if n_invalid:
         steps.append({
-            "ru": "Исправить invalid SMILES до повторного запуска batch-анализа.",
-            "kk": "Batch талдауын қайта іске қоспас бұрын invalid SMILES жазбаларын түзетіңіз.",
+            "ru": "Исправить некорректные SMILES до повторного запуска массового анализа.",
+            "kk": "Жаппай талдауды қайта іске қоспас бұрын қате SMILES жазбаларын түзетіңіз.",
             "en": "Fix invalid SMILES before rerunning the batch analysis.",
         }[lang])
     if not steps:
         steps.append({
-            "ru": "Использовать таблицу xai_* как учебный чек-лист факторов BBB/P-gp для каждой молекулы.",
-            "kk": "Әр молекула үшін xai_* кестесін BBB/P-gp факторларының оқу чек-парағы ретінде қолданыңыз.",
+            "ru": "Использовать таблицу xai_* как учебный чек-лист факторов ГЭБ/P-gp для каждой молекулы.",
+            "kk": "Әр молекула үшін xai_* кестесін қан-ми тосқауылы/P-gp факторларының оқу чек-парағы ретінде қолданыңыз.",
             "en": "Use the xai_* table as an educational BBB/P-gp factor checklist for each molecule.",
         }[lang])
     return steps
@@ -1143,22 +803,22 @@ def _teacher_note_from_xai_priority(label: str, lang: str = "ru") -> str:
     flag = _priority_flag_from_xai_label(label)
     notes = {
         "ru": {
-            "cns_candidate": "Хороший пример согласованного BBB/P-gp профиля для обсуждения CNS-доступности.",
+            "cns_candidate": "Хороший пример согласованного ГЭБ/P-gp профиля для обсуждения доступности для ЦНС.",
             "cns_candidate_with_caution": "Кандидат интересен, но стоит разобрать предупреждения и пограничные признаки.",
-            "pgp_efflux_risk": "Полезный учебный пример конфликта: пассивная проницаемость против активного эффлюкса.",
-            "full_barrier": "Пример двойного ограничения: физико-химический BBB-барьер плюс P-gp.",
-            "poor_passive_bbb": "Пример неблагоприятного физико-химического профиля для BBB.",
-            "outside_domain": "Использовать для обсуждения домена применимости модели и ограничений in silico-прогноза.",
+            "pgp_efflux_risk": "Полезный учебный пример конфликта: пассивное прохождение против активного выведения.",
+            "full_barrier": "Пример двойного ограничения: физико-химический барьер ГЭБ плюс P-gp.",
+            "poor_passive_bbb": "Пример неблагоприятного физико-химического профиля для прохождения через ГЭБ.",
+            "outside_domain": "Использовать для обсуждения надёжности модели и ограничений in silico-прогноза.",
             "invalid_smiles": "Сначала исправить структуру SMILES; модельный вывод недоступен.",
             "unknown": "Пограничный случай для ручного разбора.",
         },
         "kk": {
-            "cns_candidate": "CNS қолжетімділігін талқылауға арналған келісілген BBB/P-gp профилінің жақсы мысалы.",
+            "cns_candidate": "ОЖЖ қолжетімділігін талқылауға арналған келісілген қан-ми тосқауылы/P-gp профилінің жақсы мысалы.",
             "cns_candidate_with_caution": "Кандидат қызықты, бірақ ескертулер мен шекаралық белгілерді талдау керек.",
-            "pgp_efflux_risk": "Пайдалы оқу мысалы: пассивті өткізгіштік пен белсенді efflux арасындағы қақтығыс.",
-            "full_barrier": "Қос шектеу мысалы: физика-химиялық BBB бөгеті және P-gp.",
-            "poor_passive_bbb": "BBB үшін қолайсыз физика-химиялық профильдің мысалы.",
-            "outside_domain": "Модельдің қолданылу домені мен in silico болжам шектеулерін талқылауға қолданыңыз.",
+            "pgp_efflux_risk": "Пайдалы оқу мысалы: пассивті өту мен белсенді шығарылу арасындағы қайшылық.",
+            "full_barrier": "Қос шектеу мысалы: қан-ми тосқауылының физика-химиялық шектеуі және P-gp.",
+            "poor_passive_bbb": "Қан-ми тосқауылынан өту үшін қолайсыз физика-химиялық профильдің мысалы.",
+            "outside_domain": "Модель сенімділігі мен in silico болжам шектеулерін талқылауға қолданыңыз.",
             "invalid_smiles": "Алдымен SMILES құрылымын түзету керек; модель қорытындысы қолжетімсіз.",
             "unknown": "Қолмен талдауға арналған шекаралық жағдай.",
         },
@@ -1180,16 +840,16 @@ def _build_review_reasons(explanation_dict: Mapping[str, Any], final_class: str,
     lang = _i18n_normalize_language(lang or str(explanation_dict.get("language", "ru")))
     reasons: list[str] = []
     if final_class == "peripheral_action_risk":
-        reasons.append({"ru": "конфликт ???????? ???/P-gp: пассивная проницаемость против активного эффлюкса", "kk": "???????? ???/P-gp қақтығысы: пассивті өткізгіштік пен белсенді efflux", "en": "???????? ???/P-gp conflict: passive permeability versus active efflux"}[lang])
+        reasons.append({"ru": "конфликт ГЭБ/P-gp: пассивное прохождение против активного выведения", "kk": "қан-ми тосқауылы/P-gp қайшылығы: пассивті өту мен белсенді шығарылу", "en": "BBB/P-gp conflict: passive permeability versus active efflux"}[lang])
     if final_class == "full_barrier":
-        reasons.append({"ru": "двойной барьер: плохая пассивная BBB-проницаемость и P-gp efflux", "kk": "қос бөгет: төмен пассивті BBB өткізгіштігі және P-gp efflux", "en": "double barrier: poor passive BBB permeability plus P-gp efflux"}[lang])
+        reasons.append({"ru": "двойное ограничение: слабое прохождение через ГЭБ и активное выведение через P-gp", "kk": "қос шектеу: қан-ми тосқауылынан әлсіз өту және P-gp арқылы белсенді шығарылу", "en": "double barrier: poor passive BBB permeability plus P-gp efflux"}[lang])
     if final_class == "likely_not_bbb_penetrant":
-        reasons.append({"ru": "основное ограничение - физико-химический профиль пассивной BBB-проницаемости", "kk": "негізгі шектеу - пассивті BBB өткізгіштігінің физика-химиялық профилі", "en": "main limitation: physicochemical profile for passive BBB permeability"}[lang])
+        reasons.append({"ru": "основное ограничение - физико-химический профиль прохождения через ГЭБ", "kk": "негізгі шектеу - қан-ми тосқауылынан өтудің физика-химиялық профилі", "en": "main limitation: physicochemical profile for passive BBB permeability"}[lang])
     if final_class == "uncertain_or_borderline":
         reasons.append({"ru": "пограничные вероятности или противоречивые сигналы модели", "kk": "шекаралық ықтималдықтар немесе модельдің қарама-қайшы сигналдары", "en": "borderline probabilities or conflicting model signals"}[lang])
     applicability = _as_mapping(explanation_dict.get("applicability_domain"))
     if str(applicability.get("level") or "") in {"caution", "outside"}:
-        reasons.append({"ru": "есть предупреждение о домене применимости", "kk": "қолданылу домені туралы ескерту бар", "en": "applicability-domain warning is present"}[lang])
+        reasons.append({"ru": "есть предупреждение о надёжности модели для этой молекулы", "kk": "бұл молекула үшін модель сенімділігі туралы ескерту бар", "en": "applicability-domain warning is present"}[lang])
     if warnings:
         reasons.append({"ru": "есть структурные/model warnings", "kk": "құрылымдық немесе модельдік ескертулер бар", "en": "structural or model warnings are present"}[lang])
     negative = _factor_names(explanation_dict, "negative")
@@ -1203,40 +863,4 @@ def _build_review_reasons(explanation_dict: Mapping[str, Any], final_class: str,
     return "; ".join(reasons)
 
 
-_stage6_2_build_batch_explanation_row_from_explanation = build_batch_explanation_row_from_explanation
-
-
-def build_batch_explanation_row_from_explanation(
-    explanation_dict: Mapping[str, Any],
-    *,
-    include_long_text: bool = False,
-    lang: str | None = None,
-) -> dict[str, Any]:
-    lang = _i18n_normalize_language(lang or str(explanation_dict.get("language", "ru")))
-    row = _stage6_2_build_batch_explanation_row_from_explanation(explanation_dict, include_long_text=include_long_text, lang=lang)
-    warnings = str(row.get("xai_warnings") or "")
-    final_class = str(row.get("xai_final_class") or "uncertain_or_borderline")
-    row["xai_review_reasons"] = _build_review_reasons(explanation_dict, final_class, warnings, lang=lang)
-    if include_long_text and not bool(row.get("xai_valid_smiles", True)):
-        row["xai_student_interpretation_long"] = {"ru": "Невалидная структура не должна интерпретироваться как реальный ADMET-прогноз.", "kk": "Валидті емес құрылым нақты ADMET болжамы ретінде түсіндірілмеуі керек.", "en": "An invalid structure must not be interpreted as a real ADMET prediction."}[lang]
-        row["xai_applicability_message_long"] = {"ru": "Вне домена: структура не распознана.", "kk": "Доменнен тыс: құрылым танылмады.", "en": "Outside domain: the structure was not parsed."}[lang]
-        row["xai_uncertainty_message_long"] = {"ru": "Неопределённость высокая, потому что молекулярный граф не построен.", "kk": "Белгісіздік жоғары, себебі молекулалық граф құрылмады.", "en": "Uncertainty is high because the molecular graph was not built."}[lang]
-    return row
-
-
-_stage6_2_summarize_batch_explanations = summarize_batch_explanations
-
-
-def summarize_batch_explanations(batch_df: pd.DataFrame | Sequence[Mapping[str, Any]], lang: str = "ru") -> dict[str, Any]:
-    lang = _i18n_normalize_language(lang)
-    summary = _stage6_2_summarize_batch_explanations(batch_df, lang=lang)
-    summary["recommended_next_steps"] = _build_recommended_next_steps(
-        summary.get("final_class_counts") or {},
-        summary.get("priority_counts") or {},
-        int(summary.get("n_invalid", summary.get("invalid_count", 0)) or 0),
-        lang=lang,
-    )
-    return summary
-
-# Keep compatibility alias aligned with the final override.
 summarize_batch_explainability = summarize_batch_explanations

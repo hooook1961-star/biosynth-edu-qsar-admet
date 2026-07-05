@@ -10,10 +10,16 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Mapping
 
+from core.text_catalog import (
+    DESCRIPTOR_DISPLAY_NAMES,
+    DESCRIPTOR_SHORT_LABELS,
+    DESCRIPTOR_THRESHOLD_NOTES,
+    ZONE_COMMENTS,
+)
+
 try:  # RU fallback comes from the accepted Stage 1 templates.
     from core.teaching_templates import (
         BASE_DESCRIPTOR_EXPLANATIONS_RU,
-        ZONE_COMMENTS_RU,
         FINAL_DECISION_TEXTS,
         IN_SILICO_DISCLAIMER_RU,
         WHAT_IF_DISCLAIMER_RU,
@@ -21,7 +27,6 @@ try:  # RU fallback comes from the accepted Stage 1 templates.
     )
 except Exception:  # pragma: no cover - defensive for partial installs
     BASE_DESCRIPTOR_EXPLANATIONS_RU = {}
-    ZONE_COMMENTS_RU = {}
     FINAL_DECISION_TEXTS = {}
     IN_SILICO_DISCLAIMER_RU = ""
     WHAT_IF_DISCLAIMER_RU = ""
@@ -59,8 +64,8 @@ EFFECT_LABELS = {
         "uncertain": "неопределённо",
     },
     "kk": {
-        "supports_bbb": "BBB өткізгіштігін қолдайды",
-        "opposes_bbb": "BBB өткізгіштігін төмендетеді",
+        "supports_bbb": "қан-ми тосқауылынан өтуді қолдайды",
+        "opposes_bbb": "қан-ми тосқауылынан өтуді төмендетеді",
         "borderline": "шекаралық әсер",
         "supports_cns_exposure": "ОЖЖ қолжетімділігін қолдайды",
         "opposes_cns_exposure": "ОЖЖ қолжетімділігін төмендетеді",
@@ -288,29 +293,29 @@ UI = {'ru': {'language.select': 'Тіл / Язык / Language',
         'tabs.explain': '🧩 Модель шешімін талдау',
         'tabs.what_if': '🧪 What-if зертханасы',
         'tabs.report': '📄 Оқу есебі',
-        'tabs.matrix': '🧬 BBB × P-gp матрицасы',
+        'tabs.matrix': '🧬 Қан-ми тосқауылы × P-gp матрицасы',
         'tabs.methodology': '🔬 Әдістеме',
         'tabs.limitations': '⚠️ Модель шектеулері',
         'section.decision': '### 🧠 Модельдің оқу қорытындысы',
         'section.molecule': '### 🧬 Бастапқы молекула',
         'section.descriptors': '### 📊 Негізгі дескрипторлар',
-        'section.factors': '### 🚦 BBB өткізгіштігін қолдайтын және шектейтін факторлар',
+        'section.factors': '### 🚦 Қан-ми тосқауылынан өтуді қолдайтын және шектейтін факторлар',
         'section.stepwise': '### 🧭 Модель шешімінің қадамдары',
-        'section.matrix': '### 🧫 BBB × P-gp матрицасы',
+        'section.matrix': '### 🧫 Қан-ми тосқауылы × P-gp матрицасы',
         'section.what_if': '### 🧪 What-if зертханасы: молекула қасиетін өзгерту',
         'section.report': '### 📄 Молекула бойынша оқу есебі',
         'section.methodology': '### 🔬 Әдістеме',
         'section.limitations': '### ⚠️ Шектеулер',
-        'metric.bbb': 'BBB арқылы өту бағасы',
+        'metric.bbb': 'Қан-ми тосқауылынан өту бағасы',
         'metric.pgp': 'P-gp бағасы',
-        'metric.bbb_gupta': 'BBB үшін Gupta көрсеткіші',
+        'metric.bbb_gupta': 'Қан-ми тосқауылы үшін Gupta көрсеткіші',
         'metric.pgp_class': 'P-gp статусы',
         'metric.pgp_probability': 'P-gp қаупінің бағасы',
         'metric.clint': 'Clint (метаболизм)',
         'metric.pka': 'pKa',
-        'what_if.base_passive_bbb': 'BBB арқылы өтудің базалық бағасы',
+        'what_if.base_passive_bbb': 'Қан-ми тосқауылынан өтудің базалық бағасы',
         'what_if.base_cns': 'ОЖЖ қолжетімділігінің базалық бағасы',
-        'what_if.passive_bbb': 'BBB арқылы өту',
+        'what_if.passive_bbb': 'Қан-ми тосқауылынан өту',
         'what_if.educational_cns': 'ОЖЖ қолжетімділігінің оқу бағасы',
         'what_if.slider.mw': 'Молекулалық масса (MW), Да',
         'what_if.slider.logp': 'Липофильділік (LogP)',
@@ -331,12 +336,12 @@ UI = {'ru': {'language.select': 'Тіл / Язык / Language',
         'descriptor.column.effect': 'Әсері',
         'descriptor.column.meaning': 'Мағынасы',
         'descriptor.details': 'Толығырақ: әр дескриптордың түсіндірмесі',
-        'factors.positive': 'BBB арқылы өтуді қолдайды',
-        'factors.negative': 'BBB арқылы өтуге немесе ОЖЖ қолжетімділігіне кедергі жасайды',
+        'factors.positive': 'Қан-ми тосқауылынан өтуді қолдайды',
+        'factors.negative': 'Қан-ми тосқауылынан өтуге немесе ОЖЖ қолжетімділігіне кедергі жасайды',
         'factors.borderline': '🟡 Шекаралық',
         'factors.empty': 'Бұл топта айқын фактор жоқ.',
         'matrix.current': 'Ағымдағы сценарий',
-        'matrix.pgp_expander': 'Неге P-gp жақсы BBB өткізгіштігін төмендетуі мүмкін?',
+        'matrix.pgp_expander': 'Неге P-gp қан-ми тосқауылынан жақсы өтуді әлсіретуі мүмкін?',
         'what_if.slider_title': '#### Дескриптор жүгірткілері',
         'what_if.result': '#### Оқу симуляциясының нәтижесі',
         'what_if.changed_factors': '#### Өзгерген факторлар',
@@ -346,7 +351,7 @@ UI = {'ru': {'language.select': 'Тіл / Язык / Language',
         'what_if.no_improve': 'Оқу эвристикасы бойынша айқын жақсару жоқ.',
         'what_if.no_worse': 'Оқу эвристикасы бойынша айқын нашарлау жоқ.',
         'what_if.not_enough': 'What-if симуляциясы үшін дескрипторлар жеткіліксіз.',
-        'report.info': 'Бұл есеп бастапқы молекуланы, негізгі дескрипторларды, оң/теріс факторларды, BBB × P-gp матрицасын, қадамдық '
+        'report.info': 'Бұл есеп бастапқы молекуланы, негізгі дескрипторларды, оң/теріс факторларды, қан-ми тосқауылы × P-gp матрицасын, қадамдық '
                        'шешімді, әдістемені және шектеулерді біріктіреді.',
         'report.preview': 'Markdown есебін алдын ала көру',
         'report.download_html': '📥 HTML есебін жүктеу',
@@ -393,8 +398,8 @@ UI = {'ru': {'language.select': 'Тіл / Язык / Language',
         'status.not_substrate': 'Айқын P-gp қаупі байқалмайды',
         'status.substrate_efflux': 'P-gp арқылы белсенді шығарылу мүмкін',
         'batch.page_title': '📂 Жаппай скрининг + Explainable ADMET',
-        'batch.intro_stage5': 'Жаппай кесте әр молекула үшін қысқа оқу түсіндірмесімен толықтырылады: ОЖЖ үшін қорытынды класс, BBB × P-gp '
-                              'сценарийі, оң/теріс факторлар, warnings және белгісіздік деңгейі.',
+        'batch.intro_stage5': 'Жаппай кесте әр молекула үшін қысқа оқу түсіндірмесімен толықтырылады: ОЖЖ үшін қорытынды класс, қан-ми тосқауылы × P-gp '
+                              'сценарийі, оң/теріс факторлар, ескертулер және белгісіздік деңгейі.',
         'batch.source_label': 'Дереккөзі:',
         'batch.source_file': 'Файл (CSV/Excel)',
         'batch.source_text': 'Мәтін өрісі (SMILES)',
@@ -456,7 +461,7 @@ UI = {'ru': {'language.select': 'Тіл / Язык / Language',
         'label.value': 'Мәні',
         'label.zone': 'Аймақ',
         'msg.insufficient_what_if': 'What-if симуляциясы үшін дескрипторлар жеткіліксіз.',
-        'msg.pgp_vs_bbb': 'P-gp BBB арқылы өту қолайлы болса да ОЖЖ қолжетімділігін төмендетуі мүмкін.',
+        'msg.pgp_vs_bbb': 'P-gp қан-ми тосқауылынан өту қолайлы болса да ОЖЖ қолжетімділігін төмендетуі мүмкін.',
         'msg.what_if_intro': 'Жүгірткілерді өзгерту - жаңа құрылымның болжамы емес, оқу симуляциясы.',
         'section.steps': '### 🧭 Модель шешімінің қадамдары',
         'tabs.ml_explain': '🧠 ML-талдау',
@@ -684,21 +689,21 @@ UI = {'ru': {'language.select': 'Тіл / Язык / Language',
 DESCRIPTOR_BASE = {
     "ru": BASE_DESCRIPTOR_EXPLANATIONS_RU,
     "kk": {
-        "MW": "Молекулалық масса молекуланың өлшемін көрсетеді. Үлкен молекулалар, әсіресе полярлығы және HBD/HBA саны жоғары болса, биологиялық бөгеттерден қиынырақ өтеді.",
-        "LogP": "LogP молекуланың липофильдігін көрсетеді. BBB арқылы өту үшін молекула мембранаға ене алатындай липофильді болуы керек, бірақ ерігіштікті жоғалтатындай тым липофильді болмауы тиіс.",
+        "MW": "Молекулалық масса молекуланың өлшемін көрсетеді. Үлкен молекулалар, әсіресе полярлығы және сутектік байланыс донорлары мен акцепторлары көп болса, биологиялық бөгеттерден қиынырақ өтеді.",
+        "LogP": "LogP молекуланың липофильдігін көрсетеді. Қан-ми тосқауылынан өту үшін молекула мембранаға ене алатындай липофильді болуы керек, бірақ ерігіштікті жоғалтатындай тым липофильді болмауы тиіс.",
         "TPSA": "TPSA молекуланың полярлық беткейін сипаттайды. TPSA жоғары болған сайын молекула сумен күштірек әрекеттеседі және липидті қабаттан өтуі қиындайды.",
         "HBD": "HBD сутектік байланыс донорларының санын көрсетеді. Донорлар көп болса, молекула сумен күштірек байланысып, пассивті диффузия қиындауы мүмкін.",
-        "HBA": "HBA сутектік байланыс акцепторларының санын көрсетеді. Акцепторлар көп болса, полярлық өсіп, BBB арқылы пассивті өту төмендеуі мүмкін.",
+        "HBA": "HBA сутектік байланыс акцепторларының санын көрсетеді. Акцепторлар көп болса, полярлық өсіп, қан-ми тосқауылынан пассивті өту төмендеуі мүмкін.",
         "RotatableBonds": "Айналмалы байланыстар молекуланың икемділігін көрсетеді. Өте икемді молекулалардың ADMET профилі жиі күрделірек болады.",
         "AromaticRings": "Ароматты сақиналар липофильділік пен ақуыздармен байланысуды арттыра алады. Орташа саны қолайлы, ал артық саны ерігіштікті нашарлатуы мүмкін.",
         "pKa_pred": "pKa физиологиялық pH-та молекуланың иондану күйін бағалауға көмектеседі. Қатты иондалған түрлер липидті мембранадан нашар өтеді.",
-        "FormalCharge": "Формальды заряд молекуланың толық оң немесе теріс заряд алып тұрғанын көрсетеді. Бейтарап түр BBB үшін әдетте қолайлырақ.",
+        "FormalCharge": "Формальды заряд молекуланың толық оң немесе теріс заряд алып тұрғанын көрсетеді. Бейтарап түр қан-ми тосқауылынан өту үшін әдетте қолайлырақ.",
         "GasteigerMin": "Гастейгер жартылай зарядтары электрондық тығыздықтың таралуын көрсетеді және полярлық аймақтарды бағалауға көмектеседі.",
         "GasteigerMax": "Гастейгер жартылай зарядтары электрондық тығыздықтың таралуын көрсетеді және полярлық аймақтарды бағалауға көмектеседі.",
         "GasteigerAbsMax": "Максималды абсолютті Гастейгер заряды жергілікті полярлықтың айқындылығын көрсетеді.",
-        "BBB_probability": "BBB бағасы молекуланың қан-ми тосқауылынан өтуі ықтимал қосылыстарға ұқсастығын көрсетеді. Бұл эксперименттік ықтималдық емес.",
+        "BBB_probability": "Қан-ми тосқауылынан өту бағасы молекуланың осы тосқауылдан өте алатын қосылыстарға ұқсастығын көрсетеді. Бұл эксперименттік ықтималдық емес.",
         "Pgp_probability": "P-gp — молекуланы жасушадан қанға қайта шығара алатын тасымалдаушы. Ол ОЖЖ қолжетімділігін төмендетуі мүмкін.",
-        "Clint_risk": "Clint ішкі клиренс пен метаболизм қаупін сипаттайды. Бұл BBB өткізгіштігін тікелей анықтамайды, бірақ ADMET профилін толықтырады.",
+        "Clint_risk": "Clint ішкі клиренс пен метаболизм қаупін сипаттайды. Бұл қан-ми тосқауылынан өтуді тікелей анықтамайды, бірақ ADMET профилін толықтырады.",
         "CATMoS_LD50": "CATMoS / LD50 токсикологиялық бағалауға жатады және BBB түсіндірмесін толықтыратын бөлек ADMET көрсеткіші болып саналады.",
     },
     "en": {
@@ -721,37 +726,15 @@ DESCRIPTOR_BASE = {
     },
 }
 
-ZONE_COMMENTS = {
-    "ru": ZONE_COMMENTS_RU,
-    "kk": {
-        "MW": {"green": "Мән BBB профилі үшін қолайлы оқу диапазонында.", "yellow": "Мән шекаралық: жеке өзі BBB арқылы өтуді жоққа шығармайды, бірақ контекст қажет.", "red": "Мән BBB арқылы пассивті өтуді нашарлатуы мүмкін.", "gray": "Өлшем әсерін қолда бар дерекпен бағалау қиын."},
-        "LogP": {"green": "Липофильділік орташа және пассивті диффузияны қолдайды.", "yellow": "Липофильділік шекаралық: мембранадан өту мен ерігіштік арасында компромисс болуы мүмкін.", "red": "Липофильділік қолайсыз: молекула тым гидрофильді немесе тым липофильді болуы мүмкін.", "gray": "LogP әсерін бағалау мүмкін емес."},
-        "TPSA": {"green": "Полярлық беткей төмен немесе орташа, бұл BBB арқылы пассивті өтуді қолдайды.", "yellow": "TPSA шекаралық аймақта; BBB арқылы өту туралы сенімділік төмендеуі мүмкін.", "red": "Жоғары TPSA липидті бөгеттен пассивті өтуді әдетте қиындатады.", "gray": "TPSA әсерін бағалау мүмкін емес."},
-        "HBD": {"green": "HBD саны төмен, BBB үшін қолайлы.", "yellow": "HBD саны шекаралық.", "red": "HBD санының жоғары болуы BBB арқылы пассивті диффузияға кедергі келтіруі мүмкін.", "gray": "HBD әсерін бағалау мүмкін емес."},
-        "HBA": {"green": "HBA саны BBB профилі үшін қолайлы көрінеді.", "yellow": "HBA саны шекаралық және полярлықты арттыруы мүмкін.", "red": "HBA саны жоғары болса, пассивті BBB өткізгіштігі төмендеуі мүмкін.", "gray": "HBA әсерін бағалау мүмкін емес."},
-        "pKa_pred": {"green": "pKa 7.4 pH-та айқын иондануды көрсетпейді.", "yellow": "pKa физиологиялық pH-қа жақын немесе орталықтың қышқыл/негіз типін білуді қажет етеді.", "red": "pKa физиологиялық pH-та көбіне иондалған түрге нұсқауы мүмкін.", "gray": "pKa түсіндірмесі қышқыл-негіз орталығына тәуелді."},
-        "Pgp_probability": {"green": "P-gp арқылы белсенді шығарылу қаупі төмен, ОЖЖ қолжетімділігі үшін қолайлы.", "yellow": "P-gp бағасы анық емес аймақта.", "red": "P-gp арқылы белсенді шығарылу қаупі жоғары, ОЖЖ қолжетімділігін төмендетуі мүмкін.", "gray": "P-gp бағасы қолжетімсіз."},
-    },
-    "en": {
-        "MW": {"green": "The value is in an educationally favourable range for a BBB profile.", "yellow": "The value is borderline and should be interpreted in context.", "red": "The value may reduce passive BBB permeability.", "gray": "The size effect could not be evaluated from available data."},
-        "LogP": {"green": "Lipophilicity is moderate and supports passive diffusion.", "yellow": "Lipophilicity is borderline; membrane entry and solubility may be in tension.", "red": "Lipophilicity looks unfavourable: the molecule may be too hydrophilic or too lipophilic.", "gray": "The LogP effect could not be evaluated."},
-        "TPSA": {"green": "Polar surface area is low or moderate, supporting passive BBB diffusion.", "yellow": "TPSA is borderline and may reduce confidence in BBB+ behaviour.", "red": "High TPSA usually opposes passive diffusion through the lipid barrier.", "gray": "The TPSA effect could not be evaluated."},
-        "HBD": {"green": "A low number of hydrogen-bond donors is favourable for BBB.", "yellow": "The number of donors is borderline.", "red": "A higher HBD count may oppose passive diffusion through BBB.", "gray": "The HBD effect could not be evaluated."},
-        "HBA": {"green": "The HBA count looks acceptable for a BBB profile.", "yellow": "The HBA count is borderline and may increase polarity.", "red": "A high HBA count may reduce passive BBB permeability.", "gray": "The HBA effect could not be evaluated."},
-        "pKa_pred": {"green": "pKa does not suggest strong ionisation at pH 7.4 under this simple heuristic.", "yellow": "pKa is near physiological pH or requires the acid/base centre type.", "red": "pKa may indicate a predominantly ionised form at physiological pH.", "gray": "pKa interpretation depends on the acid/base centre."},
-        "Pgp_probability": {"green": "Low P-gp substrate risk supports CNS exposure.", "yellow": "P-gp score is in the uncertainty zone.", "red": "High P-gp substrate risk may reduce actual CNS exposure.", "gray": "P-gp score is unavailable."},
-    },
-}
-
 FINAL_DECISIONS = {
     "ru": FINAL_DECISION_TEXTS,
     "kk": {
-        "likely_cns_active": {"title": "ОЖЖ үшін қолайлы профиль болуы мүмкін", "final_label_ru": "ОЖЖ үшін қолайлы профиль болуы мүмкін", "summary": "Модель BBB арқылы пассивті өтуді қолайлы, ал P-gp арқылы белсенді шығарылу қаупін төмен деп бағалайды.", "student_interpretation": "Бұл профиль ОЖЖ қолжетімділігі туралы гипотезаны қолдайды, бірақ эксперименттік дәлел емес."},
-        "peripheral_action_risk": {"title": "ОЖЖ қолжетімділігі төмендеуі мүмкін", "final_label_ru": "ОЖЖ қолжетімділігі төмендеуі мүмкін", "summary": "BBB арқылы пассивті өту қолайлы көрінеді, бірақ P-gp арқылы белсенді шығарылу қаупі жоғары.", "student_interpretation": "Молекула тосқауыл аймағына өтуі мүмкін, бірақ P-gp арқылы қайта шығарылуы ықтимал."},
-        "likely_not_bbb_penetrant": {"title": "BBB арқылы өтуі әлсіз болуы мүмкін", "final_label_ru": "BBB арқылы өтуі әлсіз болуы мүмкін", "summary": "P-gp негізгі шектеу емес, бірақ физика-химиялық профиль BBB арқылы пассивті өтуді қолдамайды.", "student_interpretation": "Негізгі шектеу — пассивті диффузия үшін қолайсыз қасиеттер."},
-        "full_barrier": {"title": "Екі шектеу бар", "final_label_ru": "Екі шектеу бар: BBB арқылы өту әлсіз және P-gp қаупі жоғары", "summary": "Молекулада BBB арқылы пассивті өту профилі қолайсыз және P-gp арқылы белсенді шығарылу қаупі жоғары.", "student_interpretation": "Бұл ОЖЖ қолжетімділігі үшін екі жақты шектеу."},
+        "likely_cns_active": {"title": "ОЖЖ үшін қолайлы профиль болуы мүмкін", "final_label_ru": "ОЖЖ үшін қолайлы профиль болуы мүмкін", "summary": "Модель қан-ми тосқауылынан пассивті өтуді қолайлы, ал P-gp арқылы белсенді шығарылу қаупін төмен деп бағалайды.", "student_interpretation": "Бұл профиль ОЖЖ қолжетімділігі туралы гипотезаны қолдайды, бірақ эксперименттік дәлел емес."},
+        "peripheral_action_risk": {"title": "ОЖЖ қолжетімділігі төмендеуі мүмкін", "final_label_ru": "ОЖЖ қолжетімділігі төмендеуі мүмкін", "summary": "Қан-ми тосқауылынан пассивті өту қолайлы көрінеді, бірақ P-gp арқылы белсенді шығарылу қаупі жоғары.", "student_interpretation": "Молекула тосқауыл аймағына өтуі мүмкін, бірақ P-gp арқылы қайта шығарылуы ықтимал."},
+        "likely_not_bbb_penetrant": {"title": "Қан-ми тосқауылынан өтуі әлсіз болуы мүмкін", "final_label_ru": "Қан-ми тосқауылынан өтуі әлсіз болуы мүмкін", "summary": "P-gp негізгі шектеу емес, бірақ физика-химиялық профиль қан-ми тосқауылынан пассивті өтуді қолдамайды.", "student_interpretation": "Негізгі шектеу — пассивті диффузия үшін қолайсыз қасиеттер."},
+        "full_barrier": {"title": "Екі шектеу бар", "final_label_ru": "Екі шектеу бар: қан-ми тосқауылынан өту әлсіз және P-gp қаупі жоғары", "summary": "Молекулада қан-ми тосқауылынан пассивті өту профилі қолайсыз және P-gp арқылы белсенді шығарылу қаупі жоғары.", "student_interpretation": "Бұл ОЖЖ қолжетімділігі үшін екі жақты шектеу."},
         "uncertain_or_borderline": {"title": "Анық емес / шекаралық", "final_label_ru": "Анық емес / шекаралық", "summary": "Бағалар шектерге жақын немесе модель блоктары ішінара қарама-қайшы сигнал береді.", "student_interpretation": "Мұндай нәтиже нақты қорытынды емес, әрі қарай талдау үшін себеп ретінде қарастырылуы керек."},
-        "insufficient_data": {"title": "Қорытындыға дерек жеткіліксіз", "final_label_ru": "Дерек жеткіліксіз", "summary": "BBB немесе P-gp бағасы жоқ.", "student_interpretation": "BBB және P-gp модельдері сандық баға қайтарғанын тексеріңіз."},
+        "insufficient_data": {"title": "Қорытындыға дерек жеткіліксіз", "final_label_ru": "Дерек жеткіліксіз", "summary": "Қан-ми тосқауылы немесе P-gp бағасы жоқ.", "student_interpretation": "Қан-ми тосқауылы және P-gp модельдері сандық баға қайтарғанын тексеріңіз."},
     },
     "en": {
         "likely_cns_active": {"title": "Likely CNS-active profile", "final_label_ru": "Likely CNS-active profile", "summary": "The model sees favourable passive BBB permeability and low P-gp efflux risk.", "student_interpretation": "This profile supports a hypothesis of CNS exposure, but it is not experimental proof."},
@@ -766,7 +749,7 @@ FINAL_DECISIONS = {
 DISCLAIMERS = {
     "ru": {"in_silico": IN_SILICO_DISCLAIMER_RU, "what_if": WHAT_IF_DISCLAIMER_RU},
     "kk": {
-        "in_silico": "BioSynth-EDU in silico болжам береді. Бұл медициналық ұсыныс емес және BBB өткізгіштігі, уыттылық немесе тиімділік бойынша эксперименттік дәлел емес. Модель ықтималдықтары абсолютті биологиялық шындық емес, модельдік score ретінде түсіндірілуі керек.",
+        "in_silico": "BioSynth-EDU in silico болжам береді. Бұл медициналық ұсыныс емес және қан-ми тосқауылынан өту, уыттылық немесе тиімділік бойынша эксперименттік дәлел емес. Модель бағаларын абсолютті биологиялық шындық емес, есептік баға ретінде түсіндіру керек.",
         "what_if": "Бұл блок педагогикалық симуляция болып табылады. Сіз химиялық құрылымды емес, жеке дескрипторларды өзгертесіз; нәтиже жаңа молекулаға нақты болжам емес.",
     },
     "en": {
@@ -819,17 +802,17 @@ WARNING_MESSAGES = {
         "multiple_fragments": "Молекулада бірнеше фрагмент бар; бұл тұз немесе қоспа белгісі болуы мүмкін.",
         "salt_or_mixture": "Тұз немесе қоспа белгілері анықталды; болжам сенімділігі төмендеуі мүмкін.",
         "no_carbon_or_inorganic": "Молекулада көміртек жоқ немесе бейорганикалық құрылымға ұқсайды; ADMET моделі сенімсіз болуы мүмкін.",
-        "very_large_molecule": "Молекулалық масса өте үлкен: модель доменінен шығуы мүмкін.",
-        "very_high_tpsa": "TPSA өте жоғары: гликозидтер мен полифенолдар үшін типтік BBB доменінен шығуы мүмкін.",
-        "many_hbd": "HBD саны жоғары: пассивті BBB диффузиясы қатты шектелуі мүмкін.",
-        "many_hba": "HBA саны жоғары: профиль BBB үшін тым полярлы болуы мүмкін.",
-        "formal_charge_nonzero": "Формальды заряд 0 емес; пассивті BBB түсіндірмесін сақтықпен қарау керек.",
-        "high_abs_formal_charge": "Формальды заряд айқын; пассивті BBB өткізгіштігі сенімсіз бағалануы мүмкін.",
-        "extreme_logp_low": "LogP өте төмен: молекула BBB арқылы пассивті өту үшін тым гидрофильді болуы мүмкін.",
+        "very_large_molecule": "Молекулалық масса өте үлкен: молекула модельдің қолданылу аймағынан шығуы мүмкін.",
+        "very_high_tpsa": "TPSA өте жоғары: гликозидтер мен полифенолдар үшін қан-ми тосқауылынан өтуді бағалаудың типтік қолданылу аймағынан шығуы мүмкін.",
+        "many_hbd": "HBD саны жоғары: қан-ми тосқауылынан пассивті өту қатты шектелуі мүмкін.",
+        "many_hba": "HBA саны жоғары: профиль қан-ми тосқауылынан өту үшін тым полярлы болуы мүмкін.",
+        "formal_charge_nonzero": "Формальды заряд 0 емес; қан-ми тосқауылынан пассивті өтуді сақтықпен түсіндіру керек.",
+        "high_abs_formal_charge": "Формальды заряд айқын; қан-ми тосқауылынан пассивті өту сенімсіз бағалануы мүмкін.",
+        "extreme_logp_low": "LogP өте төмен: молекула қан-ми тосқауылынан пассивті өту үшін тым гидрофильді болуы мүмкін.",
         "extreme_logp_high": "LogP өте жоғары: ерігіштік және бейспецификалық байланысу мәселелері болуы мүмкін.",
-        "polyphenol_like": "Құрылым полифенолдық табиғи қосылысқа ұқсайды; BBB/P-gp модельдері сенімсіз болуы мүмкін.",
-        "glycoside_like": "Гликозидтік/қант фрагментінің белгілері бар; қолданылу доменінен шығуы мүмкін.",
-        "bbb_pgp_conflict": "BBB арқылы өту бағасы жоғары және P-gp қаупі жоғары: пассивті өту белсенді шығарылумен қайшы келуі мүмкін.",
+        "polyphenol_like": "Құрылым полифенолдық табиғи қосылысқа ұқсайды; қан-ми тосқауылы/P-gp модельдері сенімсіз болуы мүмкін.",
+        "glycoside_like": "Гликозидтік/қант фрагментінің белгілері бар; қолданылу аймағынан шығуы мүмкін.",
+        "bbb_pgp_conflict": "Қан-ми тосқауылынан өту бағасы жоғары және P-gp қаупі жоғары: пассивті өту белсенді шығарылумен қайшы келуі мүмкін.",
     },
     "en": {
         "invalid_smiles": "The SMILES could not be parsed correctly.",
@@ -861,8 +844,8 @@ METHODOLOGY = {
     "kk": [
         {"title": "1. Құрылымды тексеру", "text": "SMILES молекулалық графқа түрлендіріледі. Құрылым танылмаса, есептеу және түсіндіру орындалмайды."},
         {"title": "2. Физика-химиялық дескрипторлар", "text": "Оқу түсіндірмесінде молекулалық масса, LogP, TPSA, сутектік байланыс донорлары мен акцепторлары, pKa, заряд және P-gp бағасы қолданылады."},
-        {"title": "3. BBB арқылы өту", "text": "BBB қан-ми тосқауылын білдіреді. Бұл блок молекула қасиеттерінің осы тосқауылдан пассивті өтуге қаншалықты сәйкес келетінін бағалайды."},
-        {"title": "4. P-gp", "text": "P-gp молекуланы қайтадан қанға белсенді шығара алатын бөлек механизм ретінде қарастырылады. Сондықтан BBB арқылы өту қолайлы болса да, ОЖЖ қолжетімділігі төмендеуі мүмкін."},
+        {"title": "3. Қан-ми тосқауылынан өту", "text": "Бұл блок молекула қасиеттерінің қан-ми тосқауылынан пассивті өтуге қаншалықты сәйкес келетінін бағалайды."},
+        {"title": "4. P-gp", "text": "P-gp молекуланы қайтадан қанға белсенді шығара алатын бөлек механизм ретінде қарастырылады. Сондықтан қан-ми тосқауылынан өту қолайлы болса да, ОЖЖ қолжетімділігі төмендеуі мүмкін."},
         {"title": "5. Оқу түсіндірмесі", "text": "Қорытынды дескрипторлар мен модельдік бағалардың оқу интерпретациясы ретінде беріледі. Ол эксперименттік тексеруді алмастырмайды."},
     ],
     "en": [
@@ -884,7 +867,7 @@ LIMITATIONS = {
     ],
     "kk": [
         "BioSynth-EDU есептік болжам береді, медициналық ұсыныс емес.",
-        "Болжам BBB арқылы өту, уыттылық немесе тиімділік бойынша эксперименттік дәлел емес.",
+        "Болжам қан-ми тосқауылынан өту, уыттылық немесе тиімділік бойынша эксперименттік дәлел емес.",
         "Модель ықтималдықтары мен көрсеткіштерін абсолютті биологиялық шындық емес, есептік бағалар ретінде түсіндіру керек.",
         "What-if режимі химиялық құрылымды өзгертпей дескрипторларды өзгертеді, сондықтан бұл оқу симуляциясы.",
         "Тұздар, қоспалар, полифенолдар, гликозидтер және өте ірі молекулалар үшін молекула модель сенімді жұмыс істейтін құрылымдарға ұқсай ма, соны бөлек тексеру маңызды.",
@@ -900,30 +883,30 @@ LIMITATIONS = {
 
 STUDENT_QUESTIONS = {
     "ru": ["Какие дескрипторы сильнее всего поддерживают прохождение через ГЭБ?", "Какой фактор сильнее всего ограничивает доступность для ЦНС?", "Есть ли конфликт между пассивным прохождением через ГЭБ и активным выведением через P-gp?", "Как изменился бы учебный вывод, если TPSA или оценка P-gp стали выше?", "Какие предупреждения о надёжности модели нужно учесть?"],
-    "kk": ["BBB арқылы өтуді ең көп қолдайтын дескрипторлар қайсы?", "ОЖЖ қолжетімділігін ең көп шектейтін фактор қандай?", "BBB арқылы пассивті өту мен P-gp арқылы белсенді шығарылу арасында қайшылық бар ма?", "TPSA немесе P-gp бағасы жоғарыласа, оқу қорытындысы қалай өзгерер еді?", "Модель сенімділігі туралы қандай ескертулерді ескеру керек?"],
+    "kk": ["Қан-ми тосқауылынан өтуді ең көп қолдайтын дескрипторлар қайсы?", "ОЖЖ қолжетімділігін ең көп шектейтін фактор қандай?", "Қан-ми тосқауылынан пассивті өту мен P-gp арқылы белсенді шығарылу арасында қайшылық бар ма?", "TPSA немесе P-gp бағасы жоғарыласа, оқу қорытындысы қалай өзгерер еді?", "Модель сенімділігі туралы қандай ескертулерді ескеру керек?"],
     "en": ["Which two descriptors most strongly support BBB permeability?", "What is the main limitation for CNS exposure?", "Is there a conflict between passive BBB permeability and P-gp efflux?", "How would the educational conclusion change if TPSA or P-gp probability increased?", "Which applicability-domain warnings should be considered?"],
 }
 
 BATCH_PRIORITY_LABELS = {
     "ru": {
-        "CNS candidate": "CNS candidate",
-        "CNS candidate / caution": "CNS candidate / caution",
-        "Efflux risk": "Efflux risk",
-        "Review": "Review",
-        "Low passive BBB": "Low passive BBB",
-        "Full barrier": "Full barrier",
-        "Outside domain": "Outside domain",
-        "Invalid/error": "Invalid/error",
+        "CNS candidate": "Кандидат для ЦНС",
+        "CNS candidate / caution": "Кандидат для ЦНС / осторожно",
+        "Efflux risk": "Риск активного выведения",
+        "Review": "Проверить вручную",
+        "Low passive BBB": "Слабое прохождение через ГЭБ",
+        "Full barrier": "Два ограничения",
+        "Outside domain": "Вне области применимости",
+        "Invalid/error": "Ошибка / некорректные данные",
     },
     "kk": {
-        "CNS candidate": "CNS кандидаты",
-        "CNS candidate / caution": "CNS кандидаты / сақтық",
-        "Efflux risk": "Efflux қаупі",
+        "CNS candidate": "ОЖЖ кандидаты",
+        "CNS candidate / caution": "ОЖЖ кандидаты / сақтық",
+        "Efflux risk": "Белсенді шығарылу қаупі",
         "Review": "Қолмен тексеру",
-        "Low passive BBB": "Пассивті BBB төмен",
-        "Full barrier": "Толық бөгет",
-        "Outside domain": "Доменнен тыс",
-        "Invalid/error": "Invalid/қате",
+        "Low passive BBB": "Қан-ми тосқауылынан өту әлсіз",
+        "Full barrier": "Екі шектеу бар",
+        "Outside domain": "Қолданылу аймағынан тыс",
+        "Invalid/error": "Қате / жарамсыз дерек",
     },
     "en": {
         "CNS candidate": "CNS candidate",
@@ -939,7 +922,7 @@ BATCH_PRIORITY_LABELS = {
 
 BATCH_SUMMARY_TEMPLATES = {
     "ru": "Обработано молекул: {total}. Валидных: {valid}. Ошибок: {invalid}. Кандидатов для ЦНС: {cns}. Конфликт ГЭБ/P-gp: {efflux}. Пограничных: {borderline}.",
-    "kk": "Өңделген молекулалар: {total}. Валидті: {valid}. Қате: {invalid}. ОЖЖ кандидаттары: {cns}. BBB/P-gp қайшылығы: {efflux}. Шекаралық: {borderline}.",
+    "kk": "Өңделген молекулалар: {total}. Валидті: {valid}. Қате: {invalid}. ОЖЖ кандидаттары: {cns}. Қан-ми тосқауылы/P-gp қайшылығы: {efflux}. Шекаралық: {borderline}.",
     "en": "Processed molecules: {total}. Valid: {valid}. Errors: {invalid}. CNS candidates: {cns}. BBB/P-gp conflict: {efflux}. Borderline: {borderline}.",
 }
 
@@ -955,10 +938,10 @@ WHAT_IF_TEXTS = {
         "same": "Зоны и итоговые оценки почти не изменились; сдвиг остался внутри той же учебной зоны.",
     },
     "kk": {
-        "passive_up": "Симуляцияда BBB арқылы өту бағасы жақсарды.",
-        "passive_down": "Симуляцияда BBB арқылы өту бағасы төмендеді.",
-        "passive_same": "BBB арқылы өту бағасы аз ғана өзгерді.",
-        "pgp_up": "P-gp бағасының өсуі BBB арқылы өту бағасы жақсы болса да ОЖЖ қолжетімділігінің оқу бағасын төмендетеді.",
+        "passive_up": "Симуляцияда қан-ми тосқауылынан өту бағасы жақсарды.",
+        "passive_down": "Симуляцияда қан-ми тосқауылынан өту бағасы төмендеді.",
+        "passive_same": "Қан-ми тосқауылынан өту бағасы аз ғана өзгерді.",
+        "pgp_up": "P-gp бағасының өсуі қан-ми тосқауылынан өту бағасы жақсы болса да ОЖЖ қолжетімділігінің оқу бағасын төмендетеді.",
         "pgp_down": "P-gp бағасының төмендеуі белсенді шығарылу қаупін азайтып, ОЖЖ қолжетімділігінің бағасын арттыруы мүмкін.",
         "cns_up": "ОЖЖ қолжетімділігінің қорытынды бағасы өсті: профиль қолайлырақ болды.",
         "cns_down": "ОЖЖ қолжетімділігінің қорытынды бағасы төмендеді: профиль қолайсыздау болды.",
@@ -1295,7 +1278,7 @@ def localize_explanation_dict(explanation_dict: Mapping[str, Any], lang: str = D
 def _localize_stepwise(data: Mapping[str, Any], lang: str) -> list[dict[str, Any]]:
     labels = {
         "ru": ["Проверка SMILES", "Расчёт дескрипторов", "Оценка прохождения через ГЭБ", "Оценка P-gp", "Финальная учебная интерпретация"],
-        "kk": ["SMILES тексеру", "Дескрипторларды есептеу", "Пассивті BBB өткізгіштігін бағалау", "P-gp бағалау", "Қорытынды оқу түсіндірмесі"],
+        "kk": ["SMILES тексеру", "Дескрипторларды есептеу", "Қан-ми тосқауылынан пассивті өтуді бағалау", "P-gp бағалау", "Қорытынды оқу түсіндірмесі"],
         "en": ["SMILES validation", "Descriptor calculation", "Passive BBB permeability assessment", "P-gp assessment", "Final educational interpretation"],
     }[lang]
     steps = []
@@ -1320,7 +1303,7 @@ def _localize_stepwise(data: Mapping[str, Any], lang: str) -> list[dict[str, Any
     }[lang].format(names=", ".join(desc_names) if desc_names else "N/A")
     bbb = model_outputs.get("bbb_classifier_probability")
     pgp = model_outputs.get("pgp_probability")
-    step3_msg = {"ru": "BBB score: {score}.", "kk": "BBB score: {score}.", "en": "BBB score: {score}."}[lang].format(score=_format_value(bbb, ""))
+    step3_msg = {"ru": "Оценка прохождения через ГЭБ: {score}.", "kk": "Қан-ми тосқауылынан өту бағасы: {score}.", "en": "BBB score: {score}."}[lang].format(score=_format_value(bbb, ""))
     step4_msg = {"ru": "Оценка P-gp: {score}.", "kk": "P-gp бағасы: {score}.", "en": "P-gp score: {score}."}[lang].format(score=_format_value(pgp, ""))
     steps.append({"step": 1, "title": labels[0], "status": step1_status, "message": step1_msg})
     steps.append({"step": 2, "title": labels[1], "status": "ok" if desc_names else "warning", "message": step2_msg})
@@ -1340,7 +1323,7 @@ def _localize_notes(notes: Any, lang: str) -> list[str]:
         text = str(note)
         # Translate common internal reason fragments.
         mapping = {
-            "BBB and P-gp signals conflict.": {"ru": "BBB и P-gp дают конфликтующие сигналы.", "kk": "BBB және P-gp сигналдары қарама-қайшы.", "en": "BBB and P-gp signals conflict."},
+            "BBB and P-gp signals conflict.": {"ru": "ГЭБ и P-gp дают конфликтующие сигналы.", "kk": "Қан-ми тосқауылы және P-gp сигналдары қарама-қайшы.", "en": "BBB and P-gp signals conflict."},
             "invalid_smiles": {"ru": "Некорректный SMILES.", "kk": "Қате SMILES.", "en": "Invalid SMILES."},
         }
         result.append(mapping.get(text, {}).get(lang, text))
@@ -1369,7 +1352,7 @@ def _format_value(value: Any, unit: str = "") -> str:
 
 
 # ---------------------------------------------------------------------------
-# Compatibility aliases used by Stage 6 integration modules
+# Compatibility aliases used by integration modules.
 # ---------------------------------------------------------------------------
 
 def language_selectbox_options() -> list[str]:
@@ -1423,210 +1406,6 @@ def clone_translations_for_tests() -> dict[str, dict[str, str]]:
     # The current implementation is table-based rather than one giant TRANSLATIONS dict.
     return {"ru": dict(UI.get("ru", {})), "kk": dict(UI.get("kk", {})), "en": dict(UI.get("en", {}))}
 
-# Descriptor localization tables
-
-DESCRIPTOR_DISPLAY_NAMES = {
-    "ru": {
-        "MW": "Молекулярная масса",
-        "LogP": "LogP",
-        "TPSA": "TPSA",
-        "HBD": "Доноры H-связей",
-        "HBA": "Акцепторы H-связей",
-        "RotatableBonds": "Вращаемые связи",
-        "AromaticRings": "Ароматические кольца",
-        "pKa_pred": "Предсказанный pKa",
-        "FormalCharge": "Формальный заряд",
-        "GasteigerMin": "Минимальный заряд Гастейгера",
-        "GasteigerMax": "Максимальный заряд Гастейгера",
-        "GasteigerAbsMax": "Максимальный |заряд Гастейгера|",
-        "BBB_probability": "Оценка прохождения через ГЭБ",
-        "Pgp_probability": "Оценка риска P-gp",
-        "Clint_risk": "Риск Clint",
-        "CATMoS_LD50": "CATMoS / LD50",
-    },
-    "kk": {
-        "MW": "Молекулалық масса",
-        "LogP": "LogP",
-        "TPSA": "TPSA",
-        "HBD": "H-байланыс донорлары",
-        "HBA": "H-байланыс акцепторлары",
-        "RotatableBonds": "Айналмалы байланыстар",
-        "AromaticRings": "Ароматты сақиналар",
-        "pKa_pred": "Болжанған pKa",
-        "FormalCharge": "Формальды заряд",
-        "GasteigerMin": "Гастейгердің ең төмен заряды",
-        "GasteigerMax": "Гастейгердің ең жоғары заряды",
-        "GasteigerAbsMax": "Ең үлкен |Гастейгер заряды|",
-        "BBB_probability": "BBB арқылы өту бағасы",
-        "Pgp_probability": "P-gp қаупінің бағасы",
-        "Clint_risk": "Clint қаупі",
-        "CATMoS_LD50": "CATMoS / LD50",
-    },
-    "en": {
-        "MW": "Molecular weight",
-        "LogP": "LogP",
-        "TPSA": "TPSA",
-        "HBD": "Hydrogen-bond donors",
-        "HBA": "Hydrogen-bond acceptors",
-        "RotatableBonds": "Rotatable bonds",
-        "AromaticRings": "Aromatic rings",
-        "pKa_pred": "Predicted pKa",
-        "FormalCharge": "Formal charge",
-        "GasteigerMin": "Minimum Gasteiger charge",
-        "GasteigerMax": "Maximum Gasteiger charge",
-        "GasteigerAbsMax": "Maximum |Gasteiger charge|",
-        "BBB_probability": "BBB score",
-        "Pgp_probability": "P-gp probability",
-        "Clint_risk": "Clint risk",
-        "CATMoS_LD50": "CATMoS / LD50",
-    },
-}
-
-DESCRIPTOR_SHORT_LABELS = {
-    "ru": {
-        "MW": "MW",
-        "LogP": "LogP",
-        "TPSA": "TPSA",
-        "HBD": "HBD",
-        "HBA": "HBA",
-        "RotatableBonds": "RotB",
-        "AromaticRings": "Ароматические кольца",
-        "pKa_pred": "pKa",
-        "FormalCharge": "Заряд",
-        "GasteigerMin": "Gasteiger min",
-        "GasteigerMax": "Gasteiger max",
-        "GasteigerAbsMax": "|Gasteiger|max",
-        "BBB_probability": "BBB score",
-        "Pgp_probability": "P-gp prob.",
-        "Clint_risk": "Clint",
-        "CATMoS_LD50": "LD50",
-    },
-    "kk": {
-        "MW": "MW",
-        "LogP": "LogP",
-        "TPSA": "TPSA",
-        "HBD": "HBD",
-        "HBA": "HBA",
-        "RotatableBonds": "RotB",
-        "AromaticRings": "Ароматты сақиналар",
-        "pKa_pred": "pKa",
-        "FormalCharge": "Заряд",
-        "GasteigerMin": "Gasteiger min",
-        "GasteigerMax": "Gasteiger max",
-        "GasteigerAbsMax": "|Gasteiger|max",
-        "BBB_probability": "BBB score",
-        "Pgp_probability": "P-gp prob.",
-        "Clint_risk": "Clint",
-        "CATMoS_LD50": "LD50",
-    },
-    "en": {
-        "MW": "MW",
-        "LogP": "LogP",
-        "TPSA": "TPSA",
-        "HBD": "HBD",
-        "HBA": "HBA",
-        "RotatableBonds": "RotB",
-        "AromaticRings": "Aromatic rings",
-        "pKa_pred": "pKa",
-        "FormalCharge": "Charge",
-        "GasteigerMin": "Gasteiger min",
-        "GasteigerMax": "Gasteiger max",
-        "GasteigerAbsMax": "|Gasteiger|max",
-        "BBB_probability": "BBB score",
-        "Pgp_probability": "P-gp prob.",
-        "Clint_risk": "Clint",
-        "CATMoS_LD50": "LD50",
-    },
-}
-
-DESCRIPTOR_THRESHOLD_NOTES = {
-    "ru": {
-        "MW": "Учебная эвристика: 150-450 Da обычно благоприятнее для профиля ЦНС-доступности.",
-        "LogP": "Учебная эвристика: умеренный LogP примерно 1.5-3.5 поддерживает пассивную диффузию.",
-        "TPSA": "Учебная эвристика: TPSA <= 70 Å² обычно благоприятнее для прохождения через ГЭБ; > 90 Å² часто неблагоприятно.",
-        "HBD": "Учебная эвристика: 0-1 HBD обычно благоприятно; >= 3 часто мешает пассивному прохождению через ГЭБ.",
-        "HBA": "Учебная эвристика: 0-5 HBA обычно допустимо; >= 8 часто неблагоприятно.",
-        "RotatableBonds": "Учебная эвристика: 0-5 вращаемых связей обычно лучше; > 8 указывает на высокую гибкость.",
-        "AromaticRings": "Учебная эвристика: умеренное число ароматических колец допустимо; избыток может повышать липофильность и связывание.",
-        "pKa_pred": "Интерпретация pKa зависит от кислотно-основного центра; pKa около 7.4 требует осторожности.",
-        "FormalCharge": "Учебная эвристика: нейтральная форма обычно благоприятнее для пассивного прохождения через ГЭБ.",
-        "GasteigerMin": "Частичные заряды следует интерпретировать вместе с TPSA, HBD/HBA и формальным зарядом.",
-        "GasteigerMax": "Частичные заряды следует интерпретировать вместе с TPSA, HBD/HBA и формальным зарядом.",
-        "GasteigerAbsMax": "Высокий локальный заряд может указывать на выраженную полярность.",
-        "BBB_probability": "Вероятность модели - это расчётная оценка in silico, а не экспериментальная вероятность.",
-        "Pgp_probability": "Высокая оценка P-gp указывает на риск активного выведения, а не на низкую пассивную проницаемость саму по себе.",
-        "Clint_risk": "Clint описывает метаболическую стабильность/клиренс и дополняет, но не заменяет анализ прохождения через ГЭБ.",
-        "CATMoS_LD50": "Токсикологический прогноз следует трактовать отдельно от оценки прохождения через ГЭБ.",
-    },
-    "kk": {
-        "MW": "Оқу эвристикасы: 150-450 Da аралығы ОЖЖ қолжетімділігі профилі үшін жиі қолайлырақ.",
-        "LogP": "Оқу эвристикасы: шамамен 1.5-3.5 аралығындағы орташа LogP пассивті диффузияны қолдайды.",
-        "TPSA": "Оқу эвристикасы: TPSA <= 70 Å² BBB үшін жиі қолайлы; > 90 Å² жиі қолайсыз.",
-        "HBD": "Оқу эвристикасы: 0-1 HBD әдетте қолайлы; >= 3 пассивті BBB диффузиясына кедергі келтіруі мүмкін.",
-        "HBA": "Оқу эвристикасы: 0-5 HBA әдетте қолайлы; >= 8 жиі қолайсыз.",
-        "RotatableBonds": "Оқу эвристикасы: 0-5 айналмалы байланыс әдетте жақсырақ; > 8 жоғары икемділікті көрсетеді.",
-        "AromaticRings": "Оқу эвристикасы: ароматты сақиналардың орташа саны қолайлы; артық саны липофильділік пен байланысуды арттыруы мүмкін.",
-        "pKa_pred": "pKa түсіндірмесі қышқыл-негіз орталығына тәуелді; 7.4 маңындағы pKa сақтықты қажет етеді.",
-        "FormalCharge": "Оқу эвристикасы: бейтарап түр пассивті BBB диффузиясы үшін әдетте қолайлырақ.",
-        "GasteigerMin": "Жартылай зарядтарды TPSA, HBD/HBA және формальды зарядпен бірге түсіндіру керек.",
-        "GasteigerMax": "Жартылай зарядтарды TPSA, HBD/HBA және формальды зарядпен бірге түсіндіру керек.",
-        "GasteigerAbsMax": "Жоғары жергілікті заряд айқын полярлықты көрсетуі мүмкін.",
-        "BBB_probability": "Модель бағасы есептік көрсеткіш болып табылады; ол эксперименттік ықтималдық емес.",
-        "Pgp_probability": "Жоғары P-gp бағасы белсенді шығарылу қаупін көрсетеді; бұл пассивті өтудің өзі міндетті түрде төмен деген сөз емес.",
-        "Clint_risk": "Clint метаболикалық тұрақтылық/клиренсті сипаттайды және BBB талдауын толықтырады, бірақ алмастырмайды.",
-        "CATMoS_LD50": "Токсикологиялық болжам BBB өткізгіштігінен бөлек түсіндірілуі керек.",
-    },
-    "en": {
-        "MW": "Educational heuristic: 150-450 Da is often more favourable for a CNS profile.",
-        "LogP": "Educational heuristic: moderate LogP around 1.5-3.5 supports passive diffusion.",
-        "TPSA": "Educational heuristic: TPSA <= 70 Å² is often favourable for BBB; > 90 Å² is often unfavourable.",
-        "HBD": "Educational heuristic: 0-1 HBD is usually favourable; >= 3 often opposes passive BBB diffusion.",
-        "HBA": "Educational heuristic: 0-5 HBA is often acceptable; >= 8 is often unfavourable.",
-        "RotatableBonds": "Educational heuristic: 0-5 rotatable bonds is usually better; > 8 suggests high flexibility.",
-        "AromaticRings": "Educational heuristic: a moderate number of aromatic rings can be acceptable; excess aromaticity may increase lipophilicity and binding.",
-        "pKa_pred": "pKa interpretation depends on the acid/base centre; pKa near 7.4 requires caution.",
-        "FormalCharge": "Educational heuristic: a neutral form is usually more favourable for passive BBB diffusion.",
-        "GasteigerMin": "Partial charges should be interpreted together with TPSA, HBD/HBA and formal charge.",
-        "GasteigerMax": "Partial charges should be interpreted together with TPSA, HBD/HBA and formal charge.",
-        "GasteigerAbsMax": "High local charge may indicate pronounced polarity.",
-        "BBB_probability": "The model score is an in silico score, not an experimental probability.",
-        "Pgp_probability": "A high P-gp score indicates active efflux risk, not low passive permeability by itself.",
-        "Clint_risk": "Clint describes metabolic stability/clearance and complements, but does not replace, BBB analysis.",
-        "CATMoS_LD50": "The toxicology estimate should be interpreted separately from BBB permeability.",
-    },
-}
-
-_ADDITIONAL_ZONE_COMMENTS = {
-    "kk": {
-        "RotatableBonds": {"green": "Икемділік төмен немесе орташа, бұл профиль үшін қолайлы.", "yellow": "Икемділік шекаралық аймақта; қосымша контекст қажет.", "red": "Жоғары икемділік пассивті өту мен ADMET болжамын қиындатуы мүмкін.", "gray": "Икемділік әсерін бағалау мүмкін емес."},
-        "AromaticRings": {"green": "Ароматты сақиналардың саны қалыпты және профильге қарсы айқын белгі бермейді.", "yellow": "Ароматтылық шекаралық: липофильділік пен ақуыздармен байланысу өсуі мүмкін.", "red": "Ароматтылық жоғары; липофильділік пен ақуыздармен байланысу артуы мүмкін.", "gray": "Ароматтылық әсерін бағалау мүмкін емес."},
-        "FormalCharge": {"green": "Формальды заряд жоқ, бұл пассивті диффузия үшін қолайлы.", "yellow": "Формальды заряд бар; пассивті BBB диффузиясы төмендеуі мүмкін.", "red": "Айқын формальды заряд пассивті BBB өтуін қатты шектеуі мүмкін.", "gray": "Формальды заряд әсерін бағалау мүмкін емес."},
-        "GasteigerMin": {"green": "Айқын жергілікті заряд байқалмайды.", "yellow": "Жергілікті полярлық аймақтар бар; TPSA және HBD/HBA-мен бірге түсіндіріңіз.", "red": "Айқын жергілікті заряд/полярлық пассивті мембраналық өтуді қиындатуы мүмкін.", "gray": "Гастейгер зарядтарын бағалау мүмкін емес."},
-        "GasteigerMax": {"green": "Айқын жергілікті заряд байқалмайды.", "yellow": "Жергілікті полярлық аймақтар бар; TPSA және HBD/HBA-мен бірге түсіндіріңіз.", "red": "Айқын жергілікті заряд/полярлық пассивті мембраналық өтуді қиындатуы мүмкін.", "gray": "Гастейгер зарядтарын бағалау мүмкін емес."},
-        "GasteigerAbsMax": {"green": "Ең үлкен жергілікті заряд төмен, бұл айқын полярлық жоқ екенін көрсетеді.", "yellow": "Жергілікті полярлық аймақтар бар; TPSA және HBD/HBA-мен бірге түсіндіріңіз.", "red": "Жоғары жергілікті заряд айқын полярлықты көрсетіп, пассивті өтуді нашарлатуы мүмкін.", "gray": "Гастейгер зарядтарын бағалау мүмкін емес."},
-        "BBB_probability": {"green": "BBB score жоғары аймақта.", "yellow": "BBB score шекаралық аймақта.", "red": "BBB score төмен аймақта.", "gray": "BBB score қолжетімсіз."},
-        "Clint_risk": {"green": "Клиренс қаупі төмен немесе профиль тұрақты көрінеді.", "yellow": "Клиренс қаупі шекаралық немесе анық емес.", "red": "Клиренс қаупі жоғары болуы мүмкін.", "gray": "Clint түсіндірмесі қолжетімсіз."},
-        "CATMoS_LD50": {"green": "Токсикологиялық көрсеткішті бөлек ADMET белгісі ретінде түсіндіріңіз.", "yellow": "Токсикологиялық көрсеткіш контекстік түсіндіруді қажет етеді.", "red": "Токсикологиялық қауіп белгісі болуы мүмкін; эксперименттік тексеру қажет.", "gray": "LD50 түсіндірмесі модель контекстіне тәуелді."},
-    },
-    "en": {
-        "RotatableBonds": {"green": "Flexibility is low or moderate, which is generally favourable.", "yellow": "Flexibility is borderline and should be interpreted in context.", "red": "High flexibility may complicate passive passage and ADMET behaviour.", "gray": "The flexibility effect could not be evaluated."},
-        "AromaticRings": {"green": "The number of aromatic rings is moderate and does not clearly oppose the profile.", "yellow": "Aromaticity is borderline; lipophilicity and protein binding may increase.", "red": "Aromaticity is high; lipophilicity and protein binding may increase.", "gray": "The aromatic-ring effect could not be evaluated."},
-        "FormalCharge": {"green": "No formal charge is present, which is favourable for passive diffusion.", "yellow": "A formal charge is present and may reduce passive BBB diffusion.", "red": "A strong formal charge may substantially limit passive BBB passage.", "gray": "The formal-charge effect could not be evaluated."},
-        "GasteigerMin": {"green": "No pronounced local charge is visible.", "yellow": "Local polar regions are present; interpret together with TPSA and HBD/HBA.", "red": "Pronounced local charge or polarity may hinder passive membrane passage.", "gray": "Gasteiger charges could not be evaluated."},
-        "GasteigerMax": {"green": "No pronounced local charge is visible.", "yellow": "Local polar regions are present; interpret together with TPSA and HBD/HBA.", "red": "Pronounced local charge or polarity may hinder passive membrane passage.", "gray": "Gasteiger charges could not be evaluated."},
-        "GasteigerAbsMax": {"green": "The maximum local charge is low, suggesting no pronounced local polarity.", "yellow": "Local polar regions are present; interpret together with TPSA and HBD/HBA.", "red": "High local charge suggests pronounced polarity and may reduce passive passage.", "gray": "Gasteiger charges could not be evaluated."},
-        "BBB_probability": {"green": "The BBB score is in the high range.", "yellow": "The BBB score is borderline.", "red": "The BBB score is in the low range.", "gray": "BBB score is unavailable."},
-        "Clint_risk": {"green": "Clearance risk is low or the profile appears stable.", "yellow": "Clearance risk is borderline or uncertain.", "red": "Clearance risk may be high.", "gray": "Clint interpretation is unavailable."},
-        "CATMoS_LD50": {"green": "Interpret this toxicology endpoint as a separate ADMET signal.", "yellow": "This toxicology endpoint needs contextual interpretation.", "red": "This may indicate a toxicology risk signal and requires experimental verification.", "gray": "LD50 interpretation depends on model context."},
-    },
-}
-
-for _lang_code, _items in _ADDITIONAL_ZONE_COMMENTS.items():
-    ZONE_COMMENTS.setdefault(_lang_code, {})
-    for _descriptor_name, _comments in _items.items():
-        ZONE_COMMENTS[_lang_code].setdefault(_descriptor_name, {}).update(_comments)
-
-
 def descriptor_zone_comment(name: str, zone: str, lang: str = DEFAULT_LANGUAGE) -> str:
     lang = normalize_language(lang)
     name = str(name)
@@ -1678,13 +1457,13 @@ def descriptor_explanation(name: str, value_text: str, zone: str, lang: str = DE
     return " ".join(part for part in [prefix, base, comment] if part)
 
 
-_stage6_1_localize_explanation_dict = localize_explanation_dict
+_base_localize_explanation_dict = localize_explanation_dict
 
 
 def localize_explanation_dict(explanation_dict: Mapping[str, Any], lang: str = DEFAULT_LANGUAGE) -> dict[str, Any]:
     """Localize descriptor labels, notes and factor names."""
     lang = normalize_language(lang)
-    data = _stage6_1_localize_explanation_dict(explanation_dict, lang)
+    data = _base_localize_explanation_dict(explanation_dict, lang)
     descriptors = data.get("descriptors") or {}
     if isinstance(descriptors, dict):
         for name, item in descriptors.items():
@@ -1712,7 +1491,7 @@ def localize_explanation_dict(explanation_dict: Mapping[str, Any], lang: str = D
                 factor["reason"] = descriptor_zone_comment(name, zone, lang)
     return data
 
-# Stage 6.2: broader localization of legacy uncertainty/reason notes.
+# Legacy uncertainty/reason note localization.
 def _localize_notes(notes: Any, lang: str) -> list[str]:
     lang = normalize_language(lang)
     if not notes:
@@ -1720,16 +1499,16 @@ def _localize_notes(notes: Any, lang: str) -> list[str]:
     if isinstance(notes, str):
         notes = [notes]
     mapping = {
-        "BBB and P-gp signals conflict.": {"ru": "BBB и P-gp дают конфликтующие сигналы.", "kk": "BBB және P-gp сигналдары қарама-қайшы.", "en": "BBB and P-gp signals conflict."},
+        "BBB and P-gp signals conflict.": {"ru": "ГЭБ и P-gp дают конфликтующие сигналы.", "kk": "Қан-ми тосқауылы және P-gp сигналдары қарама-қайшы.", "en": "BBB and P-gp signals conflict."},
         "invalid_smiles": {"ru": "Некорректный SMILES.", "kk": "Қате SMILES.", "en": "Invalid SMILES."},
-        "Молекула вне базового домена применимости.": {"ru": "Молекула вне базового домена применимости.", "kk": "Молекула базалық қолданылу доменінен тыс.", "en": "The molecule is outside the basic applicability domain."},
-        "Есть предупреждения по домену применимости.": {"ru": "Есть предупреждения по домену применимости.", "kk": "Қолданылу домені бойынша ескертулер бар.", "en": "Applicability-domain warnings are present."},
-        "Недоступен BBB score или P-gp score.": {"ru": "Недоступна оценка ГЭБ или P-gp.", "kk": "BBB немесе P-gp бағасы қолжетімсіз.", "en": "BBB score or P-gp score is unavailable."},
-        "BBB score находится в пограничной зоне.": {"ru": "Оценка прохождения через ГЭБ находится в пограничной зоне.", "kk": "BBB арқылы өту бағасы шекаралық аймақта.", "en": "BBB score is in a borderline zone."},
+        "Молекула вне базового домена применимости.": {"ru": "Молекула плохо похожа на структуры, для которых модель обычно надёжна.", "kk": "Молекула модель әдетте сенімді жұмыс істейтін құрылымдарға онша ұқсамайды.", "en": "The molecule is outside the basic applicability domain."},
+        "Есть предупреждения по домену применимости.": {"ru": "Есть предупреждения о надёжности модели для этой молекулы.", "kk": "Бұл молекула үшін модель сенімділігі туралы ескертулер бар.", "en": "Applicability-domain warnings are present."},
+        "Недоступен BBB score или P-gp score.": {"ru": "Недоступна оценка ГЭБ или P-gp.", "kk": "Қан-ми тосқауылы немесе P-gp бағасы қолжетімсіз.", "en": "BBB score or P-gp score is unavailable."},
+        "BBB score находится в пограничной зоне.": {"ru": "Оценка прохождения через ГЭБ находится в пограничной зоне.", "kk": "Қан-ми тосқауылынан өту бағасы шекаралық аймақта.", "en": "BBB score is in a borderline zone."},
         "P-gp score находится в зоне неопределённости.": {"ru": "Оценка P-gp находится в зоне неопределённости.", "kk": "P-gp бағасы анық емес аймақта.", "en": "P-gp score is in the uncertainty zone."},
         "Есть одновременно положительные и отрицательные факторы.": {"ru": "Есть одновременно положительные и отрицательные факторы.", "kk": "Оң және теріс факторлар қатар бар.", "en": "Positive and negative factors are both present."},
-        "BBB score близок к верхнему порогу; интерпретация чувствительна к выбранному cut-off.": {"ru": "Оценка прохождения через ГЭБ близка к верхнему порогу; вывод чувствителен к выбранной границе.", "kk": "BBB арқылы өту бағасы жоғарғы шекке жақын; түсіндіру таңдалған шекке сезімтал.", "en": "BBB score is close to the upper threshold; interpretation is sensitive to the selected cut-off."},
-        "BBB score близок к нижнему порогу; интерпретация чувствительна к выбранному cut-off.": {"ru": "Оценка прохождения через ГЭБ близка к нижнему порогу; вывод чувствителен к выбранной границе.", "kk": "BBB арқылы өту бағасы төменгі шекке жақын; түсіндіру таңдалған шекке сезімтал.", "en": "BBB score is close to the lower threshold; interpretation is sensitive to the selected cut-off."},
+        "BBB score близок к верхнему порогу; интерпретация чувствительна к выбранному cut-off.": {"ru": "Оценка прохождения через ГЭБ близка к верхнему порогу; вывод чувствителен к выбранной границе.", "kk": "Қан-ми тосқауылынан өту бағасы жоғарғы шекке жақын; түсіндіру таңдалған шекке сезімтал.", "en": "BBB score is close to the upper threshold; interpretation is sensitive to the selected cut-off."},
+        "BBB score близок к нижнему порогу; интерпретация чувствительна к выбранному cut-off.": {"ru": "Оценка прохождения через ГЭБ близка к нижнему порогу; вывод чувствителен к выбранной границе.", "kk": "Қан-ми тосқауылынан өту бағасы төменгі шекке жақын; түсіндіру таңдалған шекке сезімтал.", "en": "BBB score is close to the lower threshold; interpretation is sensitive to the selected cut-off."},
         "P-gp score близок к порогу substrate; вывод о P-gp следует считать осторожным.": {"ru": "Оценка P-gp близка к порогу активного выведения; вывод о P-gp следует считать осторожным.", "kk": "P-gp бағасы белсенді шығарылу шегіне жақын; P-gp қорытындысын сақтықпен түсіндіру керек.", "en": "P-gp score is close to the substrate threshold; interpret the P-gp conclusion cautiously."},
         "P-gp score близок к порогу non-substrate; вывод о P-gp следует считать осторожным.": {"ru": "Оценка P-gp близка к порогу низкого риска; вывод о P-gp следует считать осторожным.", "kk": "P-gp бағасы төмен қауіп шегіне жақын; P-gp қорытындысын сақтықпен түсіндіру керек.", "en": "P-gp score is close to the non-substrate threshold; interpret the P-gp conclusion cautiously."},
     }
