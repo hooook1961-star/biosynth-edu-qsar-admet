@@ -49,7 +49,7 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "section.methodology": "Методология",
         "section.limitations": "Ограничения модели",
         "batch.section.summary": "Учебная сводка",
-        "batch.section.table": "Полная таблица ADMET + XAI",
+        "batch.section.table": "Компактная таблица screening_results",
         "batch.section.export": "Экспорт",
     },
     "kk": {
@@ -95,7 +95,7 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "section.methodology": "Әдістеме",
         "section.limitations": "Модель шектеулері",
         "batch.section.summary": "Оқу қорытындысы",
-        "batch.section.table": "Толық ADMET + XAI кестесі",
+        "batch.section.table": "Ықшам screening_results кестесі",
         "batch.section.export": "Экспорт",
     },
     "en": {
@@ -140,7 +140,7 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "section.methodology": "Methodology",
         "section.limitations": "Model limitations",
         "batch.section.summary": "Teaching summary",
-        "batch.section.table": "Full ADMET + XAI table",
+        "batch.section.table": "Compact screening_results table",
         "batch.section.export": "Export",
     },
 }

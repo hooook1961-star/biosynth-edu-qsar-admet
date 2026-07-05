@@ -32,6 +32,7 @@ from core.explainability_adapter import build_pipeline_result_from_current_app
 from core.batch_explainability import (
     build_batch_excel_sheets,
     build_batch_export_dataframe,
+    build_screening_interpretation_markdown,
     select_batch_display_columns,
     summarize_batch_explanations,
 )
@@ -379,13 +380,6 @@ def render_batch_screening(lang: str) -> None:
             df = pd.DataFrame({"SMILES": [s.strip() for s in text.split("\n") if s.strip()]})
             smiles_col = "SMILES"
 
-    include_long_text = st.checkbox(
-        t("batch.include_long_text", lang),
-        value=False,
-        help=t("batch.include_long_text_help", lang),
-        key="batch_include_long_text",
-    )
-
     if df is not None:
         st.caption(t("batch.loaded_rows", lang, n=len(df)))
 
@@ -426,7 +420,7 @@ def render_batch_screening(lang: str) -> None:
         batch_df = build_batch_export_dataframe(
             results_rows,
             smiles_key="SMILES",
-            include_long_text=include_long_text,
+            include_long_text=False,
             lang=lang,
         )
         batch_summary = summarize_batch_explanations(batch_df, lang=lang)
@@ -454,6 +448,8 @@ def render_batch_screening(lang: str) -> None:
 
         if section == "summary":
             render_batch_explainability_summary(batch_df, batch_summary, lang=lang)
+            with st.expander(t("batch.interpretation_title", lang), expanded=False):
+                st.markdown(build_screening_interpretation_markdown(lang))
         elif section == "table":
             display_columns = select_batch_display_columns(batch_df)
             if display_columns:
@@ -464,25 +460,33 @@ def render_batch_screening(lang: str) -> None:
                 st.dataframe(batch_df, use_container_width=True)
         elif section == "export":
             sheets = build_batch_excel_sheets(batch_df, batch_summary)
+            interpretation_md = build_screening_interpretation_markdown(lang)
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
                 for sheet_name, sheet_df in sheets.items():
                     sheet_df.to_excel(writer, sheet_name=sheet_name[:31], index=False)
 
-            c1, c2 = st.columns(2)
+            c1, c2, c3 = st.columns(3)
             with c1:
                 st.download_button(
                     t("batch.download_excel", lang),
                     buffer.getvalue(),
-                    "BioSynth_EDU_Batch_Explainable_ADMET.xlsx",
+                    "screening_results.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 )
             with c2:
                 st.download_button(
                     t("batch.download_csv", lang),
                     batch_df.to_csv(index=False).encode("utf-8"),
-                    "BioSynth_EDU_Batch_XAI.csv",
+                    "screening_results.csv",
                     mime="text/csv",
+                )
+            with c3:
+                st.download_button(
+                    t("batch.download_interpretation", lang),
+                    interpretation_md.encode("utf-8"),
+                    f"screening_interpretation_{lang}.md",
+                    mime="text/markdown",
                 )
 
 
