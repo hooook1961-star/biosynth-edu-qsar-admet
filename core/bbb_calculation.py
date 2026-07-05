@@ -17,7 +17,7 @@ The public functions from the earlier app are preserved:
 from __future__ import annotations
 
 import logging
-import os
+from io import BytesIO
 from typing import Any, Dict, Mapping, Optional, Tuple
 
 import matplotlib.pyplot as plt
@@ -476,15 +476,13 @@ def predict_bbb_rf_detailed(mol: Chem.Mol) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def generate_admet_visualizations(mol: Chem.Mol, output_dir: str = "models/") -> None:
-    """Generate the same radar and Gasteiger maps as the earlier app.
+def generate_admet_visualizations(mol: Chem.Mol, output_dir: str | None = None) -> Dict[str, bytes]:
+    """Generate ADMET visualization images in memory.
 
     This function remains a UI helper. It is intentionally separated from model
     predictions: if visual generation fails, the molecular inference result is
     still returned by ``analyze_molecule_cns_profile``.
     """
-    os.makedirs(output_dir, exist_ok=True)
-
     mw = safe_float(Descriptors.MolWt(mol))
     logp = safe_float(Descriptors.MolLogP(mol))
     tpsa = safe_float(Descriptors.TPSA(mol))
@@ -520,8 +518,10 @@ def generate_admet_visualizations(mol: Chem.Mol, output_dir: str = "models/") ->
     plt.ylim(0, 1.5)
     plt.title("Bioavailability Radar (Rule of 5)", size=12, y=1.1)
     plt.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
-    plt.savefig(os.path.join(output_dir, "admet_radar.png"), bbox_inches="tight", dpi=150)
+    radar_buffer = BytesIO()
+    plt.savefig(radar_buffer, format="png", bbox_inches="tight", dpi=150)
     plt.close(fig)
+    radar_bytes = radar_buffer.getvalue()
 
     Chem.rdPartialCharges.ComputeGasteigerCharges(mol)
     weights = []
@@ -531,8 +531,8 @@ def generate_admet_visualizations(mol: Chem.Mol, output_dir: str = "models/") ->
     drawer = rdMolDraw2D.MolDraw2DCairo(300, 300)
     SimilarityMaps.GetSimilarityMapFromWeights(mol, weights, colorMap="coolwarm", draw2d=drawer, contourLines=4)
     drawer.FinishDrawing()
-    with open(os.path.join(output_dir, "atom_weights.png"), "wb") as fh:
-        fh.write(drawer.GetDrawingText())
+    atom_weights_bytes = drawer.GetDrawingText()
+    return {"radar": radar_bytes, "atom_weights": atom_weights_bytes}
 
 
 # ---------------------------------------------------------------------------
@@ -584,12 +584,7 @@ def analyze_molecule_cns_profile(smiles: str, descriptors: Mapping[str, Any]) ->
     else:
         cns_summary = "Не активно в ЦНС (Низкая пассивная диффузия через ГЭБ)"
 
-    try:
-        generate_admet_visualizations(mol)
-        vis_status = "Успешно сгенерированы"
-    except Exception as exc:
-        logger.exception("ADMET visualization generation failed")
-        vis_status = f"Ошибка визуализации: {_error_string(exc)}"
+    vis_status = "Генерируются при отображении прогноза"
 
     model_statuses = _model_status_summary(
         ("pka", pka_result),

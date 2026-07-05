@@ -203,8 +203,6 @@ def _show_clint_in_forecast(results: dict[str, Any]) -> bool:
 
 
 def render_forecast_tab(mol: Chem.Mol, results: dict[str, Any], lang: str, developer_mode: bool = False) -> None:
-    generate_admet_visualizations(mol)
-
     st.info(f"**{tx('forecast.qsar_bridge_title', lang)}.** {tx('forecast.qsar_bridge_text', lang)}")
 
     col1, col2 = st.columns([1, 1])
@@ -262,12 +260,14 @@ def render_forecast_tab(mol: Chem.Mol, results: dict[str, Any], lang: str, devel
 
     st.markdown(t("forecast.visualization_title", lang))
     c_vis1, c_vis2 = st.columns(2)
-    with c_vis1:
-        if os.path.exists("models/admet_radar.png"):
-            st.image("models/admet_radar.png", use_container_width=True)
-    with c_vis2:
-        if os.path.exists("models/atom_weights.png"):
-            st.image("models/atom_weights.png", use_container_width=True)
+    try:
+        visualizations = generate_admet_visualizations(mol)
+        with c_vis1:
+            st.image(visualizations["radar"], use_container_width=True)
+        with c_vis2:
+            st.image(visualizations["atom_weights"], use_container_width=True)
+    except Exception:
+        st.warning("Визуализацию не удалось построить для этой молекулы.")
 
     if developer_mode:
         with st.expander(tx("forecast.model_status_title", lang), expanded=False):
