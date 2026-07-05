@@ -7,7 +7,7 @@ from typing import Any
 
 APP_TEXT: dict[str, dict[str, str]] = {
     "ru": {
-        "sidebar.stage": "**Учебная лаборатория Explainable ADMET / QSAR**",
+        "sidebar.stage": "**Учебная лаборатория ADMET / QSAR**",
         "sidebar.developer_mode": "Показать технические детали",
         "sidebar.developer_help": "Показывает статусы моделей и сведения для разработчика.",
         "sidebar.model_selection_hint": "Источник моделей:",
@@ -31,7 +31,7 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "forecast.model_status_caption": "Этот блок нужен для проверки локальной установки и не обязателен для студента.",
         "metric.catmos_score": "Показатель CATMoS",
         "help.catmos_score": "Показывается как расчётный показатель; его не следует автоматически читать как LD50 в mg/kg.",
-        "metric.bbb_rf": "Вероятность прохождения через ГЭБ по RF-модели",
+        "metric.bbb_rf": "Оценка прохождения через ГЭБ по RF-модели",
         "help.bbb_rf": "Дополнительный ML-сигнал для ГЭБ. Основной учебный разбор строится по дескрипторам и формуле Gupta.",
         "metric.bbb_formula_version": "Формула Gupta",
         "batch.learning_intro": (
@@ -53,17 +53,17 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "batch.section.export": "Экспорт",
     },
     "kk": {
-        "sidebar.stage": "**Explainable ADMET / QSAR оқу зертханасы**",
+        "sidebar.stage": "**ADMET / QSAR оқу зертханасы**",
         "sidebar.developer_mode": "Техникалық мәліметтерді көрсету",
         "sidebar.developer_help": "Модельдердің статустары мен әзірлеушіге арналған мәліметтерді көрсетеді.",
         "sidebar.model_selection_hint": "Модельдер көзі:",
         "single.learning_note_title": "Талдаудың мақсаты",
         "single.learning_note": (
             "Бұл ADMET бойынша оқу зертханасы. Алдымен болжамды қараңыз, содан кейін молекуланың қай қасиеттері "
-            "қан-ми тосқауылынан (BBB) өтуге көмектесетінін немесе кедергі жасайтынын талдаңыз. Одан кейін What-if "
+            "қан-ми тосқауылынан өтуге көмектесетінін немесе кедергі жасайтынын талдаңыз. Одан кейін What-if "
             "зертханасында дескрипторлар өзгергенде ОЖЖ қолжетімділігінің оқу бағасы қалай өзгеретінін тексеруге болады. "
             "ML-талдау қосымша техникалық блок: ол RandomForest моделі қолданған белгі топтарын көрсетеді, ал негізгі "
-            "оқу қорытындысы дескрипторлар мен BBB x P-gp матрицасына сүйенеді."
+            "оқу қорытындысы дескрипторлар мен қан-ми тосқауылы x P-gp матрицасына сүйенеді."
         ),
         "nav.main_mode": "Жұмыс режимі",
         "nav.single_section": "Жеке талдау бөлімі",
@@ -82,7 +82,7 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "metric.bbb_formula_version": "Gupta формуласы",
         "batch.learning_intro": (
             "Массалық режим әр молекулаға қысқа оқу түсіндірмесін қосады: ОЖЖ үшін қорытынды класс, "
-            "BBB x P-gp сценарийі, қолдайтын/қарсы факторлар, ескертулер және белгісіздік деңгейі."
+            "қан-ми тосқауылы x P-gp сценарийі, қолдайтын/қарсы факторлар, ескертулер және белгісіздік деңгейі."
         ),
         "batch.result_stored": "Нәтижелер сақталды. Қайта есептемей бөлімдер арасында ауысуға болады.",
         "common.na": "деректер жоқ",
@@ -91,7 +91,7 @@ APP_TEXT: dict[str, dict[str, str]] = {
         "section.ml": "ML-талдау",
         "section.what_if": "What-if зертханасы",
         "section.report": "Оқу есебі",
-        "section.matrix": "BBB x P-gp матрицасы",
+        "section.matrix": "Қан-ми тосқауылы x P-gp матрицасы",
         "section.methodology": "Әдістеме",
         "section.limitations": "Модель шектеулері",
         "batch.section.summary": "Оқу қорытындысы",

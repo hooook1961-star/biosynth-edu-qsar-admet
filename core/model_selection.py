@@ -248,7 +248,7 @@ def _false_positive_rate(metrics: Mapping[str, Any]) -> Optional[float]:
 
 def _default_reason_ru(legacy_name: str, metrics: Mapping[str, Any]) -> str:
     if legacy_name == "rf_pgp_model":
-        return "P-gp v2 показывает устойчивые classification-метрики и используется как основной блок эффлюкса."
+        return "P-gp v2 показывает устойчивые метрики классификации и используется как основной блок оценки активного выведения."
     if legacy_name == "rf_bbb_model":
         return "BBB RF v2 имеет сильный ROC-AUC, но используется как дополнительный сигнал рядом с corrected Gupta, а не как основной вердикт."
     if legacy_name == "rf_pka_model":
@@ -258,8 +258,8 @@ def _default_reason_ru(legacy_name: str, metrics: Mapping[str, Any]) -> str:
     if legacy_name == "rf_catmos_model":
         return "CATMoS v2 можно использовать только как score, потому что шкала consensus_LD50 выглядит log/transformed и единицы требуют подтверждения."
     if legacy_name == "rf_clint_model":
-        return "Clint v2 показывает слабые classification-метрики и отключается по умолчанию."
-    return "Runtime decision was assigned by model selection policy."
+        return "Clint v2 показывает слабые метрики классификации и отключается по умолчанию."
+    return "Решение для запуска назначено политикой выбора моделей."
 
 
 def _default_reason_en(legacy_name: str, metrics: Mapping[str, Any]) -> str:
@@ -275,12 +275,12 @@ def _default_reason_en(legacy_name: str, metrics: Mapping[str, Any]) -> str:
         return "CATMoS v2 is score-only because consensus_LD50 looks log/transformed and units require confirmation."
     if legacy_name == "rf_clint_model":
         return "Clint v2 shows weak classification metrics and is disabled by default."
-    return "Runtime decision was assigned by the model selection policy."
+    return "Runtime decision was assigned by model-selection rules."
 
 
 def _default_reason_kk(legacy_name: str, metrics: Mapping[str, Any]) -> str:
     if legacy_name == "rf_pgp_model":
-        return "P-gp v2 classification метрикалары тұрақты және негізгі эффлюкс моделі ретінде қолданылады."
+        return "P-gp v2 классификация метрикалары тұрақты және белсенді шығарылуды бағалайтын негізгі модель ретінде қолданылады."
     if legacy_name == "rf_bbb_model":
         return "BBB RF v2 ROC-AUC бойынша жақсы, бірақ негізгі шешім емес, corrected Gupta жанындағы қосымша сигнал ретінде қолданылады."
     if legacy_name == "rf_pka_model":
@@ -291,7 +291,7 @@ def _default_reason_kk(legacy_name: str, metrics: Mapping[str, Any]) -> str:
         return "CATMoS v2 тек score ретінде қолданылады, себебі consensus_LD50 шкаласы log/transformed болып көрінеді және бірліктерді растау қажет."
     if legacy_name == "rf_clint_model":
         return "Clint v2 classification метрикалары әлсіз, сондықтан әдепкіде өшіріледі."
-    return "Runtime шешімі model selection policy арқылы берілді."
+    return "Іске қосу шешімі модельдерді таңдау саясаты арқылы берілді."
 
 
 def corrected_gupta_entry() -> Dict[str, Any]:

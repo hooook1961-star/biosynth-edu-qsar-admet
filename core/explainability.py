@@ -582,11 +582,11 @@ def _generate_cns_decision_explanation_ru(
 
     notes: list[str] = []
     if bbb_numeric is not None and abs(bbb_numeric - BBB_HIGH_THRESHOLD) <= BORDERLINE_DISTANCE:
-        notes.append("BBB score близок к верхнему порогу; интерпретация чувствительна к выбранному cut-off.")
+        notes.append("Оценка прохождения через ГЭБ близка к верхнему порогу; интерпретация чувствительна к выбранной границе.")
     if bbb_numeric is not None and abs(bbb_numeric - BBB_LOW_THRESHOLD) <= BORDERLINE_DISTANCE:
-        notes.append("BBB score близок к нижнему порогу; интерпретация чувствительна к выбранному cut-off.")
+        notes.append("Оценка прохождения через ГЭБ близка к нижнему порогу; интерпретация чувствительна к выбранной границе.")
     if pgp_numeric is not None and abs(pgp_numeric - PGP_HIGH_THRESHOLD) <= BORDERLINE_DISTANCE:
-        notes.append("P-gp score близок к порогу substrate; вывод о P-gp следует считать осторожным.")
+        notes.append("Оценка P-gp близка к порогу активного выведения; вывод о P-gp следует считать осторожным.")
     if pgp_numeric is not None and abs(pgp_numeric - PGP_LOW_THRESHOLD) <= BORDERLINE_DISTANCE:
         notes.append("P-gp score близок к порогу non-substrate; вывод о P-gp следует считать осторожным.")
 
@@ -1035,7 +1035,7 @@ def _assess_applicability_domain(
 
     if mw is not None and mw > 700:
         level = "outside"
-        reasons.append("Очень большая молекулярная масса: возможный выход за домен применимости.")
+        reasons.append("Очень большая молекулярная масса: молекула может быть плохо сопоставима с примерами, на которых модель обычно надёжна.")
     elif mw is not None and mw > 500 and level == "inside":
         level = "caution"
         reasons.append("Молекулярная масса выше типичного drug-like/CNS диапазона.")
@@ -1048,24 +1048,24 @@ def _assess_applicability_domain(
     if hbd is not None and hbd >= 6:
         if level != "outside":
             level = "caution"
-        reasons.append("Высокое число доноров водородных связей: возможен выход за типичный BBB-домен.")
+        reasons.append("Высокое число доноров водородных связей: профиль нетипичен для пассивного прохождения через ГЭБ.")
 
     if hba is not None and hba >= 12:
         if level != "outside":
             level = "caution"
-        reasons.append("Высокое число акцепторов водородных связей: возможен выход за типичный BBB-домен.")
+        reasons.append("Высокое число акцепторов водородных связей: профиль нетипичен для пассивного прохождения через ГЭБ.")
 
     if charge is not None and abs(charge) >= 2:
         if level != "outside":
             level = "caution"
-        reasons.append("Выраженный формальный заряд: пассивная BBB-интерпретация может быть менее надёжной.")
+        reasons.append("Выраженный формальный заряд: интерпретация пассивного прохождения через ГЭБ может быть менее надёжной.")
 
     if not reasons:
         message = DEFAULT_APPLICABILITY_MESSAGE_RU
     elif level == "outside":
-        message = "Молекула имеет признаки выхода за домен применимости; результат следует трактовать очень осторожно."
+        message = "Молекула заметно отличается от типичных примеров для этой модели; результат следует трактовать очень осторожно."
     else:
-        message = "Молекула имеет предупреждения по домену применимости; прогноз полезен как учебная гипотеза, но не как твёрдый вывод."
+        message = "Есть предупреждения о надёжности прогноза для этой молекулы; прогноз полезен как учебная гипотеза, но не как твёрдый вывод."
 
     # Deduplicate reasons.
     unique_reasons = list(dict.fromkeys(reason for reason in reasons if reason))
@@ -1095,20 +1095,20 @@ def _estimate_uncertainty(
         reasons.append("Молекула вне базового домена применимости.")
     elif app_level == "caution":
         level = "medium"
-        reasons.append("Есть предупреждения по домену применимости.")
+        reasons.append("Есть предупреждения о надёжности прогноза для этой молекулы.")
 
     bbb = _safe_float(model_outputs.get("bbb_classifier_probability"))
     pgp = _safe_float(model_outputs.get("pgp_probability"))
     if bbb is None or pgp is None:
         level = "medium" if level == "low" else level
-        reasons.append("Недоступен BBB score или P-gp score.")
+        reasons.append("Недоступна оценка прохождения через ГЭБ или оценка P-gp.")
     else:
         if BBB_LOW_THRESHOLD <= bbb < BBB_HIGH_THRESHOLD:
             level = "medium" if level == "low" else level
-            reasons.append("BBB score находится в пограничной зоне.")
+            reasons.append("Оценка прохождения через ГЭБ находится в пограничной зоне.")
         if PGP_LOW_THRESHOLD <= pgp < PGP_HIGH_THRESHOLD:
             level = "medium" if level == "low" else level
-            reasons.append("P-gp score находится в зоне неопределённости.")
+            reasons.append("Оценка P-gp находится в зоне неопределённости.")
         if bbb >= BBB_HIGH_THRESHOLD and pgp >= PGP_HIGH_THRESHOLD:
             level = "medium" if level == "low" else level
             reasons.append("BBB and P-gp signals conflict.")
@@ -1158,7 +1158,7 @@ def _generate_stepwise_model_trace(
     bbb_prob = model_outputs.get("bbb_classifier_probability")
     if bbb_prob is None:
         step3_status = "warning"
-        step3_message = {"ru": "BBB score недоступен; пассивную BBB-проницаемость можно оценить только по дескрипторам.", "kk": "BBB score қолжетімсіз; пассивті BBB өткізгіштігін тек дескрипторлар бойынша бағалауға болады.", "en": "BBB score is unavailable; passive BBB permeability can only be assessed from descriptors."}.get(lang, "BBB score недоступен; пассивную BBB-проницаемость можно оценить только по дескрипторам.")
+        step3_message = {"ru": "Оценка прохождения через ГЭБ недоступна; пассивное прохождение можно оценить только по дескрипторам.", "kk": "Қан-ми тосқауылынан өту бағасы қолжетімсіз; пассивті өтуді тек дескрипторлар бойынша бағалауға болады.", "en": "BBB score is unavailable; passive BBB permeability can only be assessed from descriptors."}.get(lang, "Оценка прохождения через ГЭБ недоступна; пассивное прохождение можно оценить только по дескрипторам.")
     else:
         bbb_zone = classify_descriptor_zone("BBB_probability", bbb_prob)["zone"]
         step3_status = _status_from_zone(bbb_zone)
@@ -1167,7 +1167,7 @@ def _generate_stepwise_model_trace(
     pgp_prob = model_outputs.get("pgp_probability")
     if pgp_prob is None:
         step4_status = "warning"
-        step4_message = {"ru": "P-gp score недоступен; риск активного эффлюкса не оценён.", "kk": "P-gp score қолжетімсіз; белсенді efflux қаупі бағаланбады.", "en": "P-gp score is unavailable; active efflux risk was not evaluated."}.get(lang, "P-gp score недоступен; риск активного эффлюкса не оценён.")
+        step4_message = {"ru": "Оценка P-gp недоступна; риск активного выведения не оценён.", "kk": "P-gp бағасы қолжетімсіз; белсенді шығарылу қаупі бағаланбады.", "en": "P-gp score is unavailable; active efflux risk was not evaluated."}.get(lang, "Оценка P-gp недоступна; риск активного выведения не оценён.")
     else:
         pgp_zone = classify_descriptor_zone("Pgp_probability", pgp_prob)["zone"]
         step4_status = _status_from_zone(pgp_zone)
@@ -1193,7 +1193,7 @@ def _generate_stepwise_model_trace(
         },
         {
             "step": 3,
-            "title": {"ru": "Оценка пассивной BBB-проницаемости", "kk": "Пассивті BBB өткізгіштігін бағалау", "en": "Passive BBB permeability assessment"}.get(lang, "Оценка пассивной BBB-проницаемости"),
+            "title": {"ru": "Оценка пассивного прохождения через ГЭБ", "kk": "Қан-ми тосқауылынан пассивті өтуді бағалау", "en": "Passive BBB permeability assessment"}.get(lang, "Оценка пассивного прохождения через ГЭБ"),
             "status": step3_status,
             "message": step3_message,
         },
